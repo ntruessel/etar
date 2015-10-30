@@ -63,6 +63,18 @@ feature {NONE} -- Parsing
 
 feature {NONE} -- Output
 
+	natural_16_to_octal_string (n: NATURAL_16): STRING_8
+			-- Converts `n' to an octal string
+		do
+			Result := natural_64_to_octal_string (n.to_natural_64)
+		end
+
+	natural_32_to_octal_string (n: NATURAL_32): STRING_8
+			-- Converts `n' to an octal string
+		do
+			Result := natural_64_to_octal_string (n.to_natural_64)
+		end
+
 	natural_64_to_octal_string (n: NATURAL_64): STRING_8
 			-- Converts `n' to an octal string
 		local

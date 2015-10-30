@@ -375,21 +375,21 @@ feature -- ustar fitting
 			-- Indicates whether `user_id' fits in ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := leading_zeros_count (natural_64_to_octal_string (user_id.to_natural_64)) + 1 <= tar_header_uid_length
+			Result := natural_32_to_octal_string (user_id).count + 1 <= tar_header_uid_length
 		end
 
 	group_id_fits: BOOLEAN
 			-- Indicates whether `group_id' fits in ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := leading_zeros_count (natural_64_to_octal_string (group_id.to_natural_64)) + 1 <= tar_header_gid_length
+			Result := natural_32_to_octal_string (group_id).count + 1 <= tar_header_gid_length
 		end
 
 	size_fits: BOOLEAN
 			-- Indicates whether `size' fits in a ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := leading_zeros_count (natural_64_to_octal_string (size)) + 1 <= tar_header_size_length
+			Result := natural_64_to_octal_string (size).count + 1 <= tar_header_size_length
 		end
 
 	user_name_fits: BOOLEAN
