@@ -18,6 +18,7 @@ class
 	TAR_HEADER
 inherit {NONE}
 	TAR_CONST
+	OCTAL_UTILS
 
 create
 	make
@@ -374,21 +375,21 @@ feature -- ustar fitting
 			-- Indicates whether `user_id' fits in ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := drop_leading_zeros (natural_64_to_octal_string (user_id.to_natural_64)).count + 1 <= tar_header_uid_length
+			Result := leading_zeros_count (natural_64_to_octal_string (user_id.to_natural_64)) + 1 <= tar_header_uid_length
 		end
 
 	group_id_fits: BOOLEAN
 			-- Indicates whether `group_id' fits in ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := drop_leading_zeros (natural_64_to_octal_string (group_id.to_natural_64)).count + 1 <= tar_header_gid_length
+			Result := leading_zeros_count (natural_64_to_octal_string (group_id.to_natural_64)) + 1 <= tar_header_gid_length
 		end
 
 	size_fits: BOOLEAN
 			-- Indicates whether `size' fits in a ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := drop_leading_zeros (natural_64_to_octal_string (size)).count + 1 <= tar_header_size_length
+			Result := leading_zeros_count (natural_64_to_octal_string (size)) + 1 <= tar_header_size_length
 		end
 
 	user_name_fits: BOOLEAN
@@ -429,54 +430,6 @@ feature -- Output
 			else
 				-- Have to create extended header
 			end
-		end
-
-feature {NONE} -- Utilities
-
-	natural_8_to_octal_character (a_number: NATURAL_8): CHARACTER_8
-			-- Octal character representing `a_number'
-		require
-			in_bounds: 0 <= a_number and a_number <= 7
-		do
-			Result := (a_number.to_integer_32 + ('0').code).to_character_8
-		ensure
-			valid_character: ("01234567").has (Result)
-		end
-
-	natural_64_to_octal_string (a_number: NATURAL_64): STRING_8
-			-- Octal representation of `a_number'
-		local
-			i: INTEGER
-			tmp: NATURAL_64
-		do
-			from
-				i := 1
-				tmp := a_number
-				create Result.make_empty
-			until
-				i > 64 // 3 + 1
-			loop
-				Result.append_character (natural_8_to_octal_character((tmp & 0c7).to_natural_8))
-				tmp := tmp |>> 3
-				i := i + 1
-			end
-			Result.mirror
-		end
-
-	drop_leading_zeros (a_string: STRING_8): STRING_8
-			-- Drop all leading zeros of `a_string' except last
-		local
-			i: INTEGER
-		do
-			Result := a_string.twin
-			from
-				i := 1
-			until
-				i >= Result.count or else Result[i] /= '0'
-			loop
-				i := i + 1
-			end
-			Result.keep_tail (Result.count - i + 1)
 		end
 
 end
