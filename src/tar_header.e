@@ -12,12 +12,18 @@ note
 	date: "$Date$"
 	revision: "$Revision$"
 
--- TODO: implement reading and writing from/to file
-
+	-- TODO: implement reading and writing from/to file
 class
 	TAR_HEADER
-inherit -- {NONE}
+
+inherit
+
+	ANY
+
 	OCTAL_UTILS
+		export
+			{NONE} all
+		end
 
 create
 	make
@@ -344,15 +350,13 @@ feature -- Assign
 				set_group_id (a_fileinfo.group_id.to_natural_32)
 				set_size (a_fileinfo.size.to_natural_64)
 				set_mtime (a_fileinfo.date.to_natural_64)
-
 				if (a_fileinfo.is_plain) then
 					set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
 				elseif (a_fileinfo.is_directory) then
 					set_typeflag ({TAR_CONST}.tar_typeflag_directory)
 				else
-					-- unreachable
+						-- unreachable
 				end
-
 				set_user_name (a_fileinfo.owner_name)
 				set_group_name (a_fileinfo.group_name)
 			end
@@ -364,30 +368,30 @@ feature -- ustar fitting
 	filename_fits: BOOLEAN
 			-- Indicates whether `filename' fits in a ustar header
 		do
-			-- We don't mind splitting the string in a platform independent way.
-			-- If it's too long to fit into the name field we add an extended header
-			-- This is not as efficient as possible but less error prone than splitting
+				-- We don't mind splitting the string in a platform independent way.
+				-- If it's too long to fit into the name field we add an extended header
+				-- This is not as efficient as possible but less error prone than splitting
 			Result := filename.utf_8_name.count <= {TAR_CONST}.tar_header_name_length
 		end
 
 	user_id_fits: BOOLEAN
 			-- Indicates whether `user_id' fits in ustar header
 		do
-			-- + 1 for the terminating space or '%U'
+				-- + 1 for the terminating space or '%U'
 			Result := natural_32_to_octal_string (user_id).count + 1 <= {TAR_CONST}.tar_header_uid_length
 		end
 
 	group_id_fits: BOOLEAN
 			-- Indicates whether `group_id' fits in ustar header
 		do
-			-- + 1 for the terminating space or '%U'
+				-- + 1 for the terminating space or '%U'
 			Result := natural_32_to_octal_string (group_id).count + 1 <= {TAR_CONST}.tar_header_gid_length
 		end
 
 	size_fits: BOOLEAN
 			-- Indicates whether `size' fits in a ustar header
 		do
-			-- + 1 for the terminating space or '%U'
+				-- + 1 for the terminating space or '%U'
 			Result := natural_64_to_octal_string (size).count + 1 <= {TAR_CONST}.tar_header_size_length
 		end
 
@@ -414,9 +418,9 @@ feature -- Input
 	read_from_file (a_file: FILE)
 			-- Read an entire header from `a_file'
 		do
-			-- Read first header. If it's an extended header read things from its payload
-			-- Now read ustar header and fill rest of informations (extended header has higher
-			-- priority)
+				-- Read first header. If it's an extended header read things from its payload
+				-- Now read ustar header and fill rest of informations (extended header has higher
+				-- priority)
 		end
 
 feature -- Output
@@ -425,9 +429,9 @@ feature -- Output
 			-- Write the entire header to `a_file'
 		do
 			if fits_in_ustar then
-				-- Fits into single ustar header
+					-- Fits into single ustar header
 			else
-				-- Have to create extended header
+					-- Have to create extended header
 			end
 		end
 

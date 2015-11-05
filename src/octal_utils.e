@@ -14,7 +14,7 @@ note
 class
 	OCTAL_UTILS
 
-feature {NONE} -- Parsing
+feature -- Parsing
 
 	octal_string_to_natural_16 (a_string: STRING_8): NATURAL_32
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_16
@@ -61,7 +61,7 @@ feature {NONE} -- Parsing
 			end
 		end
 
-feature {NONE} -- Output
+feature -- Output
 
 	natural_16_to_octal_string (n: NATURAL_16): STRING_8
 			-- Converts `n' to an octal string
@@ -91,7 +91,7 @@ feature {NONE} -- Output
 			end
 		end
 
-feature {NONE} -- Utilities
+feature -- Utilities
 
 	natural_8_to_octal_character (n: NATURAL_8): CHARACTER_8
 			-- Convert `n' to its corresponding character representation
@@ -137,7 +137,7 @@ feature {NONE} -- Utilities
 			zeros_prepended: a_string.head (n).to_natural_64 = 0
 		end
 
-feature {NONE} -- Constants
+feature -- Constants
 
 	octal_16_max_digits: INTEGER = 6
 			-- Maximal digits of a 16 bit natural octal string representation
