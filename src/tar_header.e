@@ -249,7 +249,7 @@ feature -- Assign
 	set_setuid (b: BOOLEAN)
 			-- Set uid bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.setuid_mask else mode & ({TAR_CONST}.setuid_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.setuid_mask)
 		ensure
 			correctly_set: is_setuid = b
 		end
@@ -257,7 +257,7 @@ feature -- Assign
 	set_setgid (b: BOOLEAN)
 			-- Set gid bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.setgid_mask else mode & ({TAR_CONST}.setgid_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.setgid_mask)
 		ensure
 			correctly_set: is_setgid = b
 		end
@@ -265,7 +265,7 @@ feature -- Assign
 	set_user_readable (b: BOOLEAN)
 			-- Set user-read bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.uread_mask else mode & ({TAR_CONST}.uread_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.uread_mask)
 		ensure
 			correctly_set: is_user_readable = b
 		end
@@ -273,7 +273,7 @@ feature -- Assign
 	set_user_writable (b: BOOLEAN)
 			-- Set user-write bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.uwrite_mask else mode & ({TAR_CONST}.uwrite_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.uwrite_mask)
 		ensure
 			correctly_set: is_user_writable = b
 		end
@@ -281,7 +281,7 @@ feature -- Assign
 	set_user_executable (b: BOOLEAN)
 			-- Set user-execute bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.uexec_mask else mode & ({TAR_CONST}.uexec_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.uexec_mask)
 		ensure
 			correctly_set: is_user_executable = b
 		end
@@ -289,7 +289,7 @@ feature -- Assign
 	set_group_readable (b: BOOLEAN)
 			-- Set group-read bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.gread_mask else mode & ({TAR_CONST}.gread_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.gread_mask)
 		ensure
 			correctly_set: is_group_readable = b
 		end
@@ -297,7 +297,7 @@ feature -- Assign
 	set_group_writable (b: BOOLEAN)
 			-- Set group-write bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.gwrite_mask else mode & ({TAR_CONST}.gwrite_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.gwrite_mask)
 		ensure
 			correctly_set: is_group_writable = b
 		end
@@ -305,7 +305,7 @@ feature -- Assign
 	set_group_executable (b: BOOLEAN)
 			-- Set group-execute bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.gexec_mask else mode & ({TAR_CONST}.gexec_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.gexec_mask)
 		ensure
 			correctly_set: is_group_executable = b
 		end
@@ -313,7 +313,7 @@ feature -- Assign
 	set_other_readable (b: BOOLEAN)
 			-- Set other-read bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.oread_mask else mode & ({TAR_CONST}.oread_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.oread_mask)
 		ensure
 			correctly_set: is_other_readable = b
 		end
@@ -321,7 +321,7 @@ feature -- Assign
 	set_other_writable (b: BOOLEAN)
 			-- Set other-write bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.owrite_mask else mode & ({TAR_CONST}.owrite_mask.bit_not) end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.owrite_mask)
 		ensure
 			correctly_set: is_other_writable = b
 		end
@@ -329,7 +329,7 @@ feature -- Assign
 	set_other_executable (b: BOOLEAN)
 			-- Set other-execute bit to `b'
 		do
-			mode := if b then mode | {TAR_CONST}.oexec_mask else mode & {TAR_CONST}.oexec_mask.bit_not end
+			mode := mode.set_bit_with_mask (b, {TAR_CONST}.oexec_mask)
 		ensure
 			correctly_set: is_other_executable = b
 		end
