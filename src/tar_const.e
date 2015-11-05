@@ -9,7 +9,7 @@ note
 class
 	TAR_CONST
 
-feature {NONE} -- ustar field offsets and lengths (bytes)
+feature -- ustar field offsets and lengths (bytes)
 		-- FIXME: Group this constants logically (TUPLE?)
 		-- FIXME: Contains a lot of redundancy
 
@@ -61,7 +61,7 @@ feature {NONE} -- ustar field offsets and lengths (bytes)
 	tar_header_prefix_offset: 		INTEGER = 345 	-- filename prefix field offset
 	tar_header_prefix_length: 		INTEGER = 155 	-- filename prefix field length
 
-feature {NONE} -- Mode/Permission masks
+feature -- Mode/Permission masks
 
 	setuid_mask: NATURAL_16 = 0c04000 -- Setuid bitmask
 
@@ -85,7 +85,7 @@ feature {NONE} -- Mode/Permission masks
 
 	oexec_mask: NATURAL_16 = 0c00001 -- Other executable bitmask
 
-feature {NONE} -- Typeflags
+feature -- Typeflags
 
 	tar_typeflag_regular_file:		CHARACTER_8 = '0' -- Typeflag for regular files
 
@@ -109,7 +109,7 @@ feature {NONE} -- Typeflags
 
 	tar_typeflag_pax_global:		CHARACTER_8 = 'g' -- Typeflag for pax global header
 
-feature {NONE} -- Miscellaneous
+feature -- Miscellaneous
 	tar_block_size:	INTEGER = 512 -- Block size in tar
 
 end

@@ -16,8 +16,7 @@ note
 
 class
 	TAR_HEADER
-inherit {NONE}
-	TAR_CONST
+inherit -- {NONE}
 	OCTAL_UTILS
 
 create
@@ -86,67 +85,67 @@ feature -- Mode queries
 	is_setuid: BOOLEAN
 			-- is the setuid bit set?
 		do
-			Result := (mode & setuid_mask) /= 0
+			Result := (mode & {TAR_CONST}.setuid_mask) /= 0
 		end
 
 	is_setgid: BOOLEAN
 			-- is the setgid bit set?
 		do
-			Result := (mode & setgid_mask) /= 0
+			Result := (mode & {TAR_CONST}.setgid_mask) /= 0
 		end
 
 	is_user_readable: BOOLEAN
 			-- is the user-read bit set?
 		do
-			Result := (mode & uread_mask) /= 0
+			Result := (mode & {TAR_CONST}.uread_mask) /= 0
 		end
 
 	is_user_writable: BOOLEAN
 			-- is the user-write bit set?
 		do
-			Result := (mode & uwrite_mask) /= 0
+			Result := (mode & {TAR_CONST}.uwrite_mask) /= 0
 		end
 
 	is_user_executable: BOOLEAN
 			-- is the user-execute bit set?
 		do
-			Result := (mode & uexec_mask) /= 0
+			Result := (mode & {TAR_CONST}.uexec_mask) /= 0
 		end
 
 	is_group_readable: BOOLEAN
 			-- is the group-read bit set?
 		do
-			Result := (mode & gread_mask) /= 0
+			Result := (mode & {TAR_CONST}.gread_mask) /= 0
 		end
 
 	is_group_writable: BOOLEAN
 			-- is the group-write bit set?
 		do
-			Result := (mode & gwrite_mask) /= 0
+			Result := (mode & {TAR_CONST}.gwrite_mask) /= 0
 		end
 
 	is_group_executable: BOOLEAN
 			-- is the group-execute bit set?
 		do
-			Result := (mode & gexec_mask) /= 0
+			Result := (mode & {TAR_CONST}.gexec_mask) /= 0
 		end
 
 	is_other_readable: BOOLEAN
 			-- is the other-read bit set?
 		do
-			Result := (mode & oread_mask) /= 0
+			Result := (mode & {TAR_CONST}.oread_mask) /= 0
 		end
 
 	is_other_writable: BOOLEAN
 			-- is the other-write bit set?
 		do
-			Result := (mode & owrite_mask) /= 0
+			Result := (mode & {TAR_CONST}.owrite_mask) /= 0
 		end
 
 	is_other_executable: BOOLEAN
 			-- is the other-execute bit set?
 		do
-			Result := (mode & oexec_mask) /= 0
+			Result := (mode & {TAR_CONST}.oexec_mask) /= 0
 		end
 
 feature -- Assign
@@ -250,7 +249,7 @@ feature -- Assign
 	set_setuid (b: BOOLEAN)
 			-- Set uid bit to `b'
 		do
-			mode := if b then mode | setuid_mask else mode & (setuid_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.setuid_mask else mode & ({TAR_CONST}.setuid_mask.bit_not) end
 		ensure
 			correctly_set: is_setuid = b
 		end
@@ -258,7 +257,7 @@ feature -- Assign
 	set_setgid (b: BOOLEAN)
 			-- Set gid bit to `b'
 		do
-			mode := if b then mode | setgid_mask else mode & (setgid_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.setgid_mask else mode & ({TAR_CONST}.setgid_mask.bit_not) end
 		ensure
 			correctly_set: is_setgid = b
 		end
@@ -266,7 +265,7 @@ feature -- Assign
 	set_user_readable (b: BOOLEAN)
 			-- Set user-read bit to `b'
 		do
-			mode := if b then mode | uread_mask else mode & (uread_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.uread_mask else mode & ({TAR_CONST}.uread_mask.bit_not) end
 		ensure
 			correctly_set: is_user_readable = b
 		end
@@ -274,7 +273,7 @@ feature -- Assign
 	set_user_writable (b: BOOLEAN)
 			-- Set user-write bit to `b'
 		do
-			mode := if b then mode | uwrite_mask else mode & (uwrite_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.uwrite_mask else mode & ({TAR_CONST}.uwrite_mask.bit_not) end
 		ensure
 			correctly_set: is_user_writable = b
 		end
@@ -282,7 +281,7 @@ feature -- Assign
 	set_user_executable (b: BOOLEAN)
 			-- Set user-execute bit to `b'
 		do
-			mode := if b then mode | uexec_mask else mode & (uexec_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.uexec_mask else mode & ({TAR_CONST}.uexec_mask.bit_not) end
 		ensure
 			correctly_set: is_user_executable = b
 		end
@@ -290,7 +289,7 @@ feature -- Assign
 	set_group_readable (b: BOOLEAN)
 			-- Set group-read bit to `b'
 		do
-			mode := if b then mode | gread_mask else mode & (gread_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.gread_mask else mode & ({TAR_CONST}.gread_mask.bit_not) end
 		ensure
 			correctly_set: is_group_readable = b
 		end
@@ -298,7 +297,7 @@ feature -- Assign
 	set_group_writable (b: BOOLEAN)
 			-- Set group-write bit to `b'
 		do
-			mode := if b then mode | gwrite_mask else mode & (gwrite_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.gwrite_mask else mode & ({TAR_CONST}.gwrite_mask.bit_not) end
 		ensure
 			correctly_set: is_group_writable = b
 		end
@@ -306,7 +305,7 @@ feature -- Assign
 	set_group_executable (b: BOOLEAN)
 			-- Set group-execute bit to `b'
 		do
-			mode := if b then mode | gexec_mask else mode & (gexec_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.gexec_mask else mode & ({TAR_CONST}.gexec_mask.bit_not) end
 		ensure
 			correctly_set: is_group_executable = b
 		end
@@ -314,7 +313,7 @@ feature -- Assign
 	set_other_readable (b: BOOLEAN)
 			-- Set other-read bit to `b'
 		do
-			mode := if b then mode | oread_mask else mode & (oread_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.oread_mask else mode & ({TAR_CONST}.oread_mask.bit_not) end
 		ensure
 			correctly_set: is_other_readable = b
 		end
@@ -322,7 +321,7 @@ feature -- Assign
 	set_other_writable (b: BOOLEAN)
 			-- Set other-write bit to `b'
 		do
-			mode := if b then mode | owrite_mask else mode & (owrite_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.owrite_mask else mode & ({TAR_CONST}.owrite_mask.bit_not) end
 		ensure
 			correctly_set: is_other_writable = b
 		end
@@ -330,7 +329,7 @@ feature -- Assign
 	set_other_executable (b: BOOLEAN)
 			-- Set other-execute bit to `b'
 		do
-			mode := if b then mode | oexec_mask else mode & (oexec_mask.bit_not) end
+			mode := if b then mode | {TAR_CONST}.oexec_mask else mode & {TAR_CONST}.oexec_mask.bit_not end
 		ensure
 			correctly_set: is_other_executable = b
 		end
@@ -347,9 +346,9 @@ feature -- Assign
 				set_mtime (a_fileinfo.date.to_natural_64)
 
 				if (a_fileinfo.is_plain) then
-					set_typeflag (tar_typeflag_regular_file)
+					set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
 				elseif (a_fileinfo.is_directory) then
-					set_typeflag (tar_typeflag_directory)
+					set_typeflag ({TAR_CONST}.tar_typeflag_directory)
 				else
 					-- unreachable
 				end
@@ -368,40 +367,40 @@ feature -- ustar fitting
 			-- We don't mind splitting the string in a platform independent way.
 			-- If it's too long to fit into the name field we add an extended header
 			-- This is not as efficient as possible but less error prone than splitting
-			Result := filename.utf_8_name.count <= tar_header_name_length
+			Result := filename.utf_8_name.count <= {TAR_CONST}.tar_header_name_length
 		end
 
 	user_id_fits: BOOLEAN
 			-- Indicates whether `user_id' fits in ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := natural_32_to_octal_string (user_id).count + 1 <= tar_header_uid_length
+			Result := natural_32_to_octal_string (user_id).count + 1 <= {TAR_CONST}.tar_header_uid_length
 		end
 
 	group_id_fits: BOOLEAN
 			-- Indicates whether `group_id' fits in ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := natural_32_to_octal_string (group_id).count + 1 <= tar_header_gid_length
+			Result := natural_32_to_octal_string (group_id).count + 1 <= {TAR_CONST}.tar_header_gid_length
 		end
 
 	size_fits: BOOLEAN
 			-- Indicates whether `size' fits in a ustar header
 		do
 			-- + 1 for the terminating space or '%U'
-			Result := natural_64_to_octal_string (size).count + 1 <= tar_header_size_length
+			Result := natural_64_to_octal_string (size).count + 1 <= {TAR_CONST}.tar_header_size_length
 		end
 
 	user_name_fits: BOOLEAN
 			-- Indicates whether `user_name' fits in a ustar header
 		do
-			Result := user_name.count <= tar_header_uname_length
+			Result := user_name.count <= {TAR_CONST}.tar_header_uname_length
 		end
 
 	group_name_fits: BOOLEAN
 			-- Indicates whether `group_name' fits in a ustar header
 		do
-			Result := group_name.count <= tar_header_gname_length
+			Result := group_name.count <= {TAR_CONST}.tar_header_gname_length
 		end
 
 	fits_in_ustar: BOOLEAN
