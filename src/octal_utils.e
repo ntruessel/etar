@@ -109,18 +109,27 @@ feature -- Utilities
 			from
 				Result := 1
 			until
-				Result >= a_string.count or else a_string[Result] /= '0'
+				Result > a_string.count or else a_string[Result] /= '0'
 			loop
 				Result := Result + 1
 			end
 			-- Loop stops at first non-zero digit, hence subtract one
 			Result := Result - 1
+			-- "0" has no leading zeros
+			Result := if not a_string.is_empty and Result = a_string.count then Result - 1 else Result end
+		ensure
+			leading_zeros: a_string.head (Result).to_natural = 0
+			not_more_zeros: a_string.is_empty or else a_string[Result + 1] /= '0' or else Result + 1 = a_string.count
 		end
 
 	truncate_leading_zeros (a_string: STRING_8)
 			-- Truncates leading zeros of `a_string' until it has no more leading zeros or only one character left
 		do
 			a_string.keep_tail (a_string.count - leading_zeros_count(a_string))
+		ensure
+			no_leading_zero: a_string.count <= 1 or else a_string[1] /= '0'
+			correct_length: a_string.count + old leading_zeros_count(a_string) = old a_string.count
+			is_end: old a_string.ends_with (a_string)
 		end
 
 	pad (a_string: STRING_8; n: INTEGER)
@@ -133,7 +142,7 @@ feature -- Utilities
 			create zeros.make_filled ('0', n)
 			a_string.prepend_string (zeros)
 		ensure
-			prepended: a_string.count + n = old a_string.count -- Hope old makes a copy
+			prepended: a_string.count - n = old a_string.count
 			zeros_prepended: a_string.head (n).to_natural_64 = 0
 		end
 
