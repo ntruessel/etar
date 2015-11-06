@@ -79,9 +79,46 @@ feature -- Test routines
 			testing:	"covers/{OCTAL_UTILS}.natural_64_to_octal_string"
 		local
 			unit_under_test: OCTAL_UTILS
+			n16: NATURAL_16
+			n32: NATURAL_32
+			n64: NATURAL_64
 		do
 			create unit_under_test
-			assert ("not_implemented", False)
+
+			-- Basic functionality
+			n16 := 0c12642
+			assert ("Basic output (16bit)", unit_under_test.natural_16_to_octal_string (n16) ~ "12642")
+			n32 := 0c34635231
+			assert ("Basic output (32bit)", unit_under_test.natural_32_to_octal_string (n32) ~ "34635231")
+			n64 := 0c1467623523
+			assert ("Basic output (64bit)", unit_under_test.natural_64_to_octal_string (n64) ~ "1467623523")
+
+			n16 := 0c12042
+			assert ("Basic output 2 (16bit)", unit_under_test.natural_16_to_octal_string (n16) ~ "12042")
+			n32 := 0c30635031
+			assert ("Basic output 2 (32bit)", unit_under_test.natural_32_to_octal_string (n32) ~ "30635031")
+			n64 := 0c1460023523
+			assert ("Basic output 2 (64bit)", unit_under_test.natural_64_to_octal_string (n64) ~ "1460023523")
+
+			-- Max values
+			n16 := {NATURAL_16}.max_value
+			assert ("Max 16bit output", unit_under_test.natural_16_to_octal_string (n16) ~ "177777")
+
+			n32 := {NATURAL_32}.max_value
+			assert ("Max 32bit output", unit_under_test.natural_32_to_octal_string (n32) ~ "37777777777")
+
+			n64 := {NATURAL_64}.max_value
+			assert ("Max 64bit output", unit_under_test.natural_64_to_octal_string (n64) ~ "1777777777777777777777")
+
+			-- Zero
+			n16 := 0
+			assert ("Zero 16bit output", unit_under_test.natural_16_to_octal_string (n16) ~ "0")
+
+			n32 := 0
+			assert ("Zero 32bit output", unit_under_test.natural_32_to_octal_string (n32) ~ "0")
+
+			n64 := 0
+			assert ("Zero 64bit output", unit_under_test.natural_64_to_octal_string (n64) ~ "0")
 		end
 
 feature -- Utilities
