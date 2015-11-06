@@ -89,6 +89,11 @@ feature -- Output
 				Result.append_character (natural_8_to_octal_character ((tmp & 0c7).to_natural_8))
 				tmp := tmp |>> 3
 			end
+			Result.mirror
+			
+			if Result.is_empty then
+				Result := "0"
+			end
 		end
 
 feature -- Utilities
