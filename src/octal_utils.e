@@ -19,9 +19,9 @@ feature -- Parsing
 	octal_string_to_natural_16 (a_string: STRING_8): NATURAL_32
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_16
 		require
-			valid_format: a_string.is_natural_16 and not a_string.has ('8') and not a_string.has ('9')
-			in_range: (leading_zeros_count (a_string) < octal_16_max_digits) or
-						((leading_zeros_count (a_string) = octal_16_max_digits) and (a_string[octal_16_max_digits].code <= ('1').code))
+			valid_format: a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
+			in_range: (a_string.count - leading_zeros_count (a_string) < octal_16_max_digits) or
+						((a_string.count - leading_zeros_count (a_string) = octal_16_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('1').code))
 		do
 			Result := octal_string_to_natural_64 (a_string).to_natural_16
 		end
@@ -29,9 +29,9 @@ feature -- Parsing
 	octal_string_to_natural_32 (a_string: STRING_8): NATURAL_32
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_32
 		require
-			valid_format: a_string.is_natural_32 and not a_string.has ('8') and not a_string.has ('9')
-			in_range: (leading_zeros_count (a_string) < octal_32_max_digits) or
-						((leading_zeros_count (a_string) = octal_32_max_digits) and (a_string[octal_32_max_digits].code <= ('3').code))
+			valid_format: a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
+			in_range: (a_string.count - leading_zeros_count (a_string) < octal_32_max_digits) or
+						((a_string.count - leading_zeros_count (a_string) = octal_32_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('3').code))
 		do
 			Result := octal_string_to_natural_64 (a_string).to_natural_32
 		end
@@ -39,9 +39,9 @@ feature -- Parsing
 	octal_string_to_natural_64 (a_string: STRING_8): NATURAL_64
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_64
 		require
-			valid_format: a_string.is_natural_64 and not a_string.has ('8') and not a_string.has ('9')
-			in_range: (leading_zeros_count (a_string) < octal_64_max_digits) or
-						((leading_zeros_count (a_string) = octal_64_max_digits) and (a_string[octal_64_max_digits].code <= ('1').code))
+			valid_format: a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
+			in_range: (a_string.count - leading_zeros_count (a_string) < octal_64_max_digits) or
+						((a_string.count - leading_zeros_count (a_string) = octal_64_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('1').code))
 		local
 			digit_weight: NATURAL_64
 			i: INTEGER
