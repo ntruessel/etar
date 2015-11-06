@@ -23,9 +23,52 @@ feature -- Test routines
 			testing:	"covers/{OCTAL_UTILS}.octal_string_to_natural_64"
 		local
 			unit_under_test: OCTAL_UTILS
+			s: STRING
 		do
 			create unit_under_test
-			assert ("not_implemented", False)
+
+			-- Basic functionality
+			s := "141223"
+			assert ("Basic parsing (16bit)", unit_under_test.octal_string_to_natural_16 (s) = 0c141223)
+			assert ("Basic parsing (32bit)", unit_under_test.octal_string_to_natural_32 (s) = 0c141223)
+			assert ("Basic parsing (64bit)", unit_under_test.octal_string_to_natural_64 (s) = 0c141223)
+
+			s := "70365"
+			assert ("Basic parsing 2 (16bit)", unit_under_test.octal_string_to_natural_16 (s) = 0c70365)
+			assert ("Basic parsing 2 (32bit)", unit_under_test.octal_string_to_natural_32 (s) = 0c70365)
+			assert ("Basic parsing 2 (64bit)", unit_under_test.octal_string_to_natural_64 (s) = 0c70365)
+
+			-- Max values
+			s := "177777"
+			assert ("Max 16bit parsing", unit_under_test.octal_string_to_natural_16 (s) = {NATURAL_16}.max_value)
+
+			s := "37777777777"
+			assert ("Max 32bit parsing", unit_under_test.octal_string_to_natural_32 (s) = {NATURAL_32}.max_value)
+
+			s := "1777777777777777777777"
+			assert ("Max 64bit parsing", unit_under_test.octal_string_to_natural_64 (s) = {NATURAL_64}.max_value)
+
+			-- All zeros
+			s := "000000000000000"
+			assert ("All zero parsing (16bit)", unit_under_test.octal_string_to_natural_16 (s) = 0)
+			assert ("All zero parsing (32bit)", unit_under_test.octal_string_to_natural_32 (s) = 0)
+			assert ("All zero parsing (64bit)", unit_under_test.octal_string_to_natural_64 (s) = 0)
+
+			-- Leading zeros
+			s := "0000000000000001"
+			assert ("All zero parsing (16bit)", unit_under_test.octal_string_to_natural_16 (s) = 1)
+			assert ("All zero parsing (32bit)", unit_under_test.octal_string_to_natural_32 (s) = 1)
+			assert ("All zero parsing (64bit)", unit_under_test.octal_string_to_natural_64 (s) = 1)
+
+			-- Leading zeros max values
+			s := "00000000177777"
+			assert ("Max 16bit parsing", unit_under_test.octal_string_to_natural_16 (s) = {NATURAL_16}.max_value)
+
+			s := "0000000037777777777"
+			assert ("Max 32bit parsing", unit_under_test.octal_string_to_natural_32 (s) = {NATURAL_32}.max_value)
+
+			s := "00000000000001777777777777777777777"
+			assert ("Max 64bit parsing", unit_under_test.octal_string_to_natural_64 (s) = {NATURAL_64}.max_value)
 		end
 
 	test_parse
@@ -152,7 +195,7 @@ feature -- Utilities
 			assert ("Empty string", s ~ "0")
 		end
 
-	test_combinations
+	test_utility_combinations
 			-- Test various combinations of the utility functions
 		local
 			unit_under_test: OCTAL_UTILS
