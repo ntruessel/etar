@@ -435,4 +435,7 @@ feature -- Output
 			end
 		end
 
+invariant
+	valid_mode: (mode & 0c6777 = mode)
+
 end
