@@ -59,9 +59,6 @@ feature -- Fields
 	mtime: NATURAL_64
 			-- Last modification time
 
-	checksum: NATURAL_32
-			-- Header checksum
-
 	typeflag: CHARACTER_8
 			-- File type flag
 
@@ -364,6 +361,7 @@ feature -- Assign
 
 feature -- ustar fitting
 	-- NOTE: Everything that always fits is not mentioned
+	-- TODO: Move to USTAR_HEADER_WRITER
 
 	filename_fits: BOOLEAN
 			-- Indicates whether `filename' fits in a ustar header
@@ -411,28 +409,6 @@ feature -- ustar fitting
 			-- Indecates whether the whole header fits in a ustar header
 		do
 			Result := filename_fits and user_id_fits and group_id_fits and size_fits and user_name_fits and group_name_fits
-		end
-
-feature -- Input
-
-	read_from_file (a_file: FILE)
-			-- Read an entire header from `a_file'
-		do
-				-- Read first header. If it's an extended header read things from its payload
-				-- Now read ustar header and fill rest of informations (extended header has higher
-				-- priority)
-		end
-
-feature -- Output
-
-	write_to_file (a_file: FILE)
-			-- Write the entire header to `a_file'
-		do
-			if fits_in_ustar then
-					-- Fits into single ustar header
-			else
-					-- Have to create extended header
-			end
 		end
 
 invariant
