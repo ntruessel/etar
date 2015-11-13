@@ -12,7 +12,6 @@ note
 	date: "$Date$"
 	revision: "$Revision$"
 
-	-- TODO: implement reading and writing from/to file
 class
 	TAR_HEADER
 
@@ -64,12 +63,6 @@ feature -- Fields
 
 	linkname: PATH
 			-- Link target
-
-	magic: STRING_8 = "ustar"
-			-- Header magic, we only support ustar.
-
-	version: STRING_8 = "00"
-			-- Header version
 
 	user_name: IMMUTABLE_STRING_8
 			-- User name
@@ -164,9 +157,9 @@ feature -- Assign
 	set_mode (a_mode: NATURAL_16)
 			-- Set `mode' to `a_mode'
 		do
-			mode := a_mode
+			mode := a_mode & 0c7777
 		ensure
-			correctly_set: mode = a_mode
+			correctly_set: mode = a_mode & 0c7777
 		end
 
 	set_user_id (a_user_id: NATURAL_32)
@@ -359,59 +352,7 @@ feature -- Assign
 			end
 		end
 
-feature -- ustar fitting
-	-- NOTE: Everything that always fits is not mentioned
-	-- TODO: Move to USTAR_HEADER_WRITER
-
-	filename_fits: BOOLEAN
-			-- Indicates whether `filename' fits in a ustar header
-		do
-				-- We don't mind splitting the string in a platform independent way.
-				-- If it's too long to fit into the name field we add an extended header
-				-- This is not as efficient as possible but less error prone than splitting
-			Result := filename.utf_8_name.count <= {TAR_CONST}.tar_header_name_length
-		end
-
-	user_id_fits: BOOLEAN
-			-- Indicates whether `user_id' fits in ustar header
-		do
-				-- + 1 for the terminating space or '%U'
-			Result := natural_32_to_octal_string (user_id).count + 1 <= {TAR_CONST}.tar_header_uid_length
-		end
-
-	group_id_fits: BOOLEAN
-			-- Indicates whether `group_id' fits in ustar header
-		do
-				-- + 1 for the terminating space or '%U'
-			Result := natural_32_to_octal_string (group_id).count + 1 <= {TAR_CONST}.tar_header_gid_length
-		end
-
-	size_fits: BOOLEAN
-			-- Indicates whether `size' fits in a ustar header
-		do
-				-- + 1 for the terminating space or '%U'
-			Result := natural_64_to_octal_string (size).count + 1 <= {TAR_CONST}.tar_header_size_length
-		end
-
-	user_name_fits: BOOLEAN
-			-- Indicates whether `user_name' fits in a ustar header
-		do
-			Result := user_name.count <= {TAR_CONST}.tar_header_uname_length
-		end
-
-	group_name_fits: BOOLEAN
-			-- Indicates whether `group_name' fits in a ustar header
-		do
-			Result := group_name.count <= {TAR_CONST}.tar_header_gname_length
-		end
-
-	fits_in_ustar: BOOLEAN
-			-- Indecates whether the whole header fits in a ustar header
-		do
-			Result := filename_fits and user_id_fits and group_id_fits and size_fits and user_name_fits and group_name_fits
-		end
-
 invariant
-	valid_mode: (mode & 0c6777 = mode)
+	valid_mode: (mode & 0c7777 = mode)
 
 end

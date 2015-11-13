@@ -1,7 +1,7 @@
 note
 	description: "[
 		Header writer for the ustar format
-		
+
 		Everything that is too large will be truncated
 	]"
 	author: ""
@@ -31,7 +31,12 @@ feature -- Status
 			-- Can `a_header' be written?
 		do
 			-- TODO: Copy over from TAR_HEADER
-			Result := false
+			Result := filename_fits (a_header) and
+						user_id_fits (a_header) and
+						group_id_fits (a_header) and
+						size_fits (a_header) and
+						user_name_fits (a_header) and
+						group_name_fits (a_header)
 		end
 
 feature -- Output
@@ -41,105 +46,144 @@ feature -- Output
 		local
 			s: STRING_8
 		do
-			-- Pad with all '%U'
+			-- Fill with all '%U'
 			p.put_special_character_8 (
 					create {SPECIAL[CHARACTER_8]}.make_filled ('%U', {TAR_CONST}.tar_block_size),
 					0, a_pos, {TAR_CONST}.tar_block_size)
 
 			-- Put filename
 			-- FIXME: Implement filename splitting
-			s := unify_path (a_header.filename)
-			p.put_special_character_8 (
-					s.area,
-					0, a_pos + {TAR_CONST}.tar_header_name_offset,
-					s.count.min ({TAR_CONST}.tar_header_name_length - 1))
+			put_string (unify_path (a_header.filename),
+					p, a_pos + {TAR_CONST}.tar_header_name_offset);
 
 			-- Put prefix
 			-- FIXME: Implement filename splitting
 
 			-- Put mode
-			s := natural_16_to_octal_string (a_header.mode)
-			pad (s, {TAR_CONST}.tar_header_mode_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_mode_offset,
-					{TAR_CONST}.tar_header_mode_length)
+			-- MASK ISVTX flag: tar does not support it (reserved)
+			put_natural (a_header.mode & 0c6777,
+					{TAR_CONST}.tar_header_mode_length,
+					p, a_pos + {TAR_CONST}.tar_header_mode_offset)
 
 			-- Put userid
-			s := natural_32_to_octal_string (a_header.user_id)
-			pad (s, {TAR_CONST}.tar_header_uid_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_uid_offset,
-					{TAR_CONST}.tar_header_uid_length)
+			put_natural (a_header.user_id,
+					{TAR_CONST}.tar_header_uid_length,
+					p, a_pos + {TAR_CONST}.tar_header_uid_offset)
 
 			-- Put groupid
-			s := natural_32_to_octal_string (a_header.group_id)
-			pad (s, {TAR_CONST}.tar_header_gid_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_gid_offset,
-					{TAR_CONST}.tar_header_gid_length)
+			put_natural (a_header.group_id,
+					{TAR_CONST}.tar_header_gid_length,
+					p, a_pos + {TAR_CONST}.tar_header_gid_offset)
 
 			-- Put size
-			s := natural_64_to_octal_string (a_header.size)
-			pad (s, {TAR_CONST}.tar_header_size_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_size_offset,
-					{TAR_CONST}.tar_header_size_length)
+			put_natural (a_header.size,
+					{TAR_CONST}.tar_header_size_length,
+					p, a_pos + {TAR_CONST}.tar_header_size_offset)
 
 			-- Put mtime
-			s := natural_64_to_octal_string (a_header.mtime)
-			pad (s, {TAR_CONST}.tar_header_mtime_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_mtime_offset,
-					{TAR_CONST}.tar_header_mtime_length)
+			put_natural (a_header.mtime,
+					{TAR_CONST}.tar_header_mtime_length,
+					p, a_pos + {TAR_CONST}.tar_header_mtime_offset)
 
 			-- Put typeflag
 			p.put_character (a_header.typeflag,
 					a_pos + {TAR_CONST}.tar_header_typeflag_offset)
 
 			-- Put linkname
-			s := unify_path (a_header.linkname)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_linkname_offset,
-					s.count.min ({TAR_CONST}.tar_header_linkname_length - 1))
+			put_string (unify_path (a_header.linkname),
+					p, a_pos + {TAR_CONST}.tar_header_linkname_offset)
 
 			-- Put magic
-			p.put_special_character_8 (magic.area,
-					0, a_pos + {TAR_CONST}.tar_header_magic_offset,
-					{TAR_CONST}.tar_header_magic_length)
+			put_string (magic, p, a_pos + {TAR_CONST}.tar_header_magic_offset)
 
 			-- Put version
-			p.put_special_character_8 (version.area,
-					0, a_pos + {TAR_CONST}.tar_header_version_offset,
-					{TAR_CONST}.tar_header_version_length)
+			put_string (version, p, a_pos + {TAR_CONST}.tar_header_version_offset)
 
 			-- Put username
-			p.put_special_character_8 (a_header.user_name.as_string_8.area,
-					0, a_pos + {TAR_CONST}.tar_header_uname_offset,
-					a_header.user_name.count.min ({TAR_CONST}.tar_header_uname_length - 1))
+			put_string (a_header.user_name.as_string_8,
+					p, a_pos + {TAR_CONST}.tar_header_uname_offset)
 
 			-- Put groupname
-			p.put_special_character_8 (a_header.group_name.as_string_8.area,
-					0, a_pos + {TAR_CONST}.tar_header_gname_offset,
-					a_header.group_name.count.min ({TAR_CONST}.tar_header_gname_length - 1))
+			put_string (a_header.group_name.as_string_8,
+					p, a_pos + {TAR_CONST}.tar_header_gname_offset)
 
 			-- Put devmajor
-			s := natural_32_to_octal_string (a_header.device_major)
-			pad (s, {TAR_CONST}.tar_header_devmajor_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_devmajor_offset,
-					{TAR_CONST}.tar_header_devmajor_length)
+			put_natural (a_header.device_major,
+					{TAR_CONST}.tar_header_devmajor_length,
+					p, a_pos + {TAR_CONST}.tar_header_devmajor_offset)
 
 			-- Put devminor
-			s := natural_32_to_octal_string (a_header.device_minor)
-			pad (s, {TAR_CONST}.tar_header_devminor_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_CONST}.tar_header_devminor_offset,
-					{TAR_CONST}.tar_header_devminor_length)
+			put_natural (a_header.device_minor,
+					{TAR_CONST}.tar_header_devminor_length,
+					p, a_pos + {TAR_CONST}.tar_header_devminor_offset)
 
+			-- Put checksum
 			put_checksum (p, a_pos)
 		end
 
+feature {NONE} -- Fitting
+
+	filename_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `filename' of `a_header' fits in a ustar header
+		do
+				-- TODO: Implement splitting
+				-- No need for terminating '%U'
+			Result := a_header.filename.utf_8_name.count <= {TAR_CONST}.tar_header_name_length
+		end
+
+	user_id_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `user_id' of `a_header' fits in ustar header
+		do
+				-- Strictly less: terminating '%U'
+			Result := natural_32_to_octal_string (a_header.user_id).count < {TAR_CONST}.tar_header_uid_length
+		end
+
+	group_id_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `group_id' of `a_header' fits in ustar header
+		do
+				-- Strictly less: terminating '%U'
+			Result := natural_32_to_octal_string (a_header.group_id).count < {TAR_CONST}.tar_header_gid_length
+		end
+
+	size_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `size' of `a_header' fits in a ustar header
+		do
+				-- Strictly less: terminating '%U'
+			Result := natural_64_to_octal_string (a_header.size).count < {TAR_CONST}.tar_header_size_length
+		end
+
+	user_name_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `user_name' of `a_header' fits in a ustar header
+		do
+				-- No need for terminating '%U'
+			Result := a_header.user_name.count <= {TAR_CONST}.tar_header_uname_length
+		end
+
+	group_name_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `group_name' of `a_header' fits in a ustar header
+		do
+				-- No need for terminating '%U'
+			Result := a_header.group_name.count <= {TAR_CONST}.tar_header_gname_length
+		end
+
 feature {NONE} -- Utilities
+
+	put_string (s: STRING_8; p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write `s' to `p' at `a_pos'
+		do
+			p.put_special_character_8 (s.area, 0, a_pos, s.count)
+		end
+
+	put_natural (n: NATURAL_64; length: INTEGER; p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write the octal representation of `n' padded to `lenght' - 1 to `p' at `a_pos'
+			-- `length' - 1 because tar requires a terminating '%U' for numeric values
+		local
+			s: STRING_8
+		do
+			s := natural_64_to_octal_string (n)
+			pad (s, length - s.count - 1)
+			p.put_special_character_8 (s.area, 0, a_pos, s.count)
+		end
 
 	put_checksum (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Calculate the checksum for the ustar header in `p' starting at `a_pos'
@@ -172,7 +216,7 @@ feature {NONE} -- Utilities
 					{TAR_CONST}.tar_header_chksum_length)
 		end
 
-	unfiy_path (a_path: PATH): STRING_8
+	unify_path (a_path: PATH): STRING_8
 			-- Turns `a_path' into a UTF-8 string using unix directory separators
 		do
 			Result := a_path.utf_8_name
