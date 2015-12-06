@@ -206,6 +206,7 @@ feature {NONE} -- Utilities
 				i >= {TAR_CONST}.tar_block_size
 			loop
 				checksum := checksum + p.read_natural_8 (a_pos + i)
+				i := i + 1
 			end
 
 			-- Write checksum
