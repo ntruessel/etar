@@ -22,7 +22,8 @@ feature -- Test routines
 		local
 			easy_tar_header: TAR_HEADER
 			unit_under_test: USTAR_HEADER_WRITER
-			p: MANAGED_POINTER
+			p: SPECIAL[CHARACTER_8]
+			i: INTEGER
 		do
 			create unit_under_test
 			create easy_tar_header.make
@@ -36,14 +37,14 @@ feature -- Test routines
 			easy_tar_header.set_user_name (easy_header_username)
 			easy_tar_header.set_group_name (easy_header_groupname)
 
-			p := unit_under_test.write_to_new_managed_pointer (easy_tar_header)
-			easy_header_template.replace_substring_all ("$", "%U")
-			
 			assert ("can write valid header", unit_under_test.can_write (easy_tar_header))
-			assert ("has correct size", unit_under_test.required_space (easy_tar_header) = 512)
+			assert ("has correct size", unit_under_test.required_space (easy_tar_header) = {TAR_CONST}.tar_block_size)
 
+			p := unit_under_test.write_to_new_managed_pointer (easy_tar_header).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			easy_header_template.replace_substring_all ("$", "%U")
 
-			assert ("not_implemented", False)
+			assert ("correct output length", p.count = {TAR_CONST}.tar_block_size)
+			assert ("correct output content", p.same_items (easy_header_template.area, 0, 0, {TAR_CONST}.tar_block_size))
 		end
 
 feature {NONE} -- Data
