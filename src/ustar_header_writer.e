@@ -30,7 +30,6 @@ feature -- Status
 	can_write (a_header: TAR_HEADER): BOOLEAN
 			-- Can `a_header' be written?
 		do
-			-- TODO: Copy over from TAR_HEADER
 			Result := filename_fits (a_header) and
 						user_id_fits (a_header) and
 						group_id_fits (a_header) and
