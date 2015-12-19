@@ -16,7 +16,7 @@ class
 
 feature -- Parsing
 
-	octal_string_to_natural_16 (a_string: STRING_8): NATURAL_32
+	octal_string_to_natural_16 (a_string: STRING_8): NATURAL_16
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_16
 		require
 			valid_format: a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
@@ -90,7 +90,7 @@ feature -- Output
 				tmp := tmp |>> 3
 			end
 			Result.mirror
-			
+
 			if Result.is_empty then
 				Result := "0"
 			end
