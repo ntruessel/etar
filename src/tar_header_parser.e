@@ -28,6 +28,7 @@ feature -- Parsing
 			-- parse `block' (starting from `pos')
 		require
 			block_size_large_enough: pos + {TAR_CONST}.tar_block_size <= block.count
+			non_negative_length: pos >= 0
 		deferred
 		end
 
@@ -45,5 +46,33 @@ feature {NONE} -- Implementation
 	current_header: TAR_HEADER
 			-- The current header (based on the parsed blocks)
 
+feature {NONE} -- Utilities
+
+	parse_string(block: MANAGED_POINTER; pos, length: INTEGER): STRING
+			-- Parse a string in `block' from `pos' with length at most `length'
+			-- A string is a sequence of characters, stopping at the first '%U'
+			-- that occurs. In case no '%U' occurs, it ends after at `length'
+			-- characters
+			-- FIXME: Slow implementation
+		require
+			enough_characters: pos + length <= block.count
+			non_negative_pos: pos >= 0
+			positive_length: length > 0
+		local
+			c: CHARACTER_8
+			i: INTEGER
+		do
+			create Result.make (length) -- Might waste space here
+			from
+				i := 0
+				c := block.read_character (pos + i)
+			until
+				i >= length or c = '%U'
+			loop
+				Result[i + 1] := c;
+				i := i + 1;
+				c := block.read_character (pos + i)
+			end
+		end
 
 end
