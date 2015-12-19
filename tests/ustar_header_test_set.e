@@ -8,7 +8,7 @@ note
 	testing: "type/manual"
 
 class
-	USTAR_HEADER_WRITER_TEST_SET
+	USTAR_HEADER_TEST_SET
 
 inherit
 	EQA_TEST_SET
