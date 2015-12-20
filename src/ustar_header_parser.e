@@ -28,7 +28,7 @@ feature -- Parsing
 			-- FIXME: Implement filename splitting
 			current_header.set_filename (
 						create {PATH}.make_from_string (
-									parse_string (block, pos + {TAR_CONST}.tar_header_name_length, {TAR_CONST}.tar_header_name_length)))
+									parse_string (block, pos + {TAR_CONST}.tar_header_name_offset, {TAR_CONST}.tar_header_name_length)))
 
 			-- parse mode
 			current_header.set_mode (
@@ -81,12 +81,12 @@ feature -- Parsing
 			-- TODO: parse devmajor
 			current_header.set_device_major (
 						octal_string_to_natural_32 (
-									parse_string (block, pos + {TAR_CONST}.tar_header_devmajor_offset, {TAR_CONST}.tar_header_devminor_length)))
+									parse_string (block, pos + {TAR_CONST}.tar_header_devmajor_offset, {TAR_CONST}.tar_header_devmajor_length)))
 
 			-- TODO: parse devminor
 			current_header.set_device_minor (
 						octal_string_to_natural_32 (
-									parse_string (block, pos + {TAR_CONST}.tar_header_devminor_length, {TAR_CONST}.tar_header_devmajor_length)))
+									parse_string (block, pos + {TAR_CONST}.tar_header_devminor_offset, {TAR_CONST}.tar_header_devminor_length)))
 
 			-- TODO: parse prefix
 			-- FIXME: Implement filename splitting

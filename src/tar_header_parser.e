@@ -48,7 +48,7 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Utilities
 
-	parse_string(block: MANAGED_POINTER; pos, length: INTEGER): STRING
+	parse_string (block: MANAGED_POINTER; pos, length: INTEGER): STRING
 			-- Parse a string in `block' from `pos' with length at most `length'
 			-- A string is a sequence of characters, stopping at the first '%U'
 			-- that occurs. In case no '%U' occurs, it ends after at `length'
@@ -62,16 +62,18 @@ feature {NONE} -- Utilities
 			c: CHARACTER_8
 			i: INTEGER
 		do
-			create Result.make (length) -- Might waste space here
+			create Result.make_empty -- Might be inefficient due to many resizes
 			from
 				i := 0
 				c := block.read_character (pos + i)
 			until
 				i >= length or c = '%U'
 			loop
-				Result[i + 1] := c;
-				i := i + 1;
 				c := block.read_character (pos + i)
+				if (c /= '%U') then
+					Result.append_character (c)
+				end
+				i := i + 1
 			end
 		end
 
