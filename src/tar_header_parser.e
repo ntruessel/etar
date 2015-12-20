@@ -1,5 +1,9 @@
 note
-	description: "Summary description for {TAR_HEADER_PARSER}."
+	description: "[
+		Common ancestor for tar header parsers
+		
+		Additionally provides a string parsing utility
+	]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"

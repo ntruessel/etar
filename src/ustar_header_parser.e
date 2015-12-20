@@ -1,5 +1,7 @@
 note
-	description: "Summary description for {USTAR_HEADER_PARSER}."
+	description: "[
+		Header parser for the ustar header format
+	]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
