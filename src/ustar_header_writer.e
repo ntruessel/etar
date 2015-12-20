@@ -91,10 +91,10 @@ feature -- Output
 					p, a_pos + {TAR_CONST}.tar_header_linkname_offset)
 
 			-- Put magic
-			put_string (magic, p, a_pos + {TAR_CONST}.tar_header_magic_offset)
+			put_string ({TAR_CONST}.ustar_magic, p, a_pos + {TAR_CONST}.tar_header_magic_offset)
 
 			-- Put version
-			put_string (version, p, a_pos + {TAR_CONST}.tar_header_version_offset)
+			put_string ({TAR_CONST}.ustar_version, p, a_pos + {TAR_CONST}.tar_header_version_offset)
 
 			-- Put username
 			put_string (a_header.user_name.as_string_8,
@@ -223,13 +223,5 @@ feature {NONE} -- Utilities
 				Result.replace_substring_all({PATH}.windows_separator.out, {PATH}.unix_separator.out)
 			end
 		end
-
-feature {NONE} -- Constants
-
-	magic: STRING_8 = "ustar"
-			-- Header magic, we only support ustar.
-
-	version: STRING_8 = "00"
-			-- Header version
 
 end

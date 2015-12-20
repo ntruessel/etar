@@ -101,7 +101,12 @@ feature -- Parsing
 				header.set_linkname (create {PATH}.make_from_string (current_field))
 			end
 
-			-- TODO: parse magic (and compare it)
+			-- parse and check magic
+			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_magic_offset, {TAR_CONST}.tar_header_magic_length)
+			if (not (current_field ~ {TAR_CONST}.ustar_magic)) then
+				current_header := Void
+			end
+
 
 			-- TODO: parse version (and compare)
 

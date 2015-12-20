@@ -112,4 +112,7 @@ feature -- Typeflags
 feature -- Miscellaneous
 	tar_block_size:	INTEGER = 512 -- Block size in tar
 
+	ustar_magic: STRING_8 = "ustar" -- ustar magic
+
+	ustar_version: STRING_8 = "00" -- ustar version
 end
