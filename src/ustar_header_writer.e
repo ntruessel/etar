@@ -42,8 +42,6 @@ feature -- Output
 
 	write_to_managed_pointer (a_header: TAR_HEADER; p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write `a_header' to `p' starting at `a_pos'
-		local
-			s: STRING_8
 		do
 			-- Fill with all '%U'
 			p.put_special_character_8 (
