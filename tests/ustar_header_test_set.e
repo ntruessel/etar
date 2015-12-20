@@ -41,7 +41,7 @@ feature -- Test writing methods
 			output := unit_under_test.write_to_new_managed_pointer (easy_header).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
-			assert ("correct output content", compare_special (easy_header_blob, output, {TAR_CONST}.tar_block_size))
+			assert ("correct output content", compare_block_special (easy_header_blob, output))
 		end
 
 	test_link_header_write
@@ -60,7 +60,7 @@ feature -- Test writing methods
 			output := unit_under_test.write_to_new_managed_pointer (link_header).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
-			assert ("correct output content", compare_special (link_header_blob, output, {TAR_CONST}.tar_block_size))
+			assert ("correct output content", compare_block_special (link_header_blob, output))
 		end
 
 	test_devnode_header_write
@@ -79,30 +79,76 @@ feature -- Test writing methods
 			output := unit_under_test.write_to_new_managed_pointer (devnode_header).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
-			assert ("correct output content", compare_special (devnode_header_blob, output, {TAR_CONST}.tar_block_size))
+			assert ("correct output content", compare_block_special (devnode_header_blob, output))
 		end
 
 feature -- Test parsing methods
 
 	test_easy_header_parse
-			-- Test whether USTAR_HEADER_PARSER parses the given header blob correctly
+			-- Test whether USTAR_HEADER_PARSER parses the easy blob correctly
 		note
 			testing:  "covers/{USTAR_HEADER_PARSER}"
 		local
 			unit_under_test: USTAR_HEADER_PARSER
+			p: MANAGED_POINTER
 			output: TAR_HEADER
 		do
-			create unit_under_Test.make
+			create unit_under_test.make
+			create p.make_from_pointer (easy_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
+
+			assert ("headers match", unit_under_test.parsed_header ~ easy_header)
+		end
+
+	test_link_header_parse
+			-- Test whether USTAR_HEADER_PARSER parses the link blob correctly
+		note
+			testing:  "covers/{USTAR_HEADER_PARSER}"
+		local
+			unit_under_test: USTAR_HEADER_PARSER
+			p: MANAGED_POINTER
+			output: TAR_HEADER
+		do
+			create unit_under_test.make
+			create p.make_from_pointer (link_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
+
+			assert ("headers match", unit_under_test.parsed_header ~ link_header)
+		end
+
+	test_devnode_header_parse
+			-- Test whether USTAR_HEADER_PARSER parses the devnode blob correctly
+		note
+			testing:  "covers/{USTAR_HEADER_PARSER}"
+		local
+			unit_under_test: USTAR_HEADER_PARSER
+			p: MANAGED_POINTER
+			output: TAR_HEADER
+		do
+			create unit_under_test.make
+			create p.make_from_pointer (devnode_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
+
+			assert ("headers match", unit_under_test.parsed_header ~ devnode_header)
 		end
 
 feature {NONE} -- Test utils
 
-	compare_special (expected, actual: SPECIAL[CHARACTER_8]; n: INTEGER): BOOLEAN
-			-- Compare first n bytes of `expected` to `actual` and return whether they are equal.
+	compare_block_special (expected, actual: SPECIAL[CHARACTER_8]): BOOLEAN
+			-- Compare first {TAR_CONST}.tar_block_size bytes of `expected` to `actual` and return whether they are equal.
 			-- If they are not equal print all differences found
 		require
-			expected_size: expected.count >= n
-			actual_size: actual.count >= n
+			expected_size: expected.count >= {TAR_CONST}.tar_block_size
+			actual_size: actual.count >= {TAR_CONST}.tar_block_size
 		local
 			i: INTEGER
 		do
@@ -110,7 +156,7 @@ feature {NONE} -- Test utils
 				i := 0
 				Result := true
 			until
-				i >= expected.count.min (actual.count)
+				i >= {TAR_CONST}.tar_block_size
 			loop
 				if expected[i] /= actual[i] then
 					io.put_string ("Missmatch at byte ")
