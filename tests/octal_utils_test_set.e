@@ -15,8 +15,8 @@ inherit
 
 feature -- Test routines
 
-	test_output
-			-- Test printing features
+	test_parse
+			-- Test parsing features
 		note
 			testing:	"covers/{OCTAL_UTILS}.octal_string_to_natural_16"
 			testing:	"covers/{OCTAL_UTILS}.octal_string_to_natural_32"
@@ -71,8 +71,8 @@ feature -- Test routines
 			assert ("Max 64bit parsing", unit_under_test.octal_string_to_natural_64 (s) = {NATURAL_64}.max_value)
 		end
 
-	test_parse
-			-- Test parsing features
+	test_output
+			-- Test printing features
 		note
 			testing:	"covers/{OCTAL_UTILS}.natural_16_to_octal_string"
 			testing:	"covers/{OCTAL_UTILS}.natural_32_to_octal_string"

@@ -11,20 +11,11 @@ note
 deferred class
 	TAR_HEADER_PARSER
 
-
-feature {NONE} -- Initialization
-
-	make
-			-- Create a TAR_HEADER_PARSER
-		do
-			parsing_finished := False
-			create current_header.make
-		end
-
 feature -- Status
 
 	parsing_finished: BOOLEAN
 			-- Indicates whether the current parsing step has finished
+			-- On parse failure this is True as well
 
 feature -- Parsing
 
@@ -38,7 +29,7 @@ feature -- Parsing
 
 feature -- Result query
 
-	parsed_header: TAR_HEADER
+	parsed_header: detachable TAR_HEADER
 		require
 			completely_parsed: parsing_finished
 		do
@@ -47,8 +38,9 @@ feature -- Result query
 
 feature {NONE} -- Implementation
 
-	current_header: TAR_HEADER
+	current_header: detachable TAR_HEADER
 			-- The current header (based on the parsed blocks)
+			-- Void in case of parse failures
 
 feature {NONE} -- Utilities
 

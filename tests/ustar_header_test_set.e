@@ -91,15 +91,14 @@ feature -- Test parsing methods
 		local
 			unit_under_test: USTAR_HEADER_PARSER
 			p: MANAGED_POINTER
-			output: TAR_HEADER
 		do
-			create unit_under_test.make
+			create unit_under_test
 			create p.make_from_pointer (easy_header_blob.base_address, {TAR_CONST}.tar_block_size)
 
 			unit_under_test.parse_block (p, 0)
 
 			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
-
+			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
 			assert ("headers match", unit_under_test.parsed_header ~ easy_header)
 		end
 
@@ -110,15 +109,14 @@ feature -- Test parsing methods
 		local
 			unit_under_test: USTAR_HEADER_PARSER
 			p: MANAGED_POINTER
-			output: TAR_HEADER
 		do
-			create unit_under_test.make
+			create unit_under_test
 			create p.make_from_pointer (link_header_blob.base_address, {TAR_CONST}.tar_block_size)
 
 			unit_under_test.parse_block (p, 0)
 
 			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
-
+			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
 			assert ("headers match", unit_under_test.parsed_header ~ link_header)
 		end
 
@@ -129,15 +127,14 @@ feature -- Test parsing methods
 		local
 			unit_under_test: USTAR_HEADER_PARSER
 			p: MANAGED_POINTER
-			output: TAR_HEADER
 		do
-			create unit_under_test.make
+			create unit_under_test
 			create p.make_from_pointer (devnode_header_blob.base_address, {TAR_CONST}.tar_block_size)
 
 			unit_under_test.parse_block (p, 0)
 
 			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
-
+			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
 			assert ("headers match", unit_under_test.parsed_header ~ devnode_header)
 		end
 
