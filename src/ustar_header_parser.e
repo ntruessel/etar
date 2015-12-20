@@ -88,7 +88,10 @@ feature -- Parsing
 			end
 
 
-			-- TODO: parse and verify checksum
+			-- verify checksum
+			if (not verify_checksum (block, pos)) then
+				current_header := Void
+			end
 
 			-- parse typeflag
 			if (attached current_header as header) then
@@ -108,7 +111,11 @@ feature -- Parsing
 			end
 
 
-			-- TODO: parse version (and compare)
+			-- parse and check version
+			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_version_offset, {TAR_CONST}.tar_header_version_length)
+			if (not (current_field ~ {TAR_CONST}.ustar_version)) then
+				current_header := Void
+			end
 
 			-- parse uname
 			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_uname_offset, {TAR_CONST}.tar_header_uname_length)
@@ -148,4 +155,33 @@ feature -- Parsing
 			parsing_finished := True;
 		end
 
+feature {NONE} -- Implementation
+
+	verify_checksum (block: MANAGED_POINTER; pos: INTEGER): BOOLEAN
+			-- Verify the checksum of `block' (block starting at `pos')
+		local
+			checksum_string: STRING_8
+			checksum: NATURAL_64
+			s: STRING_8
+			i: INTEGER
+		do
+			-- Sum all bytes
+			from
+				i := 0
+				checksum := 0
+			until
+				i >= {TAR_CONST}.tar_block_size
+			loop
+				if (i < {TAR_CONST}.tar_header_chksum_offset or i >= {TAR_CONST}.tar_header_chksum_offset + {TAR_CONST}.tar_header_chksum_length) then
+					checksum := checksum + block.read_natural_8 (pos + i)
+				else
+					checksum := checksum + (' ').natural_32_code.as_natural_8
+				end
+				i := i + 1
+			end
+
+			-- Parse checksum
+			checksum_string := parse_string (block, pos + {TAR_CONST}.tar_header_chksum_offset, {TAR_CONST}.tar_header_chksum_length)
+			Result := is_octal_natural_64_string (checksum_string) and then (octal_string_to_natural_64 (checksum_string) = checksum)
+		end
 end
