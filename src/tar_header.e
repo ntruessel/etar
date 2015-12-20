@@ -18,10 +18,15 @@ class
 inherit
 
 	ANY
+		redefine
+			is_equal
+		end
 
 	OCTAL_UTILS
 		export
 			{NONE} all
+		redefine
+			is_equal
 		end
 
 create
@@ -36,6 +41,24 @@ feature {NONE} -- Initialization
 			create linkname.make_empty
 			create user_name.make_empty
 			create group_name.make_empty
+		end
+
+feature -- Equality
+
+	is_equal (other: like Current): BOOLEAN
+		do
+			Result := 	Current.filename ~ other.filename and
+						Current.mode = other.mode and
+						Current.user_id = other.user_id and
+						Current.group_id = other.group_id and
+						Current.size = other.size and
+						Current.mtime = other.mtime and
+						Current.typeflag = other.typeflag and
+						Current.linkname ~ other.linkname and
+						Current.user_name ~ other.user_name and
+						Current.group_name ~ other.group_name and
+						Current.device_major = other.device_major and
+						Current.device_minor = other.device_minor
 		end
 
 feature -- Fields
