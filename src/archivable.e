@@ -61,4 +61,12 @@ feature -- Output
 			write_to_managed_pointer (Result, 0)
 		end
 
+feature {NONE} -- Utilites
+
+	needed_blocks (n: INTEGER): INTEGER
+			-- Indicate how many blocks are needed to represent `n' bytes
+		do
+			Result := (n + {TAR_CONST}.tar_block_size - 1) // {TAR_CONST}.tar_block_size
+		end
+
 end
