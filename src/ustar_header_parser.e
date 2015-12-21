@@ -32,16 +32,16 @@ feature -- Parsing
 				-- FIXME: Implement filename splitting
 			if not err then
 				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_name_offset, {TAR_CONST}.tar_header_name_length)
-				if l_field.is_whitespace then
-					err := True
-				else
+				if not l_field.is_whitespace then
 					l_header.set_filename (create {PATH}.make_from_string (l_field))
+				else
+					err := True
 				end
 			end
 
 				-- parse mode
 			if not err then
-				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_mode_offset, {TAR_CONST}.tar_header_mode_length)
+				l_field := next_block_octal_natural_16_string (block, pos + {TAR_CONST}.tar_header_mode_offset, {TAR_CONST}.tar_header_mode_length)
 				if l_field /= Void then
 					l_header.set_mode (octal_string_to_natural_16 (l_field))
 				else
@@ -51,7 +51,7 @@ feature -- Parsing
 
 				-- parse uid
 			if not err then
-				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_uid_offset, {TAR_CONST}.tar_header_uid_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_uid_offset, {TAR_CONST}.tar_header_uid_length)
 				if l_field /= Void then
 					l_header.set_user_id (octal_string_to_natural_32 (l_field))
 				else
@@ -61,7 +61,7 @@ feature -- Parsing
 
 				-- parse gid
 			if not err then
-				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_gid_offset, {TAR_CONST}.tar_header_gid_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_gid_offset, {TAR_CONST}.tar_header_gid_length)
 				if l_field /= Void then
 					l_header.set_group_id (octal_string_to_natural_32 (l_field))
 				else
@@ -81,7 +81,7 @@ feature -- Parsing
 
 				-- parse mtime
 			if not err then
-				l_field := next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_size_offset, {TAR_CONST}.tar_header_mtime_length)
+				l_field := next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_mtime_offset, {TAR_CONST}.tar_header_mtime_length)
 				if l_field /= Void then
 					l_header.set_mtime (octal_string_to_natural_64 (l_field))
 				else
@@ -145,7 +145,7 @@ feature -- Parsing
 
 				-- parse devmajor
 			if not err then
-				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_devmajor_offset, {TAR_CONST}.tar_header_devmajor_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_devmajor_offset, {TAR_CONST}.tar_header_devmajor_length)
 				if l_field /= Void then
 					l_header.set_device_major (octal_string_to_natural_32 (l_field))
 				else
@@ -155,7 +155,7 @@ feature -- Parsing
 
 				-- parse devminor
 			if not err then
-				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_devminor_offset, {TAR_CONST}.tar_header_devminor_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_devminor_offset, {TAR_CONST}.tar_header_devminor_length)
 				if l_field /= Void then
 					l_header.set_device_minor (octal_string_to_natural_32 (l_field))
 				else
@@ -168,13 +168,26 @@ feature -- Parsing
 
 			if not err then
 				last_parsed_header := l_header
+			else
+				last_parsed_header := Void
 			end
 			parsing_finished := True
 		end
 
 feature {NONE} -- Implementation
 
-	next_block_octal_string (block: MANAGED_POINTER; pos, length: INTEGER): detachable STRING
+	next_block_octal_natural_16_string (block: MANAGED_POINTER; pos, length: INTEGER): detachable STRING
+			-- Next block ocatl string in `block' at position `pos' with at most `lenght' characters.
+		do
+			Result := next_block_string (block, pos, length)
+			if not is_octal_natural_16_string (Result) then
+				Result := Void
+			end
+		ensure
+			is_octal_natural_16_string: Result /= Void implies is_octal_natural_16_string (Result)
+		end
+
+	next_block_octal_natural_32_string (block: MANAGED_POINTER; pos, length: INTEGER): detachable STRING
 			-- Next block octal string in `block' at position `pos' with at most `length' characters.
 		do
 			Result := next_block_string (block, pos, length)
