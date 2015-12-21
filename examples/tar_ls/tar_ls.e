@@ -16,8 +16,6 @@ inherit
 
 	LOCALIZED_PRINTER
 
-	USTAR_HEADER_WRITER
-
 create
 	make
 
@@ -61,11 +59,7 @@ feature {NONE} -- Implementation
 		local
 			block: MANAGED_POINTER
 			l_parser: USTAR_HEADER_PARSER
-			hw: USTAR_HEADER_WRITER
 		do
-			create hw
-			print (unify_utf_8_path (tar_file.path))
-
 			tar_file.open_read
 
 				-- Filename
