@@ -21,7 +21,8 @@ feature {NONE} -- Initialization
 			file_is_readable: a_file.is_readable
 			file_is_plain: a_file.is_plain
 		do
-			file := a_file.twin
+			create {RAW_FILE} file.make_with_path (a_file.path)
+			file.open_read
 
 			if (file.is_closed) then
 				file.open_read
@@ -51,8 +52,6 @@ feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
 			-- Write the next block to `p' starting at `pos'
-		local
-			padding: SPECIAL[CHARACTER_8]
 		do
 			if (not header_written) then
 				-- Write header
@@ -75,7 +74,7 @@ feature -- Output
 			-- Does not change the state of blockwise writing
 		local
 			l_old_header_written: BOOLEAN
-			l_file_copy: FILE
+			l_file: FILE
 			i: INTEGER
 			padding: SPECIAL[CHARACTER_8]
 		do
@@ -85,23 +84,22 @@ feature -- Output
 
 			-- Write blocks until there are no more blocks to write
 			from
-				l_file_copy := file.twin
-				l_file_copy.close
-				l_file_copy.open_read
+				create {RAW_FILE} l_file.make_with_path (file.path)
+				l_file.open_read
 				i := 1
 			until
-				i /= 1 and l_file_copy.bytes_read /= {TAR_CONST}.tar_block_size
+				i /= 1 and l_file.bytes_read /= {TAR_CONST}.tar_block_size
 			loop
-				l_file_copy.read_to_managed_pointer (p, pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
+				l_file.read_to_managed_pointer (p, pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
 				i := i + 1
 			end
 
 			-- Fill with '%U'
 			i := i - 1
-			pad (p, pos + {TAR_CONST}.tar_block_size * i + l_file_copy.bytes_read, {TAR_CONST}.tar_block_size - l_file_copy.bytes_read)
+			pad (p, pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
 
 			-- Close file
-			file.close
+			l_file.close
 		ensure then
 			header_state_unchanged: (old header_written) = header_written
 			file_pointer_unchanged: (old file.file_pointer) = file.file_pointer
