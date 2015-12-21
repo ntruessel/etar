@@ -29,7 +29,7 @@ feature -- Output
 			-- Write `a_header' to `p', starting at position `a_pos'
 		require
 			valid_position: a_pos >= 0
-			enough_space: p.count - a_pos <= required_space (a_header)
+			enough_space: p.count >= a_pos + required_space (a_header)
 			writable: can_write (a_header)
 		deferred
 		end

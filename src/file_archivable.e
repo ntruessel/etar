@@ -22,7 +22,7 @@ feature {NONE} -- Initialization
 			file_is_plain: a_file.is_plain
 		do
 			file := a_file.twin
-			
+
 			if (file.is_closed) then
 				file.open_read
 			else
@@ -122,6 +122,7 @@ feature {NONE} -- Implementation
 			-- Write header for `file' to `p' starting at `pos'
 		require
 			not_written_yet: not header_written
+			enough_space: p.count >= pos + {TAR_CONST}.tar_block_size
 		local
 			header: TAR_HEADER
 		do
