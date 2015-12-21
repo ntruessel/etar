@@ -15,7 +15,7 @@ feature -- Status
 
 	parsing_finished: BOOLEAN
 			-- Indicates whether the current parsing step has finished
-			-- On parse failure this is True as well
+			-- On parse failure this is True as well.
 
 feature -- Parsing
 
@@ -33,18 +33,18 @@ feature -- Result query
 		require
 			completely_parsed: parsing_finished
 		do
-			Result := current_header
+			Result := last_parsed_header
 		end
 
 feature {NONE} -- Implementation
 
-	current_header: detachable TAR_HEADER
+	last_parsed_header: detachable TAR_HEADER
 			-- The current header (based on the parsed blocks)
 			-- Void in case of parse failures
 
 feature {NONE} -- Utilities
 
-	parse_string (block: MANAGED_POINTER; pos, length: INTEGER): STRING
+	next_block_string (block: MANAGED_POINTER; pos, length: INTEGER): STRING
 			-- Parse a string in `block' from `pos' with length at most `length'
 			-- A string is a sequence of characters, stopping at the first '%U'
 			-- that occurs. In case no '%U' occurs, it ends after at `length'
@@ -58,15 +58,15 @@ feature {NONE} -- Utilities
 			c: CHARACTER_8
 			i: INTEGER
 		do
-			create Result.make_empty -- Might be inefficient due to many resizes
+			create Result.make (length) -- Might be inefficient due to many resizes
 			from
 				i := 0
-				c := block.read_character (pos + i)
+				c := ' ' -- dummy character different from %U
 			until
 				i >= length or c = '%U'
 			loop
 				c := block.read_character (pos + i)
-				if (c /= '%U') then
+				if c /= '%U' then
 					Result.append_character (c)
 				end
 				i := i + 1

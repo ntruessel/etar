@@ -8,6 +8,7 @@ note
 
 class
 	USTAR_HEADER_PARSER
+
 inherit
 	TAR_HEADER_PARSER
 
@@ -19,169 +20,212 @@ inherit
 feature -- Parsing
 
 	parse_block (block: MANAGED_POINTER; pos: INTEGER)
-			-- Parse ustar-header in `block' starting at position `pos'
+			-- Parse ustar-header in `block' starting at position `pos'.
 		local
-			current_field: STRING_8
+			l_field: detachable STRING_8
+			l_header: like last_parsed_header
+			err: BOOLEAN
 		do
-			create current_header.make
+			create l_header.make
 
-			-- parse filename
-			-- FIXME: Implement filename splitting
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_name_offset, {TAR_CONST}.tar_header_name_length)
-			if (current_field.is_empty) then
-				current_header := Void
+				-- parse "filename"
+				-- FIXME: Implement filename splitting
+			if not err then
+				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_name_offset, {TAR_CONST}.tar_header_name_length)
+				if l_field.is_whitespace then
+					err := True
+				else
+					l_header.set_filename (create {PATH}.make_from_string (l_field))
+				end
 			end
 
-			if (attached current_header as header) then
-				header.set_filename (create {PATH}.make_from_string (current_field))
+				-- parse mode
+			if not err then
+				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_mode_offset, {TAR_CONST}.tar_header_mode_length)
+				if l_field /= Void then
+					l_header.set_mode (octal_string_to_natural_16 (l_field))
+				else
+					err := True
+				end
 			end
 
-			-- parse mode
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_mode_offset, {TAR_CONST}.tar_header_mode_length)
-			if (not is_octal_natural_16_string (current_field)) then
-				current_header := Void
+				-- parse uid
+			if not err then
+				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_uid_offset, {TAR_CONST}.tar_header_uid_length)
+				if l_field /= Void then
+					l_header.set_user_id (octal_string_to_natural_32 (l_field))
+				else
+					err := True
+				end
 			end
 
-			if (attached current_header as header) then
-				header.set_mode (octal_string_to_natural_16 (current_field))
+				-- parse gid
+			if not err then
+				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_gid_offset, {TAR_CONST}.tar_header_gid_length)
+				if l_field /= Void then
+					l_header.set_group_id (octal_string_to_natural_32 (l_field))
+				else
+					err := True
+				end
 			end
 
-			-- parse uid
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_uid_offset, {TAR_CONST}.tar_header_uid_length)
-			if (not is_octal_natural_32_string (current_field)) then
-				current_header := Void
+				-- parse size
+			if not err then
+				l_field := next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_size_offset, {TAR_CONST}.tar_header_size_length)
+				if l_field /= Void then
+					l_header.set_size (octal_string_to_natural_64 (l_field))
+				else
+					err := True
+				end
 			end
 
-			if (attached current_header as header) then
-				header.set_user_id (octal_string_to_natural_32 (current_field))
-			end
-
-
-			-- parse gid
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_gid_offset, {TAR_CONST}.tar_header_gid_length)
-			if (not is_octal_natural_32_string (current_field)) then
-				current_header := Void
-			end
-
-			if (attached current_header as header) then
-				header.set_group_id (octal_string_to_natural_32 (current_field))
-			end
-
-			-- parse size
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_size_offset, {TAR_CONST}.tar_header_size_length)
-			if (not is_octal_natural_64_string (current_field)) then
-				current_header := Void
-			end
-
-			if (attached current_header as header) then
-				header.set_size (octal_string_to_natural_64 (current_field))
-			end
-
-			-- parse mtime
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_mtime_offset, {TAR_CONST}.tar_header_mtime_length)
-			if (not is_octal_natural_64_string (current_field)) then
-				current_header := Void
-			end
-
-			if (attached current_header as header) then
-				header.set_mtime (octal_string_to_natural_64 (current_field))
-			end
-
-
-			-- verify checksum
-			if (not verify_checksum (block, pos)) then
-				current_header := Void
-			end
-
-			-- parse typeflag
-			if (attached current_header as header) then
-				header.set_typeflag (block.read_character (pos + {TAR_CONST}.tar_header_typeflag_offset))
-			end
-
-			-- parse linkname
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_linkname_offset, {TAR_CONST}.tar_header_linkname_length)
-			if (attached current_header as header and not current_field.is_empty) then
-				header.set_linkname (create {PATH}.make_from_string (current_field))
-			end
-
-			-- parse and check magic
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_magic_offset, {TAR_CONST}.tar_header_magic_length)
-			if (not (current_field ~ {TAR_CONST}.ustar_magic)) then
-				current_header := Void
+				-- parse mtime
+			if not err then
+				l_field := next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_size_offset, {TAR_CONST}.tar_header_mtime_length)
+				if l_field /= Void then
+					l_header.set_mtime (octal_string_to_natural_64 (l_field))
+				else
+					err := True
+				end
 			end
 
 
-			-- parse and check version
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_version_offset, {TAR_CONST}.tar_header_version_length)
-			if (not (current_field ~ {TAR_CONST}.ustar_version)) then
-				current_header := Void
+				-- verify checksum
+			if not err then
+				err := not is_checksum_verified (block, pos)
 			end
 
-			-- parse uname
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_uname_offset, {TAR_CONST}.tar_header_uname_length)
-			if (attached current_header as header and not current_field.is_empty) then
-				header.set_user_name (current_field)
+				-- parse typeflag
+			if not err then
+				l_header.set_typeflag (block.read_character (pos + {TAR_CONST}.tar_header_typeflag_offset))
 			end
 
-			-- parse gname
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_gname_offset, {TAR_CONST}.tar_header_gname_length)
-			if (attached current_header as header and not current_field.is_empty) then
-				header.set_group_name (current_field)
+				-- parse linkname
+			if not err then
+				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_linkname_offset, {TAR_CONST}.tar_header_linkname_length)
+				if not l_field.is_whitespace then
+					l_header.set_linkname (create {PATH}.make_from_string (l_field))
+				else
+--					err := True
+				end
 			end
 
-			-- parse devmajor
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_devmajor_offset, {TAR_CONST}.tar_header_devmajor_length)
-			if (not is_octal_natural_32_string (current_field)) then
-				current_header := Void
+				-- parse and check magic
+			if not err then
+				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_magic_offset, {TAR_CONST}.tar_header_magic_length)
+				err := l_field /~ {TAR_CONST}.ustar_magic
 			end
 
-			if (attached current_header as header) then
-				header.set_device_major (octal_string_to_natural_32 (current_field))
+
+				-- parse and check version
+			if not err then
+				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_version_offset, {TAR_CONST}.tar_header_version_length)
+				err := l_field /~ {TAR_CONST}.ustar_version
 			end
 
-			-- parse devminor
-			current_field := parse_string (block, pos + {TAR_CONST}.tar_header_devminor_offset, {TAR_CONST}.tar_header_devminor_length)
-			if (not is_octal_natural_32_string (current_field)) then
-				current_header := Void
+				-- parse uname
+			if not err then
+				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_uname_offset, {TAR_CONST}.tar_header_uname_length)
+				if not l_field.is_whitespace then
+					l_header.set_user_name (l_field)
+				else
+--					err := True
+				end
 			end
 
-			if (attached current_header as header) then
-				header.set_device_minor (octal_string_to_natural_32 (current_field))
+				-- parse gname
+			if not err then
+				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_gname_offset, {TAR_CONST}.tar_header_gname_length)
+				if not l_field.is_whitespace then
+					l_header.set_group_name (l_field)
+				else
+--					err := True
+				end
 			end
 
-			-- TODO: parse prefix
-			-- FIXME: Implement filename splitting
+				-- parse devmajor
+			if not err then
+				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_devmajor_offset, {TAR_CONST}.tar_header_devmajor_length)
+				if l_field /= Void then
+					l_header.set_device_major (octal_string_to_natural_32 (l_field))
+				else
+					err := True
+				end
+			end
 
-			parsing_finished := True;
+				-- parse devminor
+			if not err then
+				l_field := next_block_octal_string (block, pos + {TAR_CONST}.tar_header_devminor_offset, {TAR_CONST}.tar_header_devminor_length)
+				if l_field /= Void then
+					l_header.set_device_minor (octal_string_to_natural_32 (l_field))
+				else
+					err := True
+				end
+			end
+
+				-- TODO: parse prefix
+				-- FIXME: Implement filename splitting
+
+			if not err then
+				last_parsed_header := l_header
+			end
+			parsing_finished := True
 		end
 
 feature {NONE} -- Implementation
 
-	verify_checksum (block: MANAGED_POINTER; pos: INTEGER): BOOLEAN
+	next_block_octal_string (block: MANAGED_POINTER; pos, length: INTEGER): detachable STRING
+			-- Next block octal string in `block' at position `pos' with at most `length' characters.
+		do
+			Result := next_block_string (block, pos, length)
+			if not is_octal_natural_32_string (Result) then
+				Result := Void
+			end
+		ensure
+			is_octal_natural_32_string: Result /= Void implies is_octal_natural_32_string (Result)
+		end
+
+	next_block_octal_natural_64_string (block: MANAGED_POINTER; pos, length: INTEGER): detachable STRING
+			-- Next block octal string in `block' at position `pos' with at most `length' characters.
+		do
+			Result := next_block_string (block, pos, length)
+			if not is_octal_natural_64_string (Result) then
+				Result := Void
+			end
+		ensure
+			is_octal_natural_64_string: Result /= Void implies is_octal_natural_64_string (Result)
+		end
+
+	is_checksum_verified (block: MANAGED_POINTER; pos: INTEGER): BOOLEAN
 			-- Verify the checksum of `block' (block starting at `pos')
 		local
-			checksum_string: STRING_8
 			checksum: NATURAL_64
-			s: STRING_8
 			i: INTEGER
+			l_space_code: NATURAL_8
+			l_lower, l_upper: INTEGER
 		do
-			-- Sum all bytes
+				-- Sum all bytes
+			l_space_code := (' ').natural_32_code.as_natural_8
+			l_lower := {TAR_CONST}.tar_header_chksum_offset
+			l_upper := l_lower + {TAR_CONST}.tar_header_chksum_length
 			from
 				i := 0
 				checksum := 0
 			until
 				i >= {TAR_CONST}.tar_block_size
 			loop
-				if (i < {TAR_CONST}.tar_header_chksum_offset or i >= {TAR_CONST}.tar_header_chksum_offset + {TAR_CONST}.tar_header_chksum_length) then
+				if
+					i < l_lower or l_upper <= i
+				then
 					checksum := checksum + block.read_natural_8 (pos + i)
 				else
-					checksum := checksum + (' ').natural_32_code.as_natural_8
+					checksum := checksum + l_space_code
 				end
 				i := i + 1
 			end
 
-			-- Parse checksum
-			checksum_string := parse_string (block, pos + {TAR_CONST}.tar_header_chksum_offset, {TAR_CONST}.tar_header_chksum_length)
-			Result := is_octal_natural_64_string (checksum_string) and then (octal_string_to_natural_64 (checksum_string) = checksum)
+				--| Parse checksum
+			Result := attached next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_chksum_offset, {TAR_CONST}.tar_header_chksum_length) as checksum_string and then
+					octal_string_to_natural_64 (checksum_string) = checksum
 		end
 end

@@ -50,7 +50,7 @@ feature -- Output
 
 			-- Put filename
 			-- FIXME: Implement filename splitting
-			put_string (unify_path (a_header.filename),
+			put_string (unify_utf_8_path (a_header.filename),
 					p, a_pos + {TAR_CONST}.tar_header_name_offset);
 
 			-- Put prefix
@@ -87,7 +87,7 @@ feature -- Output
 					a_pos + {TAR_CONST}.tar_header_typeflag_offset)
 
 			-- Put linkname
-			put_string (unify_path (a_header.linkname),
+			put_string (unify_utf_8_path (a_header.linkname),
 					p, a_pos + {TAR_CONST}.tar_header_linkname_offset)
 
 			-- Put magic
@@ -214,13 +214,19 @@ feature {NONE} -- Utilities
 					{TAR_CONST}.tar_header_chksum_length)
 		end
 
-	unify_path (a_path: PATH): STRING_8
+feature -- Path helpers		
+
+	unify_utf_8_path (a_path: PATH): STRING_8
 			-- Turns `a_path' into a UTF-8 string using unix directory separators
 		do
-			Result := a_path.utf_8_name
-			if (a_path.directory_separator = {PATH}.windows_separator) then
-				-- Windows prohibits unix directory separators in paths so this is a simple replacement operation
-				Result.replace_substring_all({PATH}.windows_separator.out, {PATH}.unix_separator.out)
+			create Result.make (a_path.utf_8_name.count)
+			across
+				a_path.components as ic
+			loop
+				if not Result.is_empty then
+					Result.append_character ('/')
+				end
+				Result.append (ic.item.utf_8_name)
 			end
 		end
 

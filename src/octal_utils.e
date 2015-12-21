@@ -16,40 +16,40 @@ class
 
 feature -- Format check
 
-	is_octal_natural_16_string (a_string: STRING_8): BOOLEAN
+	is_octal_natural_16_string (a_string: READABLE_STRING_8): BOOLEAN
 			-- Indicates whether `a_string' represents an octal encoded NATURAL_16
 		do
 			-- Format check
 			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
 
-			-- Lenght check
-			Result := 	Result and (
+			-- Length check
+			Result := Result and (
 							(a_string.count - leading_zeros_count (a_string) < octal_16_max_digits) or
 							((a_string.count - leading_zeros_count (a_string) = octal_16_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('1').code))
 						)
 		end
 
-	is_octal_natural_32_string (a_string: STRING_8): BOOLEAN
+	is_octal_natural_32_string (a_string: READABLE_STRING_8): BOOLEAN
 			-- Indicates whether `a_string' represents an octal encoded NATURAL_32
 		do
 			-- Format check
 			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
 
-			-- Lenght check
-			Result := 	Result and (
+			-- Length check
+			Result := Result and (
 							(a_string.count - leading_zeros_count (a_string) < octal_32_max_digits) or
 							((a_string.count - leading_zeros_count (a_string) = octal_32_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('3').code))
 						)
 		end
 
-	is_octal_natural_64_string (a_string: STRING_8): BOOLEAN
+	is_octal_natural_64_string (a_string: READABLE_STRING_8): BOOLEAN
 			-- Indicates whether `a_string' represents an octal encoded NATURAL_64
 		do
 			-- Format check
 			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
 
-			-- Lenght check
-			Result := 	Result and (
+			-- Length check
+			Result := Result and (
 							(a_string.count - leading_zeros_count (a_string) < octal_64_max_digits) or
 							((a_string.count - leading_zeros_count (a_string) = octal_64_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('1').code))
 						)
@@ -57,7 +57,7 @@ feature -- Format check
 
 feature -- Parsing
 
-	octal_string_to_natural_16 (a_string: STRING_8): NATURAL_16
+	octal_string_to_natural_16 (a_string: READABLE_STRING_8): NATURAL_16
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_16
 		require
 			valid_input: is_octal_natural_16_string (a_string)
@@ -65,7 +65,7 @@ feature -- Parsing
 			Result := octal_string_to_natural_64 (a_string).to_natural_16
 		end
 
-	octal_string_to_natural_32 (a_string: STRING_8): NATURAL_32
+	octal_string_to_natural_32 (a_string: READABLE_STRING_8): NATURAL_32
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_32
 		require
 			valid_input: is_octal_natural_32_string (a_string)
@@ -73,7 +73,7 @@ feature -- Parsing
 			Result := octal_string_to_natural_64 (a_string).to_natural_32
 		end
 
-	octal_string_to_natural_64 (a_string: STRING_8): NATURAL_64
+	octal_string_to_natural_64 (a_string: READABLE_STRING_8): NATURAL_64
 			-- Converts `a_string' (interpreted as octal) to a NATURAL_64
 		require
 			valid_input: is_octal_natural_64_string (a_string)
@@ -83,7 +83,7 @@ feature -- Parsing
 			leading_zeros: INTEGER
 		do
 			digit_weight := 1
-			Result := 0
+--			Result := 0
 			from
 				i := a_string.count
 				leading_zeros := leading_zeros_count (a_string)
