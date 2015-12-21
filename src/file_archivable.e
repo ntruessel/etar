@@ -22,7 +22,13 @@ feature {NONE} -- Initialization
 			file_is_plain: a_file.is_plain
 		do
 			file := a_file.twin
-			file.open_read
+			
+			if (file.is_closed) then
+				file.open_read
+			else
+				file.start
+			end
+
 			header_writer := a_header_writer
 			header_written := false
 		end
@@ -46,7 +52,6 @@ feature -- Output
 	write_block_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
 			-- Write the next block to `p' starting at `pos'
 		local
-			header: TAR_HEADER
 			padding: SPECIAL[CHARACTER_8]
 		do
 			if (not header_written) then
@@ -57,8 +62,7 @@ feature -- Output
 				file.read_to_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
 				if (file.end_of_file) then
 					-- Fill with '%U'
-					create padding.make_filled ('%U', {TAR_CONST}.tar_block_size - file.bytes_read)
-					p.put_special_character_8 (padding, 0, pos + file.bytes_read, padding.count)
+					pad (p, pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
 
 					-- Close file
 					file.close
@@ -69,7 +73,38 @@ feature -- Output
 	write_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
 			-- Write the whole file to `p' starting at `pos'
 			-- Does not change the state of blockwise writing
+		local
+			l_old_header_written: BOOLEAN
+			l_file_copy: FILE
+			i: INTEGER
+			padding: SPECIAL[CHARACTER_8]
 		do
+			l_old_header_written := header_written
+			write_header (p, pos)
+			header_written := l_old_header_written
+
+			-- Write blocks until there are no more blocks to write
+			from
+				l_file_copy := file.twin
+				l_file_copy.close
+				l_file_copy.open_read
+				i := 1
+			until
+				i /= 1 and l_file_copy.bytes_read /= {TAR_CONST}.tar_block_size
+			loop
+				l_file_copy.read_to_managed_pointer (p, pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
+				i := i + 1
+			end
+
+			-- Fill with '%U'
+			i := i - 1
+			pad (p, pos + {TAR_CONST}.tar_block_size * i + l_file_copy.bytes_read, {TAR_CONST}.tar_block_size - l_file_copy.bytes_read)
+
+			-- Close file
+			file.close
+		ensure then
+			header_state_unchanged: (old header_written) = header_written
+			file_pointer_unchanged: (old file.file_pointer) = file.file_pointer
 		end
 
 feature {NONE} -- Implementation
