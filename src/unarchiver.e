@@ -94,6 +94,24 @@ feature {NONE} -- Utilites
 			smallest_fit: Result * {TAR_CONST}.tar_block_size.as_natural_64 < n + {TAR_CONST}.tar_block_size.as_natural_64
 		end
 
+feature {NONE} -- Utilities stolen from file_info
+
+	file_owner (uid: INTEGER): STRING
+			-- Convert UID to login name if possible
+		external
+			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
+		alias
+			"eif_file_owner"
+		end
+
+	file_group (gid: INTEGER): STRING
+			-- Convert GID to group name if possible
+		external
+			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
+		alias
+			"eif_file_group"
+		end
+
 invariant
 	unarchiving_in_progress_needs_header: not unarchiving_finished implies attached active_header
 	unarchived_blocks_needs_header: unarchived_blocks > 0 implies attached active_header
