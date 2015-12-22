@@ -34,6 +34,7 @@ feature -- Output
 					-- Last block
 					l_file.put_managed_pointer (p, pos, remaining_bytes.as_integer_32)
 					unarchiving_finished := True
+					finalize_file
 				else
 					-- Standard block
 					l_file.put_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
@@ -58,6 +59,25 @@ feature {NONE} -- Implementation
 				active_file := l_file
 			else
 				check false end -- Unreachable, when do_internal_initialization is called, active_header references an attached TAR_HEADER object
+				-- FIXME: Better error handling
+			end
+		end
+
+	finalize_file
+			-- Do final changes to the active file (called after the last block was written)
+		do
+			if attached active_file as l_file and attached active_header as l_header then
+				l_file.change_mode (l_header.mode)
+				l_file.set_date (l_header.mtime.as_integer_32)
+
+				-- DANGEROUS! There should be a way to look up the userid for a given username
+				l_file.change_owner (l_header.user_id.as_integer_32)
+				l_file.change_group (l_header.group_id.as_integer_32)
+
+				l_file.flush
+				l_file.close
+			else
+				check false end -- Unreachable
 				-- FIXME: Better error handling
 			end
 		end
