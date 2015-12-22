@@ -59,7 +59,6 @@ feature -- Unarchiving
 		ensure
 			header_attached: attached active_header
 			nothing_unarchived: unarchived_blocks = 0
-			unarchiving_in_progress: not unarchiving_finished
 		end
 
 	unarchive_block (p: MANAGED_POINTER; pos: INTEGER)
@@ -73,7 +72,7 @@ feature -- Unarchiving
 		ensure
 			another_block_unarchived: unarchived_blocks = old unarchived_blocks + 1
 			still_attached: attached active_header
-			last_block_unarchived_iff_finished: attached active_header as header and then ((unarchived_blocks = needed_blocks (header.size)) = unarchiving_finished)
+			last_block_unarchived_iff_finished: attached active_header as header and then ((unarchived_blocks.as_natural_64 = needed_blocks (header.size)) = unarchiving_finished)
 		end
 
 feature {NONE} -- Implementation
