@@ -36,6 +36,44 @@ feature -- Result query
 			Result := last_parsed_header
 		end
 
+feature -- Access: error
+
+	has_error: BOOLEAN
+			-- Error occurred?
+		do
+				--| Dbg Hint: comment next line to see all error messages.
+			Result := attached error_messages as lst and then not lst.is_empty
+			if not Result and parsing_finished then
+				Result := last_parsed_header = Void
+			end
+		end
+
+	reset_error
+			-- Reset errors.
+		do
+			error_messages := Void
+		ensure
+			has_no_error: not has_error
+		end
+
+	report_error (a_message: READABLE_STRING_GENERAL)
+			-- Report error message `a_message'.
+		local
+			lst: like error_messages
+		do
+			lst := error_messages
+			if lst = Void then
+				create {ARRAYED_LIST [READABLE_STRING_32]} lst.make (1)
+				error_messages := lst
+			end
+			lst.force (a_message.as_string_32)
+		ensure
+			has_error: has_error
+		end
+
+	error_messages: detachable LIST [READABLE_STRING_32]
+			-- Error messages.		
+
 feature {NONE} -- Implementation
 
 	last_parsed_header: detachable TAR_HEADER
