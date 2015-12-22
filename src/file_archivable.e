@@ -1,5 +1,9 @@
 note
-	description: "Summary description for {FILE_ARCHIVABLE}."
+	description: "[
+		ARCHIVABLE wrapper for files
+		
+		This version only accepts plain files
+	]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
