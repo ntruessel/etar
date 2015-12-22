@@ -5,6 +5,7 @@ note
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
+	EIS: "name=Further information about the USTAR format", "src=http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06", "tag=ustar"
 
 class
 	USTAR_HEADER_PARSER
