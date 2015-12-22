@@ -35,7 +35,7 @@ feature -- Status
 	active_header: detachable TAR_HEADER
 			-- The header for which unarchiving is in progress
 
-	unarchived_blocks: NATURAL
+	unarchived_blocks: INTEGER
 			-- How many blocks have been unarchived so far
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
@@ -46,7 +46,7 @@ feature -- Status
 
 feature -- Unarchiving
 
-	initialize (a_header: TAR_HEADER)
+	frozen initialize (a_header: TAR_HEADER)
 			-- Initialize for unarchiving payload for `a_header'
 		require
 			can_handle: can_unarchive (a_header)
@@ -55,6 +55,7 @@ feature -- Unarchiving
 			active_header := a_header
 			unarchiving_finished := False
 			unarchived_blocks := 0
+			do_internal_initialization
 		ensure
 			header_attached: attached active_header
 			nothing_unarchived: unarchived_blocks = 0
@@ -75,6 +76,13 @@ feature -- Unarchiving
 			last_block_unarchived_iff_finished: attached active_header as header and then ((unarchived_blocks = needed_blocks (header.size)) = unarchiving_finished)
 		end
 
+feature {NONE} -- Implementation
+
+	do_internal_initialization
+			-- Initialize subclass specific internals after initialize has done its job
+		deferred
+		end
+
 feature {NONE} -- Utilites
 
 	needed_blocks (n: NATURAL_64): NATURAL_64
@@ -89,5 +97,6 @@ feature {NONE} -- Utilites
 invariant
 	unarchiving_in_progress_needs_header: not unarchiving_finished implies attached active_header
 	unarchived_blocks_needs_header: unarchived_blocks > 0 implies attached active_header
+	non_negative_number_of_blocks: unarchived_blocks >= 0
 
 end
