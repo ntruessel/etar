@@ -24,7 +24,6 @@ feature -- Parsing
 		local
 			l_field: detachable STRING_8
 			l_header: like last_parsed_header
-			cl_pos: CELL [INTEGER]
 		do
 			if attached block.read_array (pos, block.count - pos) as arr then
 				create l_field.make (arr.count)
@@ -46,7 +45,7 @@ feature -- Parsing
 				-- parse "filename"
 				-- FIXME: Implement filename splitting
 			if not has_error then
-				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_name_offset, {TAR_CONST}.tar_header_name_length)
+				l_field := next_block_string (block, pos + {TAR_HEADER_CONST}.name_offset, {TAR_HEADER_CONST}.name_length)
 				if not l_field.is_whitespace then
 					l_header.set_filename (create {PATH}.make_from_string (l_field))
 				else
@@ -56,7 +55,7 @@ feature -- Parsing
 
 				-- parse mode
 			if not has_error then
-				l_field := next_block_octal_natural_16_string (block, pos + {TAR_CONST}.tar_header_mode_offset, {TAR_CONST}.tar_header_mode_length)
+				l_field := next_block_octal_natural_16_string (block, pos + {TAR_HEADER_CONST}.mode_offset, {TAR_HEADER_CONST}.mode_length)
 				if l_field /= Void then
 					l_header.set_mode (octal_string_to_natural_16 (l_field))
 				else
@@ -66,7 +65,7 @@ feature -- Parsing
 
 				-- parse uid
 			if not has_error then
-				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_uid_offset, {TAR_CONST}.tar_header_uid_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_HEADER_CONST}.uid_offset, {TAR_HEADER_CONST}.uid_length)
 				if l_field /= Void then
 					l_header.set_user_id (octal_string_to_natural_32 (l_field))
 				else
@@ -76,7 +75,7 @@ feature -- Parsing
 
 				-- parse gid
 			if not has_error then
-				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_gid_offset, {TAR_CONST}.tar_header_gid_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_HEADER_CONST}.gid_offset, {TAR_HEADER_CONST}.gid_length)
 				if l_field /= Void then
 					l_header.set_group_id (octal_string_to_natural_32 (l_field))
 				else
@@ -86,7 +85,7 @@ feature -- Parsing
 
 				-- parse size
 			if not has_error then
-				l_field := next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_size_offset, {TAR_CONST}.tar_header_size_length)
+				l_field := next_block_octal_natural_64_string (block, pos + {TAR_HEADER_CONST}.size_offset, {TAR_HEADER_CONST}.size_length)
 				if l_field /= Void then
 					l_header.set_size (octal_string_to_natural_64 (l_field))
 				else
@@ -96,7 +95,7 @@ feature -- Parsing
 
 				-- parse mtime
 			if not has_error then
-				l_field := next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_mtime_offset, {TAR_CONST}.tar_header_mtime_length)
+				l_field := next_block_octal_natural_64_string (block, pos + {TAR_HEADER_CONST}.mtime_offset, {TAR_HEADER_CONST}.mtime_length)
 				if l_field /= Void then
 					l_header.set_mtime (octal_string_to_natural_64 (l_field))
 				else
@@ -114,12 +113,12 @@ feature -- Parsing
 
 				-- parse typeflag
 			if not has_error then
-				l_header.set_typeflag (block.read_character (pos + {TAR_CONST}.tar_header_typeflag_offset))
+				l_header.set_typeflag (block.read_character (pos + {TAR_HEADER_CONST}.typeflag_offset))
 			end
 
 				-- parse linkname
 			if not has_error then
-				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_linkname_offset, {TAR_CONST}.tar_header_linkname_length)
+				l_field := next_block_string (block, pos + {TAR_HEADER_CONST}.linkname_offset, {TAR_HEADER_CONST}.linkname_length)
 				if not l_field.is_whitespace then
 					l_header.set_linkname (create {PATH}.make_from_string (l_field))
 				else
@@ -129,7 +128,7 @@ feature -- Parsing
 
 				-- parse and check magic
 			if not has_error then
-				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_magic_offset, {TAR_CONST}.tar_header_magic_length)
+				l_field := next_block_string (block, pos + {TAR_HEADER_CONST}.magic_offset, {TAR_HEADER_CONST}.magic_length)
 				if l_field /~ {TAR_CONST}.ustar_magic then
 					report_error ("Missing magic")
 				end
@@ -138,7 +137,7 @@ feature -- Parsing
 
 				-- parse and check version
 			if not has_error then
-				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_version_offset, {TAR_CONST}.tar_header_version_length)
+				l_field := next_block_string (block, pos + {TAR_HEADER_CONST}.version_offset, {TAR_HEADER_CONST}.version_length)
 				if l_field /~ {TAR_CONST}.ustar_version then
 					report_error ("Missing version")
 				end
@@ -146,7 +145,7 @@ feature -- Parsing
 
 				-- parse uname
 			if not has_error then
-				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_uname_offset, {TAR_CONST}.tar_header_uname_length)
+				l_field := next_block_string (block, pos + {TAR_HEADER_CONST}.uname_offset, {TAR_HEADER_CONST}.uname_length)
 				if not l_field.is_whitespace then
 					l_header.set_user_name (l_field)
 				else
@@ -156,7 +155,7 @@ feature -- Parsing
 
 				-- parse gname
 			if not has_error then
-				l_field := next_block_string (block, pos + {TAR_CONST}.tar_header_gname_offset, {TAR_CONST}.tar_header_gname_length)
+				l_field := next_block_string (block, pos + {TAR_HEADER_CONST}.gname_offset, {TAR_HEADER_CONST}.gname_length)
 				if not l_field.is_whitespace then
 					l_header.set_group_name (l_field)
 				else
@@ -166,7 +165,7 @@ feature -- Parsing
 
 				-- parse devmajor
 			if not has_error then
-				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_devmajor_offset, {TAR_CONST}.tar_header_devmajor_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_HEADER_CONST}.devmajor_offset, {TAR_HEADER_CONST}.devmajor_length)
 				if l_field /= Void then
 					l_header.set_device_major (octal_string_to_natural_32 (l_field))
 				else
@@ -176,7 +175,7 @@ feature -- Parsing
 
 				-- parse devminor
 			if not has_error then
-				l_field := next_block_octal_natural_32_string (block, pos + {TAR_CONST}.tar_header_devminor_offset, {TAR_CONST}.tar_header_devminor_length)
+				l_field := next_block_octal_natural_32_string (block, pos + {TAR_HEADER_CONST}.devminor_offset, {TAR_HEADER_CONST}.devminor_length)
 				if l_field /= Void then
 					l_header.set_device_minor (octal_string_to_natural_32 (l_field))
 				else
@@ -240,8 +239,8 @@ feature {NONE} -- Implementation
 		do
 				-- Sum all bytes
 			l_space_code := (' ').natural_32_code.as_natural_8
-			l_lower := {TAR_CONST}.tar_header_chksum_offset
-			l_upper := l_lower + {TAR_CONST}.tar_header_chksum_length
+			l_lower := {TAR_HEADER_CONST}.chksum_offset
+			l_upper := l_lower + {TAR_HEADER_CONST}.chksum_length
 			from
 				i := 0
 				checksum := 0
@@ -259,7 +258,7 @@ feature {NONE} -- Implementation
 			end
 
 				--| Parse checksum
-			Result := attached next_block_octal_natural_64_string (block, pos + {TAR_CONST}.tar_header_chksum_offset, {TAR_CONST}.tar_header_chksum_length) as checksum_string and then
+			Result := attached next_block_octal_natural_64_string (block, pos + {TAR_HEADER_CONST}.chksum_offset, {TAR_HEADER_CONST}.chksum_length) as checksum_string and then
 					octal_string_to_natural_64 (checksum_string) = checksum
 		end
 end
