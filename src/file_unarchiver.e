@@ -67,6 +67,9 @@ feature {NONE} -- Implementation
 			-- Do final changes to the active file (called after the last block was written)
 		do
 			if attached active_file as l_file and attached active_header as l_header then
+				l_file.flush
+				l_file.close
+
 				l_file.change_mode (l_header.mode)
 				l_file.set_date (l_header.mtime.as_integer_32)
 
@@ -78,9 +81,6 @@ feature {NONE} -- Implementation
 				if (file_group (l_header.group_id.as_integer_32) ~ l_header.group_name) then
 					l_file.change_group (l_header.group_id.as_integer_32)
 				end
-
-				l_file.flush
-				l_file.close
 			else
 				check false end -- Unreachable
 				-- FIXME: Better error handling

@@ -12,6 +12,9 @@ class
 
 inherit
 	EQA_TEST_SET
+	redefine
+		on_prepare
+	end
 
 feature -- Test routines
 
@@ -41,13 +44,24 @@ feature -- Test routines
 			-- TODO: Compare file contents and metadata
 		end
 
+feature {NONE} -- Events
+
+	on_prepare
+			-- Create necessary output directory
+		local
+			d: DIRECTORY
+		do
+			create d.make_with_name ("test_files/unarchiver")
+			d.create_dir
+		end
+
 feature {NONE} -- Data - easy
 
 	easy_header: TAR_HEADER
 			-- Header for the easy test data
 		once
 			create Result.make
-			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver_easy.txt"))
+			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver/easy.txt"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0c1750)
 			Result.set_group_id (0c144)
