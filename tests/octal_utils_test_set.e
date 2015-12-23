@@ -15,6 +15,58 @@ inherit
 
 feature -- Test routines
 
+	test_format_check
+			-- Note test format checking features
+		note
+			testing:	"covers/{OCTAL_UTILS}.is_octal_natural_16_string"
+			testing:	"covers/{OCTAL_UTILS}.is_octal_natural_32_string"
+			testing:	"covers/{OCTAL_UTILS}.is_octal_natural_64_string"
+		local
+			unit_under_test: OCTAL_UTILS
+			s: STRING
+		do
+			create unit_under_test
+
+			-- Simple
+			s := "12551"
+			assert ("Basic format check (16bit)", unit_under_test.is_octal_natural_16_string (s))
+			assert ("Basic format check (32bit)", unit_under_test.is_octal_natural_32_string (s))
+			assert ("Basic format check (64bit)", unit_under_test.is_octal_natural_64_string (s))
+
+			-- All zeros
+			s := "0000000000000000000000000000000000000000000000000000000"
+			assert ("All zeros format check (16bit)", unit_under_test.is_octal_natural_16_string (s))
+			assert ("All zeros format check (32bit)", unit_under_test.is_octal_natural_32_string (s))
+			assert ("All zeros format check (64bit)", unit_under_test.is_octal_natural_64_string (s))
+
+			-- Max values
+			assert ("Max 16bit format check", unit_under_test.is_octal_natural_16_string (octal_natural_16_max_value_string))
+			assert ("Max 32bit format check", unit_under_test.is_octal_natural_32_string (octal_natural_32_max_value_string))
+			assert ("Max 64bit format check", unit_under_test.is_octal_natural_64_string (octal_natural_64_max_value_string))
+
+			-- Leading zero max values
+			assert ("Leading zeros max 16bit format check", unit_under_test.is_octal_natural_16_string ("00000000000" + octal_natural_16_max_value_string))
+			assert ("Leading zeros max 32bit format check", unit_under_test.is_octal_natural_32_string ("00000000000" + octal_natural_32_max_value_string))
+			assert ("Leading zeros max 64bit format check", unit_under_test.is_octal_natural_64_string ("00000000000" + octal_natural_64_max_value_string))
+
+			-- Negative number
+			s := "-1"
+			assert ("Reject negative number (16bit)", not unit_under_test.is_octal_natural_16_string (s))
+			assert ("Reject negative number (32bit)", not unit_under_test.is_octal_natural_32_string (s))
+			assert ("Reject negative number (64bit)", not unit_under_test.is_octal_natural_64_string (s))
+
+			-- Too large number
+			assert ("Reject too large (16bit)", not unit_under_test.is_octal_natural_16_string ("1" + octal_natural_16_max_value_string))
+			assert ("Reject too large (32bit)", not unit_under_test.is_octal_natural_32_string ("1" + octal_natural_32_max_value_string))
+			assert ("Reject too large (64bit)", not unit_under_test.is_octal_natural_64_string ("1" + octal_natural_64_max_value_string))
+
+			-- Non-octal number
+			s := "5327349"
+			assert ("Reject non-octal number (16bit)", not unit_under_test.is_octal_natural_16_string (s))
+			assert ("Reject non-octal number (32bit)", not unit_under_test.is_octal_natural_32_string (s))
+			assert ("Reject non-octal number (64bit)", not unit_under_test.is_octal_natural_64_string (s))
+		end
+
 	test_parse
 			-- Test parsing features
 		note
@@ -39,14 +91,9 @@ feature -- Test routines
 			assert ("Basic parsing 2 (64bit)", unit_under_test.octal_string_to_natural_64 (s) = 0c70365)
 
 			-- Max values
-			s := "177777"
-			assert ("Max 16bit parsing", unit_under_test.octal_string_to_natural_16 (s) = {NATURAL_16}.max_value)
-
-			s := "37777777777"
-			assert ("Max 32bit parsing", unit_under_test.octal_string_to_natural_32 (s) = {NATURAL_32}.max_value)
-
-			s := "1777777777777777777777"
-			assert ("Max 64bit parsing", unit_under_test.octal_string_to_natural_64 (s) = {NATURAL_64}.max_value)
+			assert ("Max 16bit parsing", unit_under_test.octal_string_to_natural_16 (octal_natural_16_max_value_string) = {NATURAL_16}.max_value)
+			assert ("Max 32bit parsing", unit_under_test.octal_string_to_natural_32 (octal_natural_32_max_value_string) = {NATURAL_32}.max_value)
+			assert ("Max 64bit parsing", unit_under_test.octal_string_to_natural_64 (octal_natural_64_max_value_string) = {NATURAL_64}.max_value)
 
 			-- All zeros
 			s := "000000000000000"
@@ -61,13 +108,13 @@ feature -- Test routines
 			assert ("All zero parsing (64bit)", unit_under_test.octal_string_to_natural_64 (s) = 1)
 
 			-- Leading zeros max values
-			s := "00000000177777"
+			s := "00000000" + octal_natural_16_max_value_string
 			assert ("Max 16bit parsing", unit_under_test.octal_string_to_natural_16 (s) = {NATURAL_16}.max_value)
 
-			s := "0000000037777777777"
+			s := "00000000" + octal_natural_32_max_value_string
 			assert ("Max 32bit parsing", unit_under_test.octal_string_to_natural_32 (s) = {NATURAL_32}.max_value)
 
-			s := "00000000000001777777777777777777777"
+			s := "0000000000000" +  octal_natural_64_max_value_string
 			assert ("Max 64bit parsing", unit_under_test.octal_string_to_natural_64 (s) = {NATURAL_64}.max_value)
 		end
 
@@ -102,13 +149,13 @@ feature -- Test routines
 
 			-- Max values
 			n16 := {NATURAL_16}.max_value
-			assert ("Max 16bit output", unit_under_test.natural_16_to_octal_string (n16) ~ "177777")
+			assert ("Max 16bit output", unit_under_test.natural_16_to_octal_string (n16) ~ octal_natural_16_max_value_string)
 
 			n32 := {NATURAL_32}.max_value
-			assert ("Max 32bit output", unit_under_test.natural_32_to_octal_string (n32) ~ "37777777777")
+			assert ("Max 32bit output", unit_under_test.natural_32_to_octal_string (n32) ~ octal_natural_32_max_value_string)
 
 			n64 := {NATURAL_64}.max_value
-			assert ("Max 64bit output", unit_under_test.natural_64_to_octal_string (n64) ~ "1777777777777777777777")
+			assert ("Max 64bit output", unit_under_test.natural_64_to_octal_string (n64) ~ octal_natural_64_max_value_string)
 
 			-- Zero
 			n16 := 0
@@ -260,6 +307,14 @@ feature -- Utilities
 			assert ("Do not remove last 0", s ~ "0")
 		end
 
+feature {NONE} -- Constants
+
+	octal_natural_16_max_value_string: STRING = "177777"
+			-- {NATURAL_16}.max_value as octal string
+
+	octal_natural_32_max_value_string: STRING = "37777777777"
+			-- {NATURAL_32}.max_value as octal string
+
+	octal_natural_64_max_value_string: STRING = "1777777777777777777777"
+			-- {NATURAL_64}.max_value as octal string
 end
-
-
