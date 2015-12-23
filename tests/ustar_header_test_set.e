@@ -35,10 +35,12 @@ feature -- Test writing methods
 		do
 			create unit_under_test
 
-			assert ("can write valid header", unit_under_test.can_write (easy_header))
-			assert ("has correct size", unit_under_test.required_space (easy_header) = {TAR_CONST}.tar_block_size)
+			unit_under_test.set_active_header (easy_header)
 
-			output := unit_under_test.write_to_new_managed_pointer (easy_header).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			assert ("can write valid header", unit_under_test.can_write (easy_header))
+			assert ("has correct size", unit_under_test.required_space = {TAR_CONST}.tar_block_size)
+
+			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_block_special (easy_header_blob, output))
@@ -54,10 +56,12 @@ feature -- Test writing methods
 		do
 			create unit_under_test
 
-			assert ("can write valid header", unit_under_test.can_write (link_header))
-			assert ("has correct size", unit_under_test.required_space (link_header) = {TAR_CONST}.tar_block_size)
+			unit_under_test.set_active_header (link_header)
 
-			output := unit_under_test.write_to_new_managed_pointer (link_header).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			assert ("can write valid header", unit_under_test.can_write (link_header))
+			assert ("has correct size", unit_under_test.required_space = {TAR_CONST}.tar_block_size)
+
+			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_block_special (link_header_blob, output))
@@ -73,10 +77,12 @@ feature -- Test writing methods
 		do
 			create unit_under_test
 
-			assert ("can write valid header", unit_under_test.can_write (devnode_header))
-			assert ("has correct size", unit_under_test.required_space (devnode_header) = {TAR_CONST}.tar_block_size)
+			unit_under_test.set_active_header (devnode_header)
 
-			output := unit_under_test.write_to_new_managed_pointer (devnode_header).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			assert ("can write valid header", unit_under_test.can_write (devnode_header))
+			assert ("has correct size", unit_under_test.required_space = {TAR_CONST}.tar_block_size)
+
+			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_block_special (devnode_header_blob, output))

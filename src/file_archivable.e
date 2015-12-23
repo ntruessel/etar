@@ -129,7 +129,8 @@ feature {NONE} -- Implementation
 		do
 			create header.make
 			header.set_from_fileinfo (file.file_info)
-			header_writer.write_to_managed_pointer (header, p, pos)
+			header_writer.set_active_header (header)
+			header_writer.write_to_managed_pointer (p, pos)
 			header_written := True
 		end
 

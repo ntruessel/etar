@@ -22,8 +22,8 @@ inherit
 
 feature -- Status
 
-	required_space (a_header: TAR_HEADER): INTEGER
-			-- Space required to write `a_header'
+	required_space: INTEGER
+			-- Space required to write `active_header'
 		once
 			Result := {TAR_CONST}.tar_block_size
 		end
@@ -41,82 +41,94 @@ feature -- Status
 
 feature -- Output
 
-	write_to_managed_pointer (a_header: TAR_HEADER; p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write `a_header' to `p' starting at `a_pos'
+	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write `active_header' to `p' starting at `a_pos'
 		do
-			-- Fill with all '%U'
-			p.put_special_character_8 (
-					create {SPECIAL[CHARACTER_8]}.make_filled ('%U', {TAR_CONST}.tar_block_size),
-					0, a_pos, {TAR_CONST}.tar_block_size)
+			if attached active_header as header then
+					-- Fill with all '%U'
+				p.put_special_character_8 (
+						create {SPECIAL[CHARACTER_8]}.make_filled ('%U', {TAR_CONST}.tar_block_size),
+						0, a_pos, {TAR_CONST}.tar_block_size)
 
-			-- Put filename
-			-- FIXME: Implement filename splitting
-			put_string (unify_utf_8_path (a_header.filename),
-					p, a_pos + {TAR_HEADER_CONST}.name_offset);
+					-- Put filename
+					-- FIXME: Implement filename splitting
+				put_string (unify_utf_8_path (header.filename),
+						p, a_pos + {TAR_HEADER_CONST}.name_offset);
 
-			-- Put prefix
-			-- FIXME: Implement filename splitting
+					-- Put prefix
+					-- FIXME: Implement filename splitting
 
-			-- Put mode
-			-- MASK ISVTX flag: tar does not support it (reserved)
-			put_natural (a_header.mode & 0c6777,
-					{TAR_HEADER_CONST}.mode_length,
-					p, a_pos + {TAR_HEADER_CONST}.mode_offset)
+					-- Put mode
+					-- MASK ISVTX flag: tar does not support it (reserved)
+				put_natural (header.mode & 0c6777,
+						{TAR_HEADER_CONST}.mode_length,
+						p, a_pos + {TAR_HEADER_CONST}.mode_offset)
 
-			-- Put userid
-			put_natural (a_header.user_id,
-					{TAR_HEADER_CONST}.uid_length,
-					p, a_pos + {TAR_HEADER_CONST}.uid_offset)
+					-- Put userid
+				put_natural (header.user_id,
+						{TAR_HEADER_CONST}.uid_length,
+						p, a_pos + {TAR_HEADER_CONST}.uid_offset)
 
-			-- Put groupid
-			put_natural (a_header.group_id,
-					{TAR_HEADER_CONST}.gid_length,
-					p, a_pos + {TAR_HEADER_CONST}.gid_offset)
+					-- Put groupid
+				put_natural (header.group_id,
+						{TAR_HEADER_CONST}.gid_length,
+						p, a_pos + {TAR_HEADER_CONST}.gid_offset)
 
-			-- Put size
-			put_natural (a_header.size,
-					{TAR_HEADER_CONST}.size_length,
-					p, a_pos + {TAR_HEADER_CONST}.size_offset)
+					-- Put size
+				put_natural (header.size,
+						{TAR_HEADER_CONST}.size_length,
+						p, a_pos + {TAR_HEADER_CONST}.size_offset)
 
-			-- Put mtime
-			put_natural (a_header.mtime,
-					{TAR_HEADER_CONST}.mtime_length,
-					p, a_pos + {TAR_HEADER_CONST}.mtime_offset)
+					-- Put mtime
+				put_natural (header.mtime,
+						{TAR_HEADER_CONST}.mtime_length,
+						p, a_pos + {TAR_HEADER_CONST}.mtime_offset)
 
-			-- Put typeflag
-			p.put_character (a_header.typeflag,
-					a_pos + {TAR_HEADER_CONST}.typeflag_offset)
+					-- Put typeflag
+				p.put_character (header.typeflag,
+						a_pos + {TAR_HEADER_CONST}.typeflag_offset)
 
-			-- Put linkname
-			put_string (unify_utf_8_path (a_header.linkname),
-					p, a_pos + {TAR_HEADER_CONST}.linkname_offset)
+					-- Put linkname
+				put_string (unify_utf_8_path (header.linkname),
+						p, a_pos + {TAR_HEADER_CONST}.linkname_offset)
 
-			-- Put magic
-			put_string ({TAR_CONST}.ustar_magic, p, a_pos + {TAR_HEADER_CONST}.magic_offset)
+					-- Put magic
+				put_string ({TAR_CONST}.ustar_magic, p, a_pos + {TAR_HEADER_CONST}.magic_offset)
 
-			-- Put version
-			put_string ({TAR_CONST}.ustar_version, p, a_pos + {TAR_HEADER_CONST}.version_offset)
+					-- Put version
+				put_string ({TAR_CONST}.ustar_version, p, a_pos + {TAR_HEADER_CONST}.version_offset)
 
-			-- Put username
-			put_string (a_header.user_name.as_string_8,
-					p, a_pos + {TAR_HEADER_CONST}.uname_offset)
+					-- Put username
+				put_string (header.user_name.as_string_8,
+						p, a_pos + {TAR_HEADER_CONST}.uname_offset)
 
-			-- Put groupname
-			put_string (a_header.group_name.as_string_8,
-					p, a_pos + {TAR_HEADER_CONST}.gname_offset)
+					-- Put groupname
+				put_string (header.group_name.as_string_8,
+						p, a_pos + {TAR_HEADER_CONST}.gname_offset)
 
-			-- Put devmajor
-			put_natural (a_header.device_major,
-					{TAR_HEADER_CONST}.devmajor_length,
-					p, a_pos + {TAR_HEADER_CONST}.devmajor_offset)
+					-- Put devmajor
+				put_natural (header.device_major,
+						{TAR_HEADER_CONST}.devmajor_length,
+						p, a_pos + {TAR_HEADER_CONST}.devmajor_offset)
 
-			-- Put devminor
-			put_natural (a_header.device_minor,
-					{TAR_HEADER_CONST}.devminor_length,
-					p, a_pos + {TAR_HEADER_CONST}.devminor_offset)
+					-- Put devminor
+				put_natural (header.device_minor,
+						{TAR_HEADER_CONST}.devminor_length,
+						p, a_pos + {TAR_HEADER_CONST}.devminor_offset)
 
-			-- Put checksum
-			put_checksum (p, a_pos)
+					-- Put checksum
+				put_checksum (p, a_pos)
+			else
+				check false end -- Unreachable (see precondition)
+			end
+
+		end
+
+	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write next block to `p' starting at `a_pos'
+		do
+			write_to_managed_pointer (p, a_pos)
+			written_blocks := written_blocks + 1
 		end
 
 feature {NONE} -- Fitting
