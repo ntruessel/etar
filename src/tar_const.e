@@ -1,65 +1,15 @@
 note
 	description: "[
-		Constans used by tar
+		Constants used by tar
 	]"
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
 	TAR_CONST
 
-feature -- ustar field offsets and lengths (bytes)
-		-- FIXME: Group this constants logically (TUPLE?)
-		-- FIXME: Contains a lot of redundancy
-
-	tar_header_name_offset: 		INTEGER =   0 	-- filename field offset
-	tar_header_name_length: 		INTEGER = 100 	-- filename field length
-
-	tar_header_mode_offset: 		INTEGER = 100 	-- mode field offset
-	tar_header_mode_length: 		INTEGER =   8 	-- mode field length
-
-	tar_header_uid_offset: 			INTEGER = 108 	-- user-id field offset
-	tar_header_uid_length: 			INTEGER =   8 	-- user-id field length
-
-	tar_header_gid_offset: 			INTEGER = 116 	-- group-id field offset
-	tar_header_gid_length: 			INTEGER =   8 	-- group-id field length
-
-	tar_header_size_offset: 		INTEGER = 124 	-- filesize field offset
-	tar_header_size_length: 		INTEGER =  12 	-- filesize field length
-
-	tar_header_mtime_offset: 		INTEGER = 136 	-- last modified field offset
-	tar_header_mtime_length: 		INTEGER =  12 	-- last modified field length
-
-	tar_header_chksum_offset: 		INTEGER = 148 	-- checksum field offset
-	tar_header_chksum_length: 		INTEGER =   8 	-- checksum field length
-
-	tar_header_typeflag_offset: 	INTEGER = 156 	-- typeflag field offset
-	tar_header_typeflag_length: 	INTEGER =   1 	-- typeflag field length
-
-	tar_header_linkname_offset: 	INTEGER = 157 	-- linkname (pointee of link) field offset
-	tar_header_linkname_length: 	INTEGER = 100 	-- linkname (pointee of link) field length
-
-	tar_header_magic_offset: 		INTEGER = 257 	-- magic field offset
-	tar_header_magic_length: 		INTEGER =   6 	-- magic field length
-
-	tar_header_version_offset: 		INTEGER = 263 	-- version field offset
-	tar_header_version_length: 		INTEGER =   2 	-- version field length
-
-	tar_header_uname_offset: 		INTEGER = 265 	-- username field offset
-	tar_header_uname_length: 		INTEGER =  32 	-- username field length
-
-	tar_header_gname_offset: 		INTEGER = 297 	-- groupname field offset
-	tar_header_gname_length: 		INTEGER =  32 	-- groupname field length
-
-	tar_header_devmajor_offset: 	INTEGER = 329 	-- device major field offset
-	tar_header_devmajor_length: 	INTEGER =   8 	-- device major field length
-
-	tar_header_devminor_offset: 	INTEGER = 337 	-- device minor field offset
-	tar_header_devminor_length: 	INTEGER =   8 	-- device minor field length
-
-	tar_header_prefix_offset: 		INTEGER = 345 	-- filename prefix field offset
-	tar_header_prefix_length: 		INTEGER = 155 	-- filename prefix field length
+inherit
+	TAR_HEADER_CONST
 
 feature -- Mode/Permission masks
 
