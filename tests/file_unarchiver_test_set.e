@@ -52,7 +52,9 @@ feature {NONE} -- Events
 			d: DIRECTORY
 		do
 			create d.make_with_name ("test_files/unarchiver")
-			d.create_dir
+			if not d.exists then
+				d.create_dir
+			end
 		end
 
 feature {NONE} -- Data - easy

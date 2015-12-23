@@ -80,7 +80,6 @@ feature -- Output
 			l_old_header_written: BOOLEAN
 			l_file: FILE
 			i: INTEGER
-			padding: SPECIAL[CHARACTER_8]
 		do
 			l_old_header_written := header_written
 			write_header (p, pos)
