@@ -20,7 +20,7 @@ feature -- Format check
 			-- Indicates whether `a_string' represents an octal encoded NATURAL_16
 		do
 			-- Format check
-			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
+			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9') and not a_string.has ('+') and not a_string.has ('-') and not a_string.has (' ')
 
 			-- Length check
 			Result := Result and (
@@ -33,7 +33,7 @@ feature -- Format check
 			-- Indicates whether `a_string' represents an octal encoded NATURAL_32
 		do
 			-- Format check
-			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
+			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9') and not a_string.has ('+') and not a_string.has ('-') and not a_string.has (' ')
 
 			-- Length check
 			Result := Result and (
@@ -46,7 +46,7 @@ feature -- Format check
 			-- Indicates whether `a_string' represents an octal encoded NATURAL_64
 		do
 			-- Format check
-			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9')
+			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9') and not a_string.has ('+') and not a_string.has ('-') and not a_string.has (' ')
 
 			-- Length check
 			Result := Result and (
