@@ -8,7 +8,7 @@ note
 	testing: "type/manual"
 
 class
-	ARCHIVABLE_TEST_SET
+	FILE_ARCHIVABLE_TEST_SET
 
 inherit
 	EQA_TEST_SET
