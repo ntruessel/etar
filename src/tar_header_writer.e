@@ -11,7 +11,7 @@ deferred class
 
 feature -- Status
 
-	required_space: INTEGER
+	required_blocks: INTEGER
 			-- Required space in blocks to write `active_header'
 		require
 			has_active_header: attached active_header
@@ -31,7 +31,7 @@ feature -- Status
 	finished_writing: BOOLEAN
 			-- Has `active_header' been completely written? (only relavant for blockwise writing)
 		do
-			Result := attached active_header and then written_blocks = required_space
+			Result := attached active_header and then written_blocks = required_blocks
 		end
 
 	written_blocks: INTEGER
@@ -56,7 +56,7 @@ feature -- Output
 			-- Write `active_header' to `p', starting at position `pos'. This does not affect blockwise writing.
 		require
 			valid_position: a_pos >= 0
-			enough_space: p.count >= a_pos + required_space
+			enough_space: p.count >= a_pos + required_blocks * {TAR_CONST}.tar_block_size
 			has_active_header: attached active_header
 		deferred
 		ensure
@@ -68,10 +68,10 @@ feature -- Output
 		require
 			has_active_header: attached active_header
 		do
-			create Result.make (required_space)
+			create Result.make (required_blocks * {TAR_CONST}.tar_block_size)
 			write_to_managed_pointer (Result, 0)
 		ensure
-			minimal_size: Result.count = required_space
+			minimal_size: Result.count = required_blocks * {TAR_CONST}.tar_block_size
 			same_blocks_written: written_blocks = old written_blocks
 		end
 

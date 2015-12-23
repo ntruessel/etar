@@ -35,7 +35,10 @@ feature {NONE} -- Initialization
 			end
 
 			header_writer := a_header_writer
-			header_written := false
+
+			generate_header
+
+			header_writer.set_active_header (header)
 		end
 
 feature -- Status
@@ -46,10 +49,10 @@ feature -- Status
 			Result := file.is_closed
 		end
 
-	required_space: INTEGER
+	required_blocks: INTEGER
 			-- Indicate how much space is needed to represent this ARCHIVABLE
 		do
-			Result := (1 + needed_blocks (file.file_info.size)) * {TAR_CONST}.tar_block_size
+			Result := (header_writer.required_blocks + needed_blocks (file.file_info.size))
 		end
 
 feature -- Output
@@ -57,9 +60,9 @@ feature -- Output
 	write_block_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
 			-- Write the next block to `p' starting at `pos'
 		do
-			if (not header_written) then
+			if (not header_writer.finished_writing) then
 				-- Write header
-				write_header (p, pos)
+				write_header_block (p, pos)
 			else
 				-- Write next block
 				file.read_to_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
@@ -77,21 +80,18 @@ feature -- Output
 			-- Write the whole file to `p' starting at `pos'
 			-- Does not change the state of blockwise writing
 		local
-			l_old_header_written: BOOLEAN
 			l_file: FILE
 			i: INTEGER
 		do
-			l_old_header_written := header_written
-			write_header (p, pos)
-			header_written := l_old_header_written
+			header_writer.write_to_managed_pointer (p, pos)
 
 			-- Write blocks until there are no more blocks to write
 			from
 				create {RAW_FILE} l_file.make_with_path (file.path)
 				l_file.open_read
-				i := 1
+				i := header_writer.required_blocks
 			until
-				i /= 1 and l_file.bytes_read /= {TAR_CONST}.tar_block_size
+				i >= required_blocks and l_file.bytes_read /= {TAR_CONST}.tar_block_size
 			loop
 				l_file.read_to_managed_pointer (p, pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
 				i := i + 1
@@ -104,34 +104,22 @@ feature -- Output
 			-- Close file
 			l_file.close
 		ensure then
-			header_state_unchanged: (old header_written) = header_written
+			header_state_unchanged: (old header_writer.finished_writing) = header_writer.finished_writing
 			file_pointer_unchanged: (old file.file_pointer) = file.file_pointer
 		end
 
 feature {NONE} -- Implementation
 
-	file: FILE
-			-- The file this ARCHIVABLE represents
-
-	header_writer: TAR_HEADER_WRITER
-			-- The header writer to use
-
-	header_written: BOOLEAN
-			-- Indicates whether the header was already written
-
-	write_header (p: MANAGED_POINTER; pos: INTEGER)
-			-- Write header for `file' to `p' starting at `pos'
+	generate_header
+			-- Generate header once file is set up properly
 		require
-			not_written_yet: not header_written
-			enough_space: p.count >= pos + {TAR_CONST}.tar_block_size
-		local
-			header: TAR_HEADER
+			file_attached: file /= Void
 		do
 			create header.make
 			header.set_from_fileinfo (file.file_info)
-			header_writer.set_active_header (header)
-			header_writer.write_to_managed_pointer (p, pos)
-			header_written := True
 		end
+
+	file: FILE
+			-- The file this ARCHIVABLE represents
 
 end

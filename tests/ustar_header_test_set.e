@@ -38,7 +38,7 @@ feature -- Test writing methods
 			unit_under_test.set_active_header (easy_header)
 
 			assert ("can write valid header", unit_under_test.can_write (easy_header))
-			assert ("has correct size", unit_under_test.required_space = {TAR_CONST}.tar_block_size)
+			assert ("has correct size", unit_under_test.required_blocks = 1)
 
 			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
@@ -59,7 +59,7 @@ feature -- Test writing methods
 			unit_under_test.set_active_header (link_header)
 
 			assert ("can write valid header", unit_under_test.can_write (link_header))
-			assert ("has correct size", unit_under_test.required_space = {TAR_CONST}.tar_block_size)
+			assert ("has correct size", unit_under_test.required_blocks = 1)
 
 			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
@@ -80,7 +80,7 @@ feature -- Test writing methods
 			unit_under_test.set_active_header (devnode_header)
 
 			assert ("can write valid header", unit_under_test.can_write (devnode_header))
-			assert ("has correct size", unit_under_test.required_space = {TAR_CONST}.tar_block_size)
+			assert ("has correct size", unit_under_test.required_blocks = 1)
 
 			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 

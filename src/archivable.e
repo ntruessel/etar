@@ -16,11 +16,11 @@ feature -- Status
 		deferred
 		end
 
-	required_space: INTEGER
-			-- Indicates how much space this archivable requires
+	required_blocks: INTEGER
+			-- Indicates how much space this archivable requires in blocks
 		deferred
 		ensure
-			at_least_header: Result >= {TAR_CONST}.tar_block_size
+			at_least_header: Result >= header_writer.required_blocks
 		end
 
 feature -- Output
@@ -49,7 +49,7 @@ feature -- Output
 			-- keep in mind that this might use quite a lot of memory for large objects
 		require
 			non_negative_position: pos >= 0
-			enough_space: p.count >= pos + required_space
+			enough_space: p.count >= pos + required_blocks * {TAR_CONST}.tar_block_size
 		deferred
 		end
 
@@ -58,11 +58,30 @@ feature -- Output
 			-- This will not change the position used for block based writing
 			-- keep in mind that this might use quite a lot of memory for large objects
 		do
-			create Result.make (required_space)
+			create Result.make (required_blocks * {TAR_CONST}.tar_block_size)
 			write_to_managed_pointer (Result, 0)
 		end
 
+feature {NONE} -- Implemenation
+
+	header_writer: TAR_HEADER_WRITER
+			-- The header writer to use
+
+	header: TAR_HEADER
+			-- Header that belongs to the payload
+
 feature {NONE} -- Utilites
+
+	write_header_block (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Writes a block of the header
+		require
+			non_negative_position: a_pos >= 0
+			enough_space: p.count >= a_pos + {TAR_CONST}.tar_block_size
+			not_written: not header_writer.finished_writing
+		do
+			header_writer.write_block_to_managed_pointer (p, a_pos)
+		end
+
 
 	needed_blocks (n: INTEGER): INTEGER
 			-- Indicate how many blocks are needed to represent `n' bytes

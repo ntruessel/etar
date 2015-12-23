@@ -22,10 +22,10 @@ inherit
 
 feature -- Status
 
-	required_space: INTEGER
-			-- Space required to write `active_header'
+	required_blocks: INTEGER
+			-- Space required to write `active_header' in blocks
 		once
-			Result := {TAR_CONST}.tar_block_size
+			Result := 1
 		end
 
 	can_write (a_header: TAR_HEADER): BOOLEAN
