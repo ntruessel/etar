@@ -98,8 +98,10 @@ feature -- Output
 			end
 
 			-- Fill with '%U'
-			i := i - 1
-			pad (p, pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
+			if (i /= required_blocks) then
+				i := i - 1
+				pad (p, pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
+			end
 
 			-- Close file
 			l_file.close
