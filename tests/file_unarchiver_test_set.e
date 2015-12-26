@@ -19,6 +19,7 @@ inherit
 feature -- Test routines
 
 	test_easy_file_unarchiver
+			-- Test FILE_UNARCHIVER with easy text-only file
 		local
 			unit_under_test: FILE_UNARCHIVER
 			p: MANAGED_POINTER
@@ -47,7 +48,7 @@ feature -- Test routines
 
 				-- Compare file contents
 			create {RAW_FILE} l_file.make_with_path (easy_header.filename)
-			assert ("File aunarchived and stored to disk", l_file.exists)
+			assert ("File unarchived and stored to disk", l_file.exists)
 
 			l_file.open_read
 			assert ("Contents match", same_content (l_file, easy_header_payload_blob, easy_header.size.as_integer_32))
