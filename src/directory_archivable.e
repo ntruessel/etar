@@ -69,7 +69,14 @@ feature {NONE} -- Implementation
 			-- Generate `header' once `directory' is set correctly
 		do
 			create header.make
-			header.set_from_fileinfo (directory.file_info)
+			header.set_filename (directory.path)
+			header.set_mode (directory.protection.to_natural_16)
+			header.set_user_id (directory.user_id.to_natural_32)
+			header.set_group_id (directory.group_id.to_natural_32)
+			header.set_mtime (directory.date.to_natural_64)
+			header.set_user_name (directory.owner_name)
+			header.set_group_name (directory.file_info.group_name)
+			header.set_typeflag ({TAR_CONST}.tar_typeflag_directory)
 		end
 
 end

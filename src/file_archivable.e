@@ -118,7 +118,15 @@ feature {NONE} -- Implementation
 			file_attached: file /= Void
 		do
 			create header.make
-			header.set_from_fileinfo (file.file_info)
+			header.set_filename (file.path)
+			header.set_mode (file.protection.as_natural_16)
+			header.set_user_id (file.user_id.as_natural_32)
+			header.set_group_id (file.group_id.as_natural_32)
+			header.set_size (file.file_info.size.as_natural_64)
+			header.set_mtime (file.date.as_natural_64)
+			header.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			header.set_user_name (file.owner_name)
+			header.set_group_name (file.file_info.group_name)
 		end
 
 	file: FILE

@@ -353,28 +353,6 @@ feature -- Assign
 			correctly_set: is_other_executable = b
 		end
 
-	set_from_fileinfo (a_fileinfo: FILE_INFO)
-			-- Set all fields from `a_fileinfo' if a_fileinfo.file_name is attached
-		do
-			if attached a_fileinfo.file_entry as file_path and (a_fileinfo.is_plain or a_fileinfo.is_directory) then
-				set_filename (file_path)
-				set_mode (a_fileinfo.protection.to_natural_16)
-				set_user_id (a_fileinfo.user_id.to_natural_32)
-				set_group_id (a_fileinfo.group_id.to_natural_32)
-				set_size (a_fileinfo.size.to_natural_64)
-				set_mtime (a_fileinfo.date.to_natural_64)
-				if (a_fileinfo.is_plain) then
-					set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
-				elseif (a_fileinfo.is_directory) then
-					set_typeflag ({TAR_CONST}.tar_typeflag_directory)
-				else
-						-- unreachable
-				end
-				set_user_name (a_fileinfo.owner_name)
-				set_group_name (a_fileinfo.group_name)
-			end
-		end
-
 invariant
 	valid_mode: (mode & 0c7777 = mode)
 

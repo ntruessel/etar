@@ -293,28 +293,6 @@ feature -- Test routines
 			assert ("Devminor set to 153", unit_under_test.device_minor = l_devminor)
 		end
 
-	test_set_from_fileinfo
-			-- Test setting from fileinfo
-		local
-			unit_under_test: TAR_HEADER
-			l_file: FILE
-		do
-			create unit_under_test.make
-			create {RAW_FILE} l_file.make_with_name ("test_files/README.md")
-			unit_under_test.set_from_fileinfo (l_file.file_info)
-			assert ("Filename set", unit_under_test.filename ~ create {PATH}.make_from_string ("test_files/README.md"))
-			assert ("Mode set", unit_under_test.mode = 0c644)
-			assert ("User id set", unit_under_test.user_id = 0c1750)
-			assert ("Group id set", unit_under_test.group_id = 0c144)
-			assert ("Username set", unit_under_test.user_name ~ "nicolas")
-			assert ("Groupname set", unit_under_test.group_name ~ "users")
-			assert ("Size set", unit_under_test.size = 0c60)
-			assert ("Mtime set", unit_under_test.mtime = 0c12636054745)
-			assert ("Typeflag set", unit_under_test.typeflag = {TAR_CONST}.tar_typeflag_regular_file)
-			assert ("No linkname set", unit_under_test.linkname.is_empty)
-			assert ("No devmajor set", unit_under_test.device_major = 0)
-			assert ("No devminor set", unit_under_test.device_minor = 0)
-		end
 end
 
 
