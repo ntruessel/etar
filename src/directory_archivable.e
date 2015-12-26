@@ -27,6 +27,8 @@ feature {NONE} -- Initialization
 			header_writer := a_header_writer
 
 			generate_header
+
+			header_writer.set_active_header (header)
 		end
 
 feature -- Status
