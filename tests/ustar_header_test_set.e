@@ -88,6 +88,27 @@ feature -- Test writing methods
 			assert ("correct output content", compare_block_special (devnode_header_blob, output))
 		end
 
+	test_split_header_write
+			-- Test whether USTAR_HEADER_WRITER generates correct ustar headers for split filenames
+		note
+			testing:  "covers/{USTAR_HEADER_WRITER}"
+		local
+			unit_under_test: USTAR_HEADER_WRITER
+			output: SPECIAL[CHARACTER_8]
+		do
+			create unit_under_test
+
+			unit_under_test.set_active_header (split_header)
+
+			assert ("can write valid header", unit_under_test.can_write (split_header))
+			assert ("has correct size", unit_under_test.required_blocks = 1)
+
+			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+
+			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
+			assert ("correct output content", compare_block_special (split_header_blob, output))
+		end
+
 feature -- Test parsing methods
 
 	test_easy_header_parse
@@ -144,6 +165,24 @@ feature -- Test parsing methods
 			assert ("headers match", unit_under_test.parsed_header ~ devnode_header)
 		end
 
+	test_split_header_parse
+			-- Test whether USTAR_HEADER_PARSER parses the split blob correctly
+		note
+			testing:  "covers/{USTAR_HEADER_PARSER}"
+		local
+			unit_under_test: USTAR_HEADER_PARSER
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+			create p.make_from_pointer (split_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
+			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
+			assert ("headers match", unit_under_test.parsed_header ~ split_header)
+		end
+
 feature {NONE} -- Test utils
 
 	compare_block_special (expected, actual: SPECIAL[CHARACTER_8]): BOOLEAN
@@ -178,7 +217,7 @@ feature {NONE} -- Test utils
 feature {NONE} -- Data - easy
 
 	easy_header_blob: SPECIAL[CHARACTER_8]
-			-- Return blob for easy_tar_header
+			-- Return blob for easy_header
 		local
 			header_template: STRING_8
 		once
@@ -211,16 +250,8 @@ feature {NONE} -- Data - easy
 feature {NONE} -- Data - link
 
 
-	-- Templates use $ instead of %U (because like this all characters are the same width)
-	--	                               Filename                                                                                            Mode    uid     gid     size        mtime       chksum T Linkname                                                                                            mag  Ve username                        groupname                       dmajor  dminor  prefix                                                                                                                                                     unused
-	--                                |                                                                                                  ||      ||      ||      ||          ||          ||      |||                                                                                                  ||    ||||                              ||                              ||      ||      ||                                                                                                                                                         ||           |
-	--                       Offset:  0       8      16      24      32      40      48      56      64      72      80      88      96     104     112     120     128     136     144     152     160     168     176     184     192     200     208     216     224     232     240     248     256     264     272     280     288     296     304     312     320     328     336     344     352     360     368     376     384     392     400     408     416     424     432     440     448     456     464     472     480     488     496     504     512
-	--                                |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
-	link_header_template: STRING_8 = ".zshrc$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000777$0001750$0000144$00000000000$12525702750$0016552$2dotfiles/zsh/zshrc$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00nicolas$$$$$$$$$$$$$$$$$$$$$$$$$users$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
-
-
 	link_header_blob: SPECIAL[CHARACTER_8]
-			-- Return blob for easy_tar_header
+			-- Return blob for link_header
 		local
 			header_template: STRING_8
 		once
@@ -236,7 +267,7 @@ feature {NONE} -- Data - link
 		end
 
 	link_header: TAR_HEADER
-			-- Header corresponding to testset easy
+			-- Header corresponding to testset link
 		once
 			create Result.make
 			Result.set_filename (create {PATH}.make_from_string (".zshrc"))
@@ -253,7 +284,7 @@ feature {NONE} -- Data - link
 feature {NONE} -- Data - Device node
 
 	devnode_header_blob: SPECIAL[CHARACTER_8]
-			-- Return blob for easy_tar_header
+			-- Return blob for devnode_header
 		local
 			header_template: STRING_8
 		once
@@ -269,7 +300,7 @@ feature {NONE} -- Data - Device node
 		end
 
 	devnode_header: TAR_HEADER
-			-- Header corresponding to testset easy
+			-- Header corresponding to testset devnode
 		once
 			create Result.make
 			Result.set_filename (create {PATH}.make_from_string ("dev/sda1"))
@@ -282,6 +313,40 @@ feature {NONE} -- Data - Device node
 			Result.set_group_name ("disk")
 			Result.set_device_major (0c10)
 			Result.set_device_minor (0c1)
+		end
+
+feature {NONE} -- Data - split
+
+	split_header_blob: SPECIAL[CHARACTER_8]
+			-- Return blob for split_header
+		local
+			header_template: STRING_8
+		once
+			-- Templates use $ instead of %U (because like this all characters are the same width)
+			--                   Filename                                                                                            Mode    uid     gid     size        mtime       chksum T Linkname                                                                                            mag  Ve username                        groupname                       dmajor  dminor  prefix                                                                                                                                                     unused
+			--                  |                                                                                                  ||      ||      ||      ||          ||          ||      |||                                                                                                  ||    ||||                              ||                              ||      ||      ||                                                                                                                                                         ||           |
+			--         Offset:  0       8      16      24      32      40      48      56      64      72      80      88      96     104     112     120     128     136     144     152     160     168     176     184     192     200     208     216     224     232     240     248     256     264     272     280     288     296     304     312     320     328     336     344     352     360     368     376     384     392     400     408     416     424     432     440     448     456     464     472     480     488     496     504     512
+			--                  |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
+			header_template := "a_not_so_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_filename0000644$0001750$0000144$00000000000$12637742055$0100624$0$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00nicolas$$$$$$$$$$$$$$$$$$$$$$$$$users$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$a_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_directory$$$$$$$$$$$$"
+			header_template.replace_substring_all ("$", "%U")
+			Result := header_template.area
+			Result.remove_tail (1)
+		end
+
+	split_header: TAR_HEADER
+			-- Header corresponding to testset split
+		once
+			create Result.make
+			Result.set_filename (create {PATH}.make_from_string ("a_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_directory/a_not_so_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_filename"))
+			Result.set_mode (0c0644)
+			Result.set_user_id (0c1750)
+			Result.set_group_id (0c144)
+			Result.set_mtime (0c12637742055)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name ("nicolas")
+			Result.set_group_name ("users")
+			Result.set_device_major (0c0)
+			Result.set_device_minor (0c0)
 		end
 
 end
