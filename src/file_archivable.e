@@ -18,8 +18,8 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_file: FILE; a_header_writer: TAR_HEADER_WRITER)
-			-- Create a new FILE_ARCHIVABLE for `a_file' using `a_header_writer' to write the headers
+	make (a_file: FILE)
+			-- Create a new FILE_ARCHIVABLE for `a_file'
 		require
 			file_existis: a_file.exists
 			file_is_readable: a_file.is_readable
@@ -34,25 +34,15 @@ feature {NONE} -- Initialization
 				file.start
 			end
 
-			header_writer := a_header_writer
-
 			generate_header
-
-			header_writer.set_active_header (header)
 		end
 
 feature -- Status
 
-	finished_writing: BOOLEAN
-			-- Indicates whether the whole file was written
-		do
-			Result := file.is_closed
-		end
-
 	required_blocks: INTEGER
 			-- Indicate how much space is needed to represent this ARCHIVABLE
 		do
-			Result := (header_writer.required_blocks + needed_blocks (file.file_info.size))
+			Result := needed_blocks (file.file_info.size)
 		end
 
 feature -- Output
@@ -60,19 +50,14 @@ feature -- Output
 	write_block_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
 			-- Write the next block to `p' starting at `pos'
 		do
-			if (not header_writer.finished_writing) then
-				-- Write header
-				write_header_block (p, pos)
-			else
-				-- Write next block
-				file.read_to_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
-				if (file.end_of_file) then
-					-- Fill with '%U'
-					pad (p, pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
+			-- Write next block
+			file.read_to_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
+			if (file.end_of_file) then
+				-- Fill with '%U'
+				pad (p, pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
 
-					-- Close file
-					file.close
-				end
+				-- Close file
+				file.close
 			end
 		end
 
@@ -83,13 +68,11 @@ feature -- Output
 			l_file: FILE
 			i: INTEGER
 		do
-			header_writer.write_to_managed_pointer (p, pos)
-
 			-- Write blocks until there are no more blocks to write
 			from
 				create {RAW_FILE} l_file.make_with_path (file.path)
 				l_file.open_read
-				i := header_writer.required_blocks
+				i := 0
 			until
 				i >= required_blocks and l_file.bytes_read /= {TAR_CONST}.tar_block_size
 			loop
@@ -106,7 +89,6 @@ feature -- Output
 			-- Close file
 			l_file.close
 		ensure then
-			header_state_unchanged: (old header_writer.finished_writing) = header_writer.finished_writing
 			file_pointer_unchanged: (old file.file_pointer) = file.file_pointer
 		end
 

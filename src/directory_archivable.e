@@ -17,18 +17,15 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_directory: FILE; a_header_writer: TAR_HEADER_WRITER)
+	make (a_directory: FILE)
 			-- Create new DIRECTORY_ARCHIVABLE for `a_directory'
 		require
 			directory_exists: a_directory.exists
 			is_directory: a_directory.is_directory
 		do
 			create {RAW_FILE} directory.make_with_path (a_directory.path)
-			header_writer := a_header_writer
 
 			generate_header
-
-			header_writer.set_active_header (header)
 		end
 
 feature -- Status
@@ -36,13 +33,7 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Indicates how many blocks are required to store this instance
 		do
-			Result := header_writer.required_blocks
-		end
-
-	finished_writing: BOOLEAN
-			-- Indicate whether everything has been written
-		do
-			Result := header_writer.finished_writing
+			Result := 0
 		end
 
 feature -- Output
@@ -50,13 +41,13 @@ feature -- Output
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write the next block to `p', starting at `a_pos'
 		do
-			header_writer.write_block_to_managed_pointer (p, a_pos)
+			-- do_nothing (impossible to call)
 		end
 
 	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write the whole representation to `p', starting at `a_pos'
 		do
-			header_writer.write_to_managed_pointer (p, a_pos)
+			-- do_nothing (impossible to call)
 		end
 
 feature {NONE} -- Implementation

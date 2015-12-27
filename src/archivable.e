@@ -13,15 +13,23 @@ feature -- Status
 
 	finished_writing: BOOLEAN
 			-- Indicates whether everything is written (usefull when using blockwise writing)
-		deferred
+		do
+			Result := written_blocks = required_blocks
 		end
 
 	required_blocks: INTEGER
 			-- Indicates how much space this archivable requires in blocks
 		deferred
 		ensure
-			at_least_header: Result >= header_writer.required_blocks
+			non_negative: Result >= 0
 		end
+
+	written_blocks: INTEGER
+			-- Indicates how many payload blocks have been written so far
+
+	header: TAR_HEADER
+			-- Header that belongs to the payload
+
 
 feature -- Output
 
@@ -32,6 +40,8 @@ feature -- Output
 			enough_space: p.count >= pos + {TAR_CONST}.tar_block_size
 			not_finished: not finished_writing
 		deferred
+		ensure
+			block_written: written_blocks = old written_blocks + 1
 		end
 
 	write_block_to_new_managed_pointer: MANAGED_POINTER
@@ -40,6 +50,7 @@ feature -- Output
 			create Result.make ({TAR_CONST}.tar_block_size)
 			write_block_to_managed_pointer (Result, 0)
 		ensure
+			block_written: written_blocks = old written_blocks + 1
 			block_size: Result.count = {TAR_CONST}.tar_block_size
 		end
 
@@ -62,26 +73,7 @@ feature -- Output
 			write_to_managed_pointer (Result, 0)
 		end
 
-feature {NONE} -- Implemenation
-
-	header_writer: TAR_HEADER_WRITER
-			-- The header writer to use
-
-	header: TAR_HEADER
-			-- Header that belongs to the payload
-
 feature {NONE} -- Utilites
-
-	write_header_block (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Writes a block of the header
-		require
-			non_negative_position: a_pos >= 0
-			enough_space: p.count >= a_pos + {TAR_CONST}.tar_block_size
-			not_written: not header_writer.finished_writing
-		do
-			header_writer.write_block_to_managed_pointer (p, a_pos)
-		end
-
 
 	needed_blocks (n: INTEGER): INTEGER
 			-- Indicate how many blocks are needed to represent `n' bytes
@@ -106,5 +98,8 @@ feature {NONE} -- Utilites
 			create l_padding.make_filled ('%U', n)
 			p.put_special_character_8 (l_padding, 0, pos, n)
 		end
+
+invariant
+	non_negative_written_blocks: written_blocks >= 0
 
 end

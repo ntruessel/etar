@@ -23,8 +23,12 @@ feature -- Test routines
 			p: MANAGED_POINTER
 		do
 			create {USTAR_HEADER_WRITER} header_writer
-			create unit_under_test.make (easy_file, header_writer)
-			p := unit_under_test.write_to_new_managed_pointer
+			create unit_under_test.make (easy_file)
+			
+			header_writer.set_active_header (unit_under_test.header)
+			p := header_writer.write_to_new_managed_pointer
+			p.append (unit_under_test.write_to_new_managed_pointer)
+
 
 			assert ("Correct size", p.count = 2 * {TAR_CONST}.tar_block_size)
 
