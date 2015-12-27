@@ -43,6 +43,8 @@ feature -- Output
 
 	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write `active_header' to `p' starting at `a_pos'
+		local
+			l_split_filename: TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 		do
 			if attached active_header as header then
 					-- Fill with all '%U'
@@ -52,11 +54,13 @@ feature -- Output
 
 					-- Put filename
 					-- FIXME: Implement filename splitting
-				put_string (unify_utf_8_path (header.filename),
+				l_split_filename := unify_and_split_filename (header.filename)
+				put_string (l_split_filename.filename,
 						p, a_pos + {TAR_HEADER_CONST}.name_offset);
 
 					-- Put prefix
-					-- FIXME: Implement filename splitting
+				put_string (l_split_filename.filename_prefix,
+						p, a_pos + {TAR_HEADER_CONST}.prefix_offset);
 
 					-- Put mode
 					-- MASK ISVTX flag: tar does not support it (reserved)
@@ -136,9 +140,8 @@ feature {NONE} -- Fitting
 	filename_fits (a_header: TAR_HEADER): BOOLEAN
 			-- Indicates whether `filename' of `a_header' fits in a ustar header
 		do
-				-- TODO: Implement splitting
 				-- No need for terminating '%U'
-			Result := a_header.filename.utf_8_name.count <= {TAR_HEADER_CONST}.name_length
+			Result := unify_and_split_filename (a_header.filename).filename_prefix.count <= {TAR_HEADER_CONST}.prefix_length
 		end
 
 	user_id_fits (a_header: TAR_HEADER): BOOLEAN
@@ -241,6 +244,53 @@ feature -- Path helpers
 				end
 				Result.append (ic.item.utf_8_name)
 			end
+		end
+
+	unify_and_split_filename (a_path: PATH): TUPLE [filename_prefix: STRING_8; filename: STRING_8]
+			-- Split `a_path' into filename and prefix, such that prefix + '/' + filename equals the UTF-8
+			-- representation of `a_path' using unix directory separator
+		local
+			l_filename: STRING_8
+			l_filename_prefix: STRING_8
+			l_components_cursor: INDEXABLE_ITERATION_CURSOR [PATH] -- like a_path.components.new_cursor
+		do
+			create l_filename_prefix.make ((a_path.utf_8_name.count - {TAR_HEADER_CONST}.name_length).max (0))
+			create l_filename.make ({TAR_HEADER_CONST}.name_length)
+
+			-- filename
+			from
+				l_components_cursor := a_path.components.new_cursor
+				l_components_cursor.reverse
+				l_components_cursor.start
+			until
+				-- Either the whole path is processed or there is no space in l_filename left
+				l_components_cursor.after or else l_filename.count + l_components_cursor.item.utf_8_name.count >= {TAR_HEADER_CONST}.name_length
+			loop
+				if not l_filename.is_empty then
+					l_filename.precede ('/')
+				end
+				l_filename.prepend (l_components_cursor.item.utf_8_name)
+				l_components_cursor.forth
+			end
+
+			-- prefix
+			from
+
+			until
+				l_components_cursor.after
+			loop
+				if not l_filename_prefix.is_empty then
+					l_filename.precede ('/')
+				end
+				l_filename.prepend (l_components_cursor.item.utf_8_name)
+				l_components_cursor.forth
+			end
+
+			Result := [l_filename_prefix, l_filename]
+		ensure
+			correct_length: Result.filename.count <= {TAR_HEADER_CONST}.name_length
+			correct_result_without_prefix: Result.filename_prefix.is_empty implies (Result.filename ~ unify_utf_8_path (a_path))
+			correct_result_with_prefix: not Result.filename_prefix.is_empty implies (Result.filename_prefix + "/" + Result.filename ~ unify_utf_8_path (a_path))
 		end
 
 end
