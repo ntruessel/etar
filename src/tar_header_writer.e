@@ -46,6 +46,7 @@ feature -- Setup
 		do
 			active_header := a_header.twin
 			written_blocks := 0
+			prepare_header
 		ensure
 			header_set: active_header ~ a_header
 		end
@@ -98,6 +99,29 @@ feature -- Output
 		ensure
 			block_size: Result.count = {TAR_CONST}.tar_block_size
 			another_block_written: written_blocks = old written_blocks + 1
+		end
+
+feature {NONE} -- Utilities
+
+	prepare_header
+			-- prepare `active_header' after set_header
+		require
+			has_active_header: attached active_header
+		deferred
+		end
+
+	unify_utf_8_path (a_path: PATH): STRING_8
+			-- Turns `a_path' into a UTF-8 string using unix directory separators
+		do
+			create Result.make (a_path.utf_8_name.count)
+			across
+				a_path.components as ic
+			loop
+				if not Result.is_empty then
+					Result.append_character ('/')
+				end
+				Result.append (ic.item.utf_8_name)
+			end
 		end
 
 invariant

@@ -35,6 +35,7 @@ feature -- Status
 						user_id_fits (a_header) and
 						group_id_fits (a_header) and
 						size_fits (a_header) and
+						linkname_fits (a_header) and
 						user_name_fits (a_header) and
 						group_name_fits (a_header)
 		end
@@ -135,7 +136,7 @@ feature -- Output
 			written_blocks := written_blocks + 1
 		end
 
-feature {NONE} -- Fitting
+feature -- Fitting
 
 	filename_fits (a_header: TAR_HEADER): BOOLEAN
 			-- Indicates whether `filename' of `a_header' fits in a ustar header
@@ -168,6 +169,20 @@ feature {NONE} -- Fitting
 			Result := natural_64_to_octal_string (a_header.size).count < {TAR_HEADER_CONST}.size_length
 		end
 
+	mtime_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `mtime' of `a_header' fits in a ustar header
+		do
+				-- Strictly less: terminating '%U'
+			Result := natural_64_to_octal_string (a_header.mtime).count < {TAR_HEADER_CONST}.mtime_length
+		end
+
+	linkname_fits (a_header: TAR_HEADER): BOOLEAN
+			-- Indicates whether `linkname' of `a_header' fits in a ustar header
+		do
+				-- No need for terminating '%U'
+			Result := unify_utf_8_path (a_header.linkname).count <= {TAR_HEADER_CONST}.linkname_length
+		end
+
 	user_name_fits (a_header: TAR_HEADER): BOOLEAN
 			-- Indicates whether `user_name' of `a_header' fits in a ustar header
 		do
@@ -183,6 +198,12 @@ feature {NONE} -- Fitting
 		end
 
 feature {NONE} -- Utilities
+
+	prepare_header
+			-- prepare `active_header' after it was set
+		do
+			-- do_nothing
+		end
 
 	put_string (s: STRING_8; p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write `s' to `p' at `a_pos'
@@ -235,19 +256,7 @@ feature {NONE} -- Utilities
 
 feature -- Path helpers		
 
-	unify_utf_8_path (a_path: PATH): STRING_8
-			-- Turns `a_path' into a UTF-8 string using unix directory separators
-		do
-			create Result.make (a_path.utf_8_name.count)
-			across
-				a_path.components as ic
-			loop
-				if not Result.is_empty then
-					Result.append_character ('/')
-				end
-				Result.append (ic.item.utf_8_name)
-			end
-		end
+
 
 	unify_and_split_filename (a_path: PATH): TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 			-- Split `a_path' into filename and prefix, such that prefix + '/' + filename equals the UTF-8
