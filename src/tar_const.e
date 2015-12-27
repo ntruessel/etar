@@ -65,4 +65,15 @@ feature -- Miscellaneous
 	ustar_magic: STRING_8 = "ustar" -- ustar magic
 
 	ustar_version: STRING_8 = "00" -- ustar version
+
+feature -- PAX
+
+	pax_header_filename: STRING_8 = "./PaxHeader" -- Filename to use for pax header
+
+	pax_header_uid: NATURAL_32 = 0 -- User-id to use for pax header
+
+	pax_header_gid: NATURAL_32 = 0 -- Group-id to use for pax header
+
+	pax_header_mode: NATURAL_16 = 0c644 -- Permissions o use for pax header
+
 end
