@@ -52,9 +52,9 @@ feature -- Output
 						create {SPECIAL[CHARACTER_8]}.make_filled ('%U', {TAR_CONST}.tar_block_size),
 						0, a_pos, {TAR_CONST}.tar_block_size)
 
-					-- Put filename
-					-- FIXME: Implement filename splitting
 				l_split_filename := unify_and_split_filename (header.filename)
+
+					-- Put filename
 				put_string (l_split_filename.filename,
 						p, a_pos + {TAR_HEADER_CONST}.name_offset);
 
