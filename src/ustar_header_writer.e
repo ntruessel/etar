@@ -139,9 +139,12 @@ feature {NONE} -- Fitting
 
 	filename_fits (a_header: TAR_HEADER): BOOLEAN
 			-- Indicates whether `filename' of `a_header' fits in a ustar header
+		local
+			l_split_filename: TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 		do
 				-- No need for terminating '%U'
-			Result := unify_and_split_filename (a_header.filename).filename_prefix.count <= {TAR_HEADER_CONST}.prefix_length
+			l_split_filename := unify_and_split_filename (a_header.filename)
+			Result := l_split_filename.filename_prefix.count <= {TAR_HEADER_CONST}.prefix_length and not l_split_filename.filename.is_empty
 		end
 
 	user_id_fits (a_header: TAR_HEADER): BOOLEAN
@@ -263,8 +266,9 @@ feature -- Path helpers
 				l_components_cursor.reverse
 				l_components_cursor.start
 			until
-				-- Either the whole path is processed or there is no space in l_filename left
-				l_components_cursor.after or else l_filename.count + l_components_cursor.item.utf_8_name.count >= {TAR_HEADER_CONST}.name_length
+				l_components_cursor.after or else 																											-- whole path processed
+					((l_filename.is_empty and l_filename.count + l_components_cursor.item.utf_8_name.count > {TAR_HEADER_CONST}.name_length) or				-- no space for first entry   (error case)
+					(not l_filename.is_empty and l_filename.count + l_components_cursor.item.utf_8_name.count >= {TAR_HEADER_CONST}.name_length))			-- no space for other entries
 			loop
 				if not l_filename.is_empty then
 					l_filename.precede ('/')
@@ -280,9 +284,9 @@ feature -- Path helpers
 				l_components_cursor.after
 			loop
 				if not l_filename_prefix.is_empty then
-					l_filename.precede ('/')
+					l_filename_prefix.precede ('/')
 				end
-				l_filename.prepend (l_components_cursor.item.utf_8_name)
+				l_filename_prefix.prepend (l_components_cursor.item.utf_8_name)
 				l_components_cursor.forth
 			end
 
@@ -290,7 +294,8 @@ feature -- Path helpers
 		ensure
 			correct_length: Result.filename.count <= {TAR_HEADER_CONST}.name_length
 			correct_result_without_prefix: Result.filename_prefix.is_empty implies (Result.filename ~ unify_utf_8_path (a_path))
-			correct_result_with_prefix: not Result.filename_prefix.is_empty implies (Result.filename_prefix + "/" + Result.filename ~ unify_utf_8_path (a_path))
+			correct_result_with_prefix: (not Result.filename_prefix.is_empty and not Result.filename.is_empty) implies (Result.filename_prefix + "/" + Result.filename ~ unify_utf_8_path (a_path))
+			correct_result_with_prefix_without_filename: (not Result.filename_prefix.is_empty and Result.filename.is_empty) implies (Result.filename_prefix ~ unify_utf_8_path (a_path))
 		end
 
 end
