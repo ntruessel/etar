@@ -191,9 +191,6 @@ feature -- Parsing
 				end
 			end
 
-				-- TODO: parse prefix
-				-- FIXME: Implement filename splitting
-
 			if not has_error then
 				last_parsed_header := l_header
 			else
