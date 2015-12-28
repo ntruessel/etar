@@ -13,6 +13,18 @@ class
 inherit
 	TAR_TEST_SET_BASE
 
+feature -- Internal tests
+
+	test_template_length
+			-- Check whether all templates have the correct length
+		do
+			assert ("correct easy template size", easy_header_blob.count = {TAR_CONST}.tar_block_size)
+			assert ("correct link template size", link_header_blob.count = {TAR_CONST}.tar_block_size)
+			assert ("correct devnode template size", devnode_header_blob.count = {TAR_CONST}.tar_block_size)
+			assert ("correct split template size", split_header_blob.count = {TAR_CONST}.tar_block_size)
+			assert ("correct long filename template size", long_filename_header_blob.count = {TAR_CONST}.tar_block_size * 3)
+		end
+
 feature -- Test routines
 
 	test_pax_header_ustar
@@ -65,6 +77,25 @@ feature -- Test routines
 
 			assert ("correct output length (split)", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content (split)", compare_special (split_header_blob, output))
+		end
+
+	test_pax_header_long_filename
+			-- Test pax header with too long filename
+		local
+			unit_under_test: PAX_HEADER_WRITER
+			output: SPECIAL[CHARACTER_8]
+		do
+			create unit_under_test
+
+			unit_under_test.set_active_header (long_filename_header)
+
+			assert ("can write valid header", unit_under_test.can_write (long_filename_header))
+			assert ("has correct size", unit_under_test.required_blocks = 3)
+
+			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, 3 * {TAR_CONST}.tar_block_size)
+
+			assert ("correct output length", output.count = 3 * {TAR_CONST}.tar_block_size)
+			assert ("correct output content", compare_special (long_filename_header_blob, output))
 		end
 
 feature {NONE} -- Data (ustar) - easy
@@ -202,6 +233,43 @@ feature {NONE} -- Data (ustar) - split
 			Result.set_device_minor (0c0)
 		end
 
+
+feature {NONE} -- Data - long filename
+
+	long_filename_header_blob: SPECIAL[CHARACTER_8]
+			-- Return blob for long_filename_header
+		local
+			header_template: STRING_8
+		once
+			-- Templates use $ instead of %U (because like this all characters are the same width)
+			--                   Filename                                                                                            Mode    uid     gid     size        mtime       chksum T Linkname                                                                                            mag  Ve username                        groupname                       dmajor  dminor  prefix                                                                                                                                                     unused
+			--                  |                                                                                                  ||      ||      ||      ||          ||          ||      |||                                                                                                  ||    ||||                              ||                              ||      ||      ||                                                                                                                                                         ||           |
+			--         Offset:  0       8      16      24      32      40      48      56      64      72      80      88      96     104     112     120     128     136     144     152     160     168     176     184     192     200     208     216     224     232     240     248     256     264     272     280     288     296     304     312     320     328     336     344     352     360     368     376     384     392     400     408     416     424     432     440     448     456     464     472     480     488     496     504     512
+			--                  |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
+			header_template := "./PaxHeader$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000644$0000000$0000000$00000000430$00000000000$0011233$x$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+							   %280 path=test_files/a_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_directory/a_not_so_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_filename^$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+							   %test_files/a_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo0000644$0001750$0000144$00000000000$00000000000$0037205$0$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00nicolas$$$$$$$$$$$$$$$$$$$$$$$$$users$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+			header_template.replace_substring_all ("$", "%U")
+			header_template.replace_substring_all ("^", "%N")
+			Result := header_template.area
+			Result.remove_tail (1)
+		end
+
+	long_filename_header: TAR_HEADER
+			-- Header corresponding to testset long filename
+		once
+			create Result.make
+			Result.set_filename (create {PATH}.make_from_string ("test_files/a_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_directory/a_not_so_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_filename"))
+			Result.set_mode (0c0644)
+			Result.set_user_id (0c1750)
+			Result.set_group_id (0c144)
+			Result.set_mtime (0c0)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name ("nicolas")
+			Result.set_group_name ("users")
+			Result.set_device_major (0c0)
+			Result.set_device_minor (0c0)
+		end
 
 end
 
