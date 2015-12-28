@@ -31,7 +31,7 @@ feature -- Status
 	unarchiving_finished: BOOLEAN
 			-- Flag that indicates whether unarchiving finished
 		do
-			Result := unarchived_blocks = required_blocks
+			Result := attached active_header implies unarchived_blocks = required_blocks
 		end
 
 	active_header: detachable TAR_HEADER
