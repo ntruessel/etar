@@ -21,6 +21,7 @@ feature -- Internal checks
 			assert ("correct easy template size", easy_header_blob.count = {TAR_CONST}.tar_block_size)
 			assert ("correct link template size", link_header_blob.count = {TAR_CONST}.tar_block_size)
 			assert ("correct devnode template size", devnode_header_blob.count = {TAR_CONST}.tar_block_size)
+			assert ("correct split template size", split_header_blob.count = {TAR_CONST}.tar_block_size)
 		end
 
 feature -- Test writing methods
