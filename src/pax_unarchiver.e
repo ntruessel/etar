@@ -44,6 +44,40 @@ feature -- Status
 			Result := entries.item (a_key)
 		end
 
+feature -- Access: error
+
+	has_error: BOOLEAN
+			-- Error occurred?
+		do
+			Result := attached error_messages as lst and then not lst.is_empty
+		end
+
+	reset_error
+			-- Reset errors.
+		do
+			error_messages := Void
+		ensure
+			has_no_error: not has_error
+		end
+
+	report_error (a_message: READABLE_STRING_GENERAL)
+			-- Report error message `a_message'.
+		local
+			lst: like error_messages
+		do
+			lst := error_messages
+			if lst = Void then
+				create {ARRAYED_LIST [READABLE_STRING_32]} lst.make (1)
+				error_messages := lst
+			end
+			lst.force (a_message.as_string_32)
+		ensure
+			has_error: has_error
+		end
+
+	error_messages: detachable LIST [READABLE_STRING_32]
+			-- Error messages.
+
 feature -- Unarchiving
 
 	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
@@ -65,19 +99,30 @@ feature -- Unarchiving
 					inspect c
 					when ' ' then
 							-- whitespace separates length from key and value
-							-- -> resize active_entry
-						if active_entry.is_integer then
+
+							-- must be natural and number of remaining characters must be non-negative
+						if active_entry.is_natural and then active_entry.to_integer - active_entry.count - 2 >= 0 then
+								-- Set expected length: parsed length - length of length-representation - space - newline
+							active_entry_expected_length := active_entry.to_integer - active_entry.count - 2
 							active_entry.grow (active_entry.to_integer)
 							active_entry.wipe_out
 						else
-							-- Report error
+							report_error ("Invalid length field: " + active_entry)
+							active_entry_expected_length := -1
 						end
 					when '%N' then
 							-- newline separates entry from next entry
-						add_entry (active_entry)
+						if i = active_entry_expected_length then
+							add_entry (active_entry)
+						elseif active_entry_expected_length >= 0 then
+							report_error ("Entry with wrong length. Expected: " + active_entry_expected_length.out + ". Actual: " + active_entry.count.out + ". Entry: " + active_entry)
+						end
 						active_entry.wipe_out
+						active_entry_expected_length := 0
 					else
-						active_entry.append_character (c)
+						if active_entry_expected_length >= 0 then
+							active_entry.append_character (c)
+						end
 					end
 					i := i + 1
 				end
@@ -101,6 +146,10 @@ feature {NONE} -- Implementation
 	active_entry: STRING_8
 			-- The entry for which reading is in progress
 
+	active_entry_expected_length: INTEGER
+			-- Indicates what length the active entry should have
+			-- negative on error
+
 	add_entry (a_entry: STRING_8)
 			-- Add `a_entry' to entries (have to split it at '=' character)
 		local
@@ -110,7 +159,13 @@ feature {NONE} -- Implementation
 			if (l_first_equals_position > 1 and l_first_equals_position < a_entry.count) then
 				entries.put (a_entry.substring (l_first_equals_position + 1, a_entry.count), a_entry.substring (1, l_first_equals_position - 1))
 			else
-				-- Report error
+				if (l_first_equals_position = 0) then
+					report_error ("Entry without equals sign: " + a_entry)
+				elseif (l_first_equals_position = 1) then
+					report_error ("Entry without key: " + a_entry)
+				elseif (l_first_equals_position = a_entry.count) then
+					report_error ("Entry without value: " + a_entry)
+				end
 			end
 		end
 
