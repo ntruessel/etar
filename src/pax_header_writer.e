@@ -163,7 +163,8 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.mtime_fits (l_ustar_header) then
 							-- put mtime in pax header
-						l_pax_archivable.put ({TAR_HEADER_CONST}.mtime_pax_key, l_ustar_header.mtime.out)	-- pax takes decimal numbers
+--						l_pax_archivable.put ({TAR_HEADER_CONST}.mtime_pax_key, l_ustar_header.mtime.out)	-- pax takes decimal numbers
+--						FIXME: Wrong format
 
 							-- simplify mtime
 						l_ustar_header.set_mtime (0)
