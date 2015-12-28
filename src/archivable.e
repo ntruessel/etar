@@ -97,8 +97,10 @@ feature {NONE} -- Utilites
 		local
 			l_padding: SPECIAL[CHARACTER_8]
 		do
-			create l_padding.make_filled ('%U', n)
-			p.put_special_character_8 (l_padding, 0, pos, n)
+			if n > 0 then
+				create l_padding.make_filled ('%U', n)
+				p.put_special_character_8 (l_padding, 0, pos, n)
+			end
 		end
 
 invariant
