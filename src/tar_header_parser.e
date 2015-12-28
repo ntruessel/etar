@@ -30,10 +30,15 @@ feature -- Parsing
 feature -- Result query
 
 	parsed_header: detachable TAR_HEADER
+			-- Return the last parsed header if no error occured
 		require
 			completely_parsed: parsing_finished
 		do
-			Result := last_parsed_header
+			if not has_error then
+				Result := last_parsed_header
+			else
+				Result := Void
+			end
 		end
 
 feature -- Access: error
