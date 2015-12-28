@@ -46,8 +46,9 @@ feature -- Output
 
 	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write the whole representation to `p', starting at `a_pos'
+			-- Does not modify blockwise writing status
 		do
-			-- do_nothing (impossible to call)
+			-- do_nothing
 		end
 
 feature {NONE} -- Implementation
@@ -69,5 +70,8 @@ feature {NONE} -- Implementation
 			header.set_group_name (directory.file_info.group_name)
 			header.set_typeflag ({TAR_CONST}.tar_typeflag_directory)
 		end
+
+invariant
+	no_payload: required_blocks = 0
 
 end
