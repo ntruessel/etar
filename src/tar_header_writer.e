@@ -48,7 +48,8 @@ feature -- Setup
 			written_blocks := 0
 			prepare_header
 		ensure
-			header_set: active_header ~ a_header
+			has_active_header: attached active_header
+--			header_set: active_header ~ a_header 		-- pax will change the header to make it fit in ustar
 		end
 
 feature -- Output

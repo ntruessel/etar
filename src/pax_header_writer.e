@@ -195,6 +195,7 @@ feature {NONE} -- Implementation
 					end
 
 					pax_archivable := l_pax_archivable
+					ustar_writer.set_active_header (l_pax_archivable.header)
 				else
 					pax_archivable := Void
 					ustar_writer.set_active_header (l_ustar_header)
@@ -202,6 +203,8 @@ feature {NONE} -- Implementation
 			else
 				-- Unreachable (precondition)
 			end
+		ensure then
+			ustar_header_attached: attached ustar_writer.active_header
 		end
 
 	pax_archivable: detachable PAX_ARCHIVABLE
