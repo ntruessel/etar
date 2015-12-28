@@ -33,8 +33,6 @@ feature {NONE} -- Initialization
 			else
 				file.start
 			end
-
-			generate_header
 		end
 
 feature -- Status
@@ -43,6 +41,22 @@ feature -- Status
 			-- Indicate how much space is needed to represent this ARCHIVABLE
 		do
 			Result := needed_blocks (file.file_info.size)
+		end
+
+	header: TAR_HEADER
+			-- Header that belongs to the payload
+		once
+			create Result.make
+
+			Result.set_filename (file.path)
+			Result.set_mode (file.protection.as_natural_16)
+			Result.set_user_id (file.user_id.as_natural_32)
+			Result.set_group_id (file.group_id.as_natural_32)
+			Result.set_size (file.file_info.size.as_natural_64)
+			Result.set_mtime (file.date.as_natural_64)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name (file.owner_name)
+			Result.set_group_name (file.file_info.group_name)
 		end
 
 feature -- Output
@@ -93,23 +107,6 @@ feature -- Output
 		end
 
 feature {NONE} -- Implementation
-
-	generate_header
-			-- Generate header once file is set up properly
-		require
-			file_attached: file /= Void
-		do
-			create header.make
-			header.set_filename (file.path)
-			header.set_mode (file.protection.as_natural_16)
-			header.set_user_id (file.user_id.as_natural_32)
-			header.set_group_id (file.group_id.as_natural_32)
-			header.set_size (file.file_info.size.as_natural_64)
-			header.set_mtime (file.date.as_natural_64)
-			header.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
-			header.set_user_name (file.owner_name)
-			header.set_group_name (file.file_info.group_name)
-		end
 
 	file: FILE
 			-- The file this ARCHIVABLE represents

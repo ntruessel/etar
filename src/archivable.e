@@ -29,6 +29,8 @@ feature -- Status
 
 	header: TAR_HEADER
 			-- Header that belongs to the payload
+		deferred
+		end
 
 
 feature -- Output

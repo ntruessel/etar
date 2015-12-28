@@ -24,8 +24,6 @@ feature {NONE} -- Initialization
 			is_directory: a_directory.is_directory
 		do
 			create {RAW_FILE} directory.make_with_path (a_directory.path)
-
-			generate_header
 		end
 
 feature -- Status
@@ -34,6 +32,20 @@ feature -- Status
 			-- Indicates how many blocks are required to store this instance
 		do
 			Result := 0
+		end
+
+	header: TAR_HEADER
+			-- Header that belongs to the payload
+		once
+			create Result.make
+			Result.set_filename (directory.path)
+			Result.set_mode (directory.protection.to_natural_16)
+			Result.set_user_id (directory.user_id.to_natural_32)
+			Result.set_group_id (directory.group_id.to_natural_32)
+			Result.set_mtime (directory.date.to_natural_64)
+			Result.set_user_name (directory.owner_name)
+			Result.set_group_name (directory.file_info.group_name)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_directory)
 		end
 
 feature -- Output
@@ -56,20 +68,6 @@ feature {NONE} -- Implementation
 	directory: FILE
 			-- the directory this instance represents/wraps
 			-- unfortunately, DIRECTORY does not provide enough metadata to use it
-
-	generate_header
-			-- Generate `header' once `directory' is set correctly
-		do
-			create header.make
-			header.set_filename (directory.path)
-			header.set_mode (directory.protection.to_natural_16)
-			header.set_user_id (directory.user_id.to_natural_32)
-			header.set_group_id (directory.group_id.to_natural_32)
-			header.set_mtime (directory.date.to_natural_64)
-			header.set_user_name (directory.owner_name)
-			header.set_group_name (directory.file_info.group_name)
-			header.set_typeflag ({TAR_CONST}.tar_typeflag_directory)
-		end
 
 invariant
 	no_payload: required_blocks = 0

@@ -41,6 +41,18 @@ feature -- Status
 			Result := needed_blocks (payload.count)
 		end
 
+	header: TAR_HEADER
+			-- Header that belongs to the payload
+		do
+			create Result.make
+
+			Result.set_filename (create {PATH}.make_from_string ({TAR_CONST}.pax_header_filename))
+			Result.set_user_id ({TAR_CONST}.pax_header_uid)
+			Result.set_group_id ({TAR_CONST}.pax_header_gid)
+			Result.set_mode ({TAR_CONST}.pax_header_mode)
+			Result.set_size (payload.count.as_natural_64)
+		end
+
 feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
