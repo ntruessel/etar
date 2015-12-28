@@ -42,7 +42,6 @@ feature {NONE} -- Implementation
 					l_directory.create_dir
 				end
 				set_metadata (l_directory)
-				unarchiving_finished := True
 			end
 		end
 

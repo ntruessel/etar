@@ -20,7 +20,6 @@ feature {NONE} -- Initialization
 	default_create
 				-- Default initialization for UNARCHIVER
 		do
-			unarchiving_finished := True
 --			active_header := Void
 --			unarchived_blocks := 0
 		ensure then
@@ -31,9 +30,22 @@ feature -- Status
 
 	unarchiving_finished: BOOLEAN
 			-- Flag that indicates whether unarchiving finished
+		do
+			Result := unarchived_blocks = required_blocks
+		end
 
 	active_header: detachable TAR_HEADER
 			-- The header for which unarchiving is in progress
+
+	required_blocks: INTEGER
+			-- Indicates how many blocks are required to unarchive this
+		require
+			has_active_header: attached active_header
+		do
+			if attached active_header as l_header then
+				Result := needed_blocks (l_header.size).as_integer_32
+			end
+		end
 
 	unarchived_blocks: INTEGER
 			-- How many blocks have been unarchived so far
@@ -53,7 +65,6 @@ feature -- Unarchiving
 			no_unarchiving_in_progress: unarchiving_finished
 		do
 			active_header := a_header
-			unarchiving_finished := False
 			unarchived_blocks := 0
 			do_internal_initialization
 		ensure

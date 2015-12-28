@@ -33,7 +33,6 @@ feature -- Output
 				if remaining_bytes <= {TAR_CONST}.tar_block_size.as_natural_64 then
 					-- Last block
 					l_file.put_managed_pointer (p, pos, remaining_bytes.as_integer_32)
-					unarchiving_finished := True
 					finalize_file
 				else
 					-- Standard block
