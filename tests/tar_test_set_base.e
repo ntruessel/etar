@@ -55,4 +55,15 @@ feature {NONE} -- Utilites
 			end
 		end
 
+	needed_blocks (n: INTEGER): INTEGER
+			-- Indicate how many blocks are needed to represent `n' bytes
+		require
+			non_negative_bytes: n >= 0
+		do
+			Result := (n + {TAR_CONST}.tar_block_size - 1) // {TAR_CONST}.tar_block_size
+		ensure
+			bytes_fit: n <= Result * {TAR_CONST}.tar_block_size
+			smallest_fit: (Result - 1) * {TAR_CONST}.tar_block_size < n
+		end
+
 end
