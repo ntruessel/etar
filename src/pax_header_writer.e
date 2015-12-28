@@ -60,12 +60,12 @@ feature -- Output
 			create l_ustar_writer
 
 			if attached active_header as l_ustar_header then
-				if attached pax_archivable as l_pax_archivable then
+				i := 0
 
+				if attached pax_archivable as l_pax_archivable then
 						-- Pax header
 					l_ustar_writer.set_active_header (l_pax_archivable.header)
 					from
-						i := 0
 					until
 						l_ustar_writer.finished_writing
 					loop
@@ -77,10 +77,10 @@ feature -- Output
 					l_pax_archivable.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
 					i := i + l_pax_archivable.required_blocks
 
-						-- Ustar header
-					l_ustar_writer.set_active_header (l_ustar_header)
-					l_ustar_writer.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
 				end
+					-- Ustar header
+				l_ustar_writer.set_active_header (l_ustar_header)
+				l_ustar_writer.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
 			else
 				-- Unreachable (precondition)
 			end
