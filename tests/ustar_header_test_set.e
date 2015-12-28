@@ -11,7 +11,7 @@ class
 	USTAR_HEADER_TEST_SET
 
 inherit
-	EQA_TEST_SET
+	TAR_TEST_SET_BASE
 
 feature -- Internal checks
 
@@ -43,7 +43,7 @@ feature -- Test writing methods
 			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
-			assert ("correct output content", compare_block_special (easy_header_blob, output))
+			assert ("correct output content", compare_special (easy_header_blob, output))
 		end
 
 	test_link_header_write
@@ -64,7 +64,7 @@ feature -- Test writing methods
 			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
-			assert ("correct output content", compare_block_special (link_header_blob, output))
+			assert ("correct output content", compare_special (link_header_blob, output))
 		end
 
 	test_devnode_header_write
@@ -85,7 +85,7 @@ feature -- Test writing methods
 			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
-			assert ("correct output content", compare_block_special (devnode_header_blob, output))
+			assert ("correct output content", compare_special (devnode_header_blob, output))
 		end
 
 	test_split_header_write
@@ -106,7 +106,7 @@ feature -- Test writing methods
 			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
-			assert ("correct output content", compare_block_special (split_header_blob, output))
+			assert ("correct output content", compare_special (split_header_blob, output))
 		end
 
 feature -- Test parsing methods
@@ -181,37 +181,6 @@ feature -- Test parsing methods
 			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
 			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
 			assert ("headers match", unit_under_test.parsed_header ~ split_header)
-		end
-
-feature {NONE} -- Test utils
-
-	compare_block_special (expected, actual: SPECIAL[CHARACTER_8]): BOOLEAN
-			-- Compare first {TAR_CONST}.tar_block_size bytes of `expected` to `actual` and return whether they are equal.
-			-- If they are not equal print all differences found
-		require
-			expected_size: expected.count >= {TAR_CONST}.tar_block_size
-			actual_size: actual.count >= {TAR_CONST}.tar_block_size
-		local
-			i: INTEGER
-		do
-			from
-				i := 0
-				Result := true
-			until
-				i >= {TAR_CONST}.tar_block_size
-			loop
-				if expected[i] /= actual[i] then
-					io.put_string ("Missmatch at byte ")
-					io.put_integer (i)
-					io.put_string (" expected: ")
-					io.put_character (expected[i])
-					io.put_string (" actual: ")
-					io.put_character (actual[i])
-					io.new_line
-					Result := False
-				end
-				i := i + 1
-			end
 		end
 
 feature {NONE} -- Data - easy

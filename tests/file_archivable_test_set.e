@@ -11,7 +11,7 @@ class
 	FILE_ARCHIVABLE_TEST_SET
 
 inherit
-	EQA_TEST_SET
+	TAR_TEST_SET_BASE
 
 feature -- Test routines
 
@@ -24,7 +24,7 @@ feature -- Test routines
 		do
 			create {USTAR_HEADER_WRITER} header_writer
 			create unit_under_test.make (easy_file)
-			
+
 			header_writer.set_active_header (unit_under_test.header)
 			p := header_writer.write_to_new_managed_pointer
 			p.append (unit_under_test.write_to_new_managed_pointer)
@@ -32,37 +32,7 @@ feature -- Test routines
 
 			assert ("Correct size", p.count = 2 * {TAR_CONST}.tar_block_size)
 
-			assert ("Correct content", compare_block_special (easy_file_blob, p.read_special_character_8 (0, p.count)))
-		end
-
-feature {NONE} -- Utilities
-
-	compare_block_special (expected, actual: SPECIAL[CHARACTER_8]): BOOLEAN
-			-- Compare all bytes of `expected` to `actual` and return whether they are equal.
-			-- If they are not equal print all differences found
-		require
-			same_size: expected.count = actual.count
-		local
-			i: INTEGER
-		do
-			from
-				i := 0
-				Result := true
-			until
-				i >= expected.count
-			loop
-				if expected[i] /= actual[i] then
-					io.put_string ("Missmatch at byte ")
-					io.put_integer (i)
-					io.put_string (" expected: ")
-					io.put_character (expected[i])
-					io.put_string (" actual: ")
-					io.put_character (actual[i])
-					io.new_line
-					Result := False
-				end
-				i := i + 1
-			end
+			assert ("Correct content", compare_special (easy_file_blob, p.read_special_character_8 (0, p.count)))
 		end
 
 feature {NONE} -- Data - easy

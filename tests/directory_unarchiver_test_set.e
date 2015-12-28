@@ -11,7 +11,7 @@ class
 	DIRECTORY_UNARCHIVER_TEST_SET
 
 inherit
-	EQA_TEST_SET
+	TAR_TEST_SET_BASE
 	redefine
 		on_prepare
 	end

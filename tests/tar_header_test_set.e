@@ -11,7 +11,7 @@ class
 	TAR_HEADER_TEST_SET
 
 inherit
-	EQA_TEST_SET
+	TAR_TEST_SET_BASE
 
 feature -- Test routines
 
