@@ -27,8 +27,10 @@ feature {NONE} -- Utilites
 				i >= expected.count
 			loop
 				if expected[i] /= actual[i] then
-					io.put_string ("Missmatch at byte ")
-					io.put_integer (i)
+					io.put_string ("Missmatch in block: ")
+					io.put_integer (i // {TAR_CONST}.tar_block_size)
+					io.put_string (" byte: ")
+					io.put_integer (i \\ {TAR_CONST}.tar_block_size)
 					io.put_string (" expected: ")
 					io.put_string (printable_character_representation (expected[i]))
 					io.put_string (" actual: ")
