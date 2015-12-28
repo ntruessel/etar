@@ -34,8 +34,9 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Indicates how many blocks are needed to write `active_header'
 		do
-			if attached pax_payload as l_pax_payload then
-				Result := 2 + needed_blocks (l_pax_payload.count)
+			if attached pax_archivable as l_pax_archivable then
+					-- FIXME: Relies on ustar_writer implemenation (exploits that both headers are the same size)
+				Result := 2 * ustar_writer.required_blocks + l_pax_archivable.required_blocks
 			else
 				Result := ustar_writer.required_blocks
 			end
@@ -56,9 +57,29 @@ feature -- Output
 			i: INTEGER
 			l_ustar_writer: USTAR_HEADER_WRITER
 		do
-			if attached active_header as l_ustar_header then
-				if attached pax_header as l_pax_header and attached pax_payload as l_pax_payload then
+			create l_ustar_writer
 
+			if attached active_header as l_ustar_header then
+				if attached pax_archivable as l_pax_archivable then
+
+						-- Pax header
+					l_ustar_writer.set_active_header (l_pax_archivable.header)
+					from
+						i := 0
+					until
+						l_ustar_writer.finished_writing
+					loop
+						l_ustar_writer.write_block_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
+						i := i + 1
+					end
+
+						-- Pax payload
+					l_pax_archivable.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
+					i := i + l_pax_archivable.required_blocks
+
+						-- Ustar header
+					l_ustar_writer.set_active_header (l_ustar_header)
+					l_ustar_writer.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
 				end
 			else
 				-- Unreachable (precondition)
@@ -68,13 +89,13 @@ feature -- Output
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write next block to `p', starting at `pos'
 		do
-			if attached pax_header as l_pax_header and attached pax_payload as l_pax_payload then
+			if attached pax_archivable as l_pax_archivable then
 				if written_blocks = 0 then
-					-- write pax header
-					ustar_writer.set_active_header (l_pax_header)
+						-- write pax header
+					ustar_writer.set_active_header (l_pax_archivable.header)
 					ustar_writer.write_block_to_managed_pointer (p, a_pos)
-				elseif written_blocks = required_blocks - 2 then
-					-- write (modified) ustar header
+				elseif written_blocks = required_blocks - 1 then
+						-- write (modified) ustar header
 					if attached active_header as l_ustar_header then
 						ustar_writer.set_active_header (l_ustar_header)
 						ustar_writer.write_block_to_managed_pointer (p, a_pos)
@@ -82,20 +103,11 @@ feature -- Output
 						-- Unreachable (precondition)
 					end
 				else
-					-- write pax payload
-
-						-- fill with NUL
-					p.put_special_character_8 (create {SPECIAL [CHARACTER_8]}.make_filled ('%U', {TAR_CONST}.tar_block_size), 0, a_pos, {TAR_CONST}.tar_block_size)
-
-						-- put next payload block
-					p.put_special_character_8 (l_pax_payload.area, (written_blocks - 1) * {TAR_CONST}.tar_block_size, a_pos,
-								{TAR_CONST}.tar_block_size.min (l_pax_payload.count - (written_blocks - 1) * {TAR_CONST}.tar_block_size))
+						-- write pax payload
+					l_pax_archivable.write_block_to_managed_pointer (p, a_pos)
 				end
 			else
-				if attached active_header as l_ustar_header then
-					ustar_writer.write_block_to_managed_pointer (p, a_pos)
-				end
-
+				ustar_writer.write_block_to_managed_pointer (p, a_pos)
 			end
 			written_blocks := written_blocks + 1
 		end
@@ -108,18 +120,16 @@ feature {NONE} -- Implementation
 	prepare_header
 			-- Prepare `active_header' after it was set
 		local
-			l_pax_payload: STRING_8
-			l_pax_header: TAR_HEADER
+			l_pax_archivable: PAX_ARCHIVABLE
 		do
 			if attached active_header as l_ustar_header then
 				if not ustar_writer.can_write (l_ustar_header) then
-					create l_pax_payload.make_empty
-					pax_payload := l_pax_payload
+					create l_pax_archivable.make_empty
 
 						-- Identify problem fields, write them to payload and simplify ustar header
 					if not ustar_writer.filename_fits (l_ustar_header) then
 							-- put filename in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.name_pax_key, unify_utf_8_path (l_ustar_header.filename))
+						l_pax_archivable.put ({TAR_HEADER_CONST}.name_pax_key, unify_utf_8_path (l_ustar_header.filename))
 
 							-- simplify filename
 						l_ustar_header.set_filename (create {PATH}.make_from_string (
@@ -129,7 +139,7 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.user_id_fits (l_ustar_header) then
 							-- put userid in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.uid_pax_key, l_ustar_header.user_id.out)	-- pax takes decimal numbers
+						l_pax_archivable.put ({TAR_HEADER_CONST}.uid_pax_key, l_ustar_header.user_id.out)	-- pax takes decimal numbers
 
 							-- simplify userid
 						l_ustar_header.set_user_id (0)
@@ -137,7 +147,7 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.group_id_fits (l_ustar_header) then
 							-- put groupid in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.gid_pax_key, l_ustar_header.group_id.out)	-- pax takes decimal numbers
+						l_pax_archivable.put ({TAR_HEADER_CONST}.gid_pax_key, l_ustar_header.group_id.out)	-- pax takes decimal numbers
 
 							-- simplify groupid
 						l_ustar_header.set_group_id (0)
@@ -145,7 +155,7 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.size_fits (l_ustar_header) then
 							-- put size in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.size_pax_key, l_ustar_header.size.out) 		-- pax takes decimal numbers
+						l_pax_archivable.put ({TAR_HEADER_CONST}.size_pax_key, l_ustar_header.size.out) 		-- pax takes decimal numbers
 
 							-- simplify size
 						l_ustar_header.set_size (0)
@@ -153,7 +163,7 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.mtime_fits (l_ustar_header) then
 							-- put mtime in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.mtime_pax_key, l_ustar_header.mtime.out)	-- pax takes decimal numbers
+						l_pax_archivable.put ({TAR_HEADER_CONST}.mtime_pax_key, l_ustar_header.mtime.out)	-- pax takes decimal numbers
 
 							-- simplify mtime
 						l_ustar_header.set_mtime (0)
@@ -161,7 +171,7 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.linkname_fits (l_ustar_header) then
 							-- put linkname in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.linkname_pax_key, unify_utf_8_path (l_ustar_header.linkname))
+						l_pax_archivable.put ({TAR_HEADER_CONST}.linkname_pax_key, unify_utf_8_path (l_ustar_header.linkname))
 
 							-- simplify linkname
 						l_ustar_header.set_linkname (create {PATH}.make_from_string (
@@ -170,7 +180,7 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.user_name_fits (l_ustar_header) then
 							-- put username in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.uname_pax_key, l_ustar_header.user_name)
+						l_pax_archivable.put ({TAR_HEADER_CONST}.uname_pax_key, l_ustar_header.user_name)
 
 							-- simplify username
 						l_ustar_header.set_user_name (l_ustar_header.user_name.head ({TAR_HEADER_CONST}.uname_length))
@@ -178,26 +188,15 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.group_name_fits (l_ustar_header) then
 							-- put groupname in pax header
-						pax_payload_put ({TAR_HEADER_CONST}.gname_pax_key, l_ustar_header.group_name)
+						l_pax_archivable.put ({TAR_HEADER_CONST}.gname_pax_key, l_ustar_header.group_name)
 
 							-- simplify groupname
 						l_ustar_header.set_group_name (l_ustar_header.group_name.head ({TAR_HEADER_CONST}.gname_length))
 					end
 
-						-- Generate pax header
-					create l_pax_header.make
-
-					l_pax_header.set_filename (create {PATH}.make_from_string ({TAR_CONST}.pax_header_filename))
-					l_pax_header.set_user_id ({TAR_CONST}.pax_header_uid)
-					l_pax_header.set_group_id ({TAR_CONST}.pax_header_gid)
-					l_pax_header.set_mode ({TAR_CONST}.pax_header_mode)
-					l_pax_header.set_size (l_pax_payload.count.as_natural_64)
-
-					pax_header := l_pax_header
-
+					pax_archivable := l_pax_archivable
 				else
-					pax_header := Void
-					pax_payload := Void
+					pax_archivable := Void
 					ustar_writer.set_active_header (l_ustar_header)
 				end
 			else
@@ -205,46 +204,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	pax_payload_put (a_key: STRING_8; a_value: STRING_8)
-			-- Put `a_entry' in `pax_payload'
-			-- Entries are of the form: length key=value%N
-			-- where length denotes the length of the whole entry including length itself and %N
-
-		require
-			has_pax_payload: attached pax_payload
-		local
-			l_entry_length: INTEGER
-		do
-			if attached pax_payload as l_pax_payload then
-
-					-- Calculate the length part of the entry
-				from
-					l_entry_length := a_key.count + a_value.count + 3	-- Three extra characters
-				until
-					l_entry_length = a_key.count + a_value.count + 3 + l_entry_length.out.count
-				loop
-					l_entry_length := a_key.count + a_value.count + 3 + l_entry_length.out.count
-				end
-
-					-- Put entry
-				l_pax_payload.append (l_entry_length.out)
-				l_pax_payload.append_character (' ')
-				l_pax_payload.append (a_key)
-				l_pax_payload.append_character ('=')
-				l_pax_payload.append (a_value)
-				l_pax_payload.append_character ('%N')
-
-			end
-		end
-
-	pax_payload: detachable STRING_8
-			-- If `active_header' does not fit in a single ustar header, this contains
-			-- the additional payload for the pax header.
-			-- These are entries of the form: length key=value%N
-			-- where length denotes the length of the whole entry including length itself and %N
-
-	pax_header: detachable TAR_HEADER
-			-- The header for the pax payload
+	pax_archivable: detachable PAX_ARCHIVABLE
 
 	needed_blocks (n: INTEGER): INTEGER
 			-- Indicate how many blocks are needed to represent `n' bytes
@@ -258,8 +218,6 @@ feature {NONE} -- Implementation
 		end
 
 invariant
-	both_pax_header_and_payload: attached pax_header = attached pax_payload
-	pax_header_writable: attached pax_header as l_header implies ustar_writer.can_write (l_header)
 	active_header_writable: attached active_header as l_header implies ustar_writer.can_write (l_header)
 
 end
