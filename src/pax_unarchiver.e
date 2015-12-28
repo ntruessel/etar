@@ -129,6 +129,7 @@ feature -- Unarchiving
 			else
 				-- Unreachable (precondition)
 			end
+			unarchived_blocks := unarchived_blocks + 1
 		end
 
 feature {NONE} -- Implementation
