@@ -25,9 +25,9 @@ feature -- Internal tests
 			assert ("correct long filename template size", long_filename_header_blob.count = {TAR_CONST}.tar_block_size * 3)
 		end
 
-feature -- Test routines
+feature -- Test writing
 
-	test_pax_header_ustar
+	test_pax_write_ustar
 			-- Run pax header writer with ustar examples
 		local
 			unit_under_test: PAX_HEADER_WRITER
@@ -79,7 +79,7 @@ feature -- Test routines
 			assert ("correct output content (split)", compare_special (split_header_blob, output))
 		end
 
-	test_pax_header_long_filename
+	test_pax_write_long_filename
 			-- Test pax header with too long filename
 		local
 			unit_under_test: PAX_HEADER_WRITER
@@ -96,6 +96,75 @@ feature -- Test routines
 
 			assert ("correct output length", output.count = 3 * {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_special (long_filename_header_blob, output))
+		end
+
+feature -- Test parsing
+
+	test_pax_parser_ustar
+			-- Test pax parsing with ustar examples
+		local
+			unit_under_test: PAX_HEADER_PARSER
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+
+				-- easy
+			create p.make_from_pointer (easy_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block (easy)", unit_under_test.parsing_finished)
+			assert ("parsing successfull (easy)", unit_under_test.parsed_header /= Void)
+			assert ("headers match (easy)", unit_under_test.parsed_header ~ easy_header)
+
+				-- link
+			create p.make_from_pointer (link_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block (link)", unit_under_test.parsing_finished)
+			assert ("parsing successfull (link)", unit_under_test.parsed_header /= Void)
+			assert ("headers match (link)", unit_under_test.parsed_header ~ link_header)
+
+				-- devnode
+			create p.make_from_pointer (devnode_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block (devnode)", unit_under_test.parsing_finished)
+			assert ("parsing successfull (devnode)", unit_under_test.parsed_header /= Void)
+			assert ("headers match (devnode)", unit_under_test.parsed_header ~ devnode_header)
+
+				-- split
+			create p.make_from_pointer (split_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block (split)", unit_under_test.parsing_finished)
+			assert ("parsing successfull (split)", unit_under_test.parsed_header /= Void)
+			assert ("headers match (split)", unit_under_test.parsed_header ~ split_header)
+		end
+
+	test_pax_parser_long_filename
+			-- Test pax header parser with too long filename
+		local
+			unit_under_test: PAX_HEADER_PARSER
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+
+			create p.make_from_pointer (long_filename_header_blob.base_address, 3 * {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+			assert ("Not finished yet", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, {TAR_CONST}.tar_block_size)
+			assert ("Not finished yet", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, {TAR_CONST}.tar_block_size * 2)
+			assert ("Finished after 3 blocks", unit_under_test.parsing_finished)
+			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
+			assert ("headers match", unit_under_test.parsed_header ~ long_filename_header)
 		end
 
 feature {NONE} -- Data (ustar) - easy
