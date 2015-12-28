@@ -57,15 +57,56 @@ feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Writes next payload block to `p', starting at `a_pos'
+		local
+			l_remaining_bytes: INTEGER
 		do
-			-- TODO
+			l_remaining_bytes := payload.count - written_blocks * {TAR_CONST}.tar_block_size
+			p.put_special_character_8 (payload.area, 0, a_pos, l_remaining_bytes.min ({TAR_CONST}.tar_block_size))
+
+			if l_remaining_bytes <= {TAR_CONST}.tar_block_size then
+				-- Fill remaining space of block with '%U'
+				pad (p, a_pos + l_remaining_bytes, {TAR_CONST}.tar_block_size - l_remaining_bytes)
+			end
+
+			written_blocks := written_blocks + 1
 		end
 
 	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Writes whole payload to `p', starting at `a_pos'
 		do
-			-- TODO
+			p.put_special_character_8 (payload.area, 0, a_pos, payload.count)
+
+			-- pad to full block
+			pad (p, a_pos + payload.count, required_blocks * {TAR_CONST}.tar_block_size - payload.count)
 		end
+
+feature -- Modification
+
+	put (a_key: STRING_8; a_value: STRING_8)
+			-- Put `a_entry' to `payload'
+		require
+			noting_written: written_blocks = 0
+		local
+			l_entry_length: INTEGER
+		do
+				-- Calculate the length part of the entry
+			from
+				l_entry_length := a_key.count + a_value.count + 3	-- Three extra characters: ' ', '=', '%N'
+			until
+				l_entry_length = a_key.count + a_value.count + 3 + l_entry_length.out.count
+			loop
+				l_entry_length := a_key.count + a_value.count + 3 + l_entry_length.out.count
+			end
+
+				-- Put entry
+			payload.append (l_entry_length.out)
+			payload.append_character (' ')
+			payload.append (a_key)
+			payload.append_character ('=')
+			payload.append (a_value)
+			payload.append_character ('%N')
+		end
+
 
 feature {NONE} -- Implementation
 
@@ -75,5 +116,8 @@ feature {NONE} -- Implementation
 			-- length key=value%N
 			-- where length is the length of the whole line including
 			-- length itself and the %N character
+
+invariant
+--	header_is_ustar: {USTAR_HEADER_WRITER}.can_write (header)
 
 end
