@@ -51,6 +51,7 @@ feature -- Status
 			Result.set_group_id ({TAR_CONST}.pax_header_gid)
 			Result.set_mode ({TAR_CONST}.pax_header_mode)
 			Result.set_size (payload.count.as_natural_64)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_pax_extended)
 		end
 
 feature -- Output
