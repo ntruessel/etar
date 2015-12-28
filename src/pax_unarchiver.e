@@ -118,6 +118,12 @@ feature -- Unarchiving
 				-- Unreachable (precondition)
 			end
 			unarchived_blocks := unarchived_blocks + 1
+
+			if unarchiving_finished then
+				if parsing_state /= ps_length then
+					report_error ("Parsing not finished, current key: " + active_key)
+				end
+			end
 		end
 
 feature {NONE} -- Implementation
@@ -234,5 +240,8 @@ invariant
 	active_length_is_natural: active_length.is_empty or active_length.is_natural
 	active_key_has_no_equal_sign: not active_key.has ('=')
 	no_newline_parsing: not active_length.has ('%N') and not active_key.has ('%N') and not active_value.has ('%N')
+	length_state_active_fields: parsing_state = ps_length implies (active_key.is_empty and active_value.is_empty)
+	key_state_active_fields: parsing_state = ps_key implies (not active_length.is_empty and active_value.is_empty)
+	value_state_active_fields: parsing_state = ps_value implies (not active_length.is_empty and not active_key.is_empty)
 
 end
