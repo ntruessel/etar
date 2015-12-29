@@ -35,8 +35,8 @@ feature -- Parsing
 
 					handle_first_header_block (block, a_pos)
 
-				when ps_pax_payload then
-					handle_pax_payload_block (block, a_pos)
+				when ps_extended_payload then
+					handle_extended_payload_block (block, a_pos)
 
 				when ps_second_header then
 					handle_second_header_block (block, a_pos)
@@ -60,10 +60,13 @@ feature {NONE} -- Implementation
 	ps_first_header: INTEGER = 0
 			-- parsing state: next block to be parsed belongs to pax header
 
-	ps_pax_payload: INTEGER = 1
+	ps_global_payload: INTEGER = 1
+			-- parsint state: next block to be parsed belongs to global pax payload
+
+	ps_extended_payload: INTEGER = 2
 			-- parsing state: next block to be parsed belongs to pax payload
 
-	ps_second_header: INTEGER = 2
+	ps_second_header: INTEGER = 3
 			-- parsing state: next block to be parsed belongs to ustar header
 
 	handle_first_header_block (block: MANAGED_POINTER; a_pos: INTEGER)
@@ -90,7 +93,7 @@ feature {NONE} -- Implementation
 						if pax_payload_unarchiver.can_unarchive (l_first_header) then
 								-- pax header
 							pax_payload_unarchiver.initialize (l_first_header)
-							parsing_state := ps_pax_payload
+							parsing_state := ps_extended_payload
 						else
 								-- ustar header
 							last_parsed_header := l_first_header
@@ -105,10 +108,10 @@ feature {NONE} -- Implementation
 
 		end
 
-	handle_pax_payload_block (block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `block', starting from `a_pos', treating it as a pax payload block
+	handle_extended_payload_block (block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Handle `block', starting from `a_pos', treating it as a extended (pax) payload block
 		require
-			correct_parsing_state: parsing_state = ps_pax_payload
+			correct_parsing_state: parsing_state = ps_extended_payload
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
 			non_negative_length: a_pos >= 0
 		do
