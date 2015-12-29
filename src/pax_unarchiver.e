@@ -109,7 +109,7 @@ feature -- Unarchiving
 					when ps_value then
 						handle_value_character (c)
 					else
-						report_error ("Unknown parser state")
+						-- Unreachable (invariant)
 					end
 
 					i := i + 1
@@ -166,6 +166,7 @@ feature {NONE} -- parsing finite state machine
 			-- Handle `c', treating it as a length character
 		require
 			no_errors: not has_error
+			correct_state: parsing_state = ps_length
 		do
 			inspect c
 			when ' ' then
@@ -191,6 +192,7 @@ feature {NONE} -- parsing finite state machine
 			-- Handle `c', treating it as a key character
 		require
 			no_errors: not has_error
+			correct_state: parsing_state = ps_key
 		do
 			inspect c
 			when '=' then
@@ -210,6 +212,7 @@ feature {NONE} -- parsing finite state machine
 			-- Handle `c', treating it as a value character
 		require
 			no_errors: not has_error
+			correct_state: parsing_state = ps_value
 		do
 			inspect c
 			when '%N' then
@@ -243,5 +246,6 @@ invariant
 	length_state_active_fields: parsing_state = ps_length implies (active_key.is_empty and active_value.is_empty)
 	key_state_active_fields: parsing_state = ps_key implies (not active_length.is_empty and active_value.is_empty)
 	value_state_active_fields: parsing_state = ps_value implies (not active_length.is_empty and not active_key.is_empty)
+	correct_state: parsing_state = ps_length or parsing_state = ps_key or parsing_state = ps_value
 
 end
