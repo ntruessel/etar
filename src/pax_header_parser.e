@@ -107,6 +107,9 @@ feature {NONE} -- Implementation
 						else
 								-- ustar header
 							last_parsed_header := l_first_header
+
+							apply_unarchiver_header_updates (global_payload_unarchiver)
+
 							parsing_state := ps_first_header
 							parsing_finished := True
 						end
@@ -201,70 +204,10 @@ feature {NONE} -- Implementation
 					if attached ustar_parser.parsed_header as l_ustar_header then
 
 							-- Modify header according to pax payload
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.name_pax_key)
-						if l_update_value /= Void then
-							l_ustar_header.set_filename (create {PATH}.make_from_string (l_update_value))
-						end
-
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.uid_pax_key)
-						if l_update_value /= Void then
-							if l_update_value.is_natural_32 then
-								l_ustar_header.set_user_id (l_update_value.to_natural_32)
-							else
-								report_error ("Parsed uid is not a valid 32bit number: " + l_update_value)
-							end
-						end
-
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.gid_pax_key)
-						if l_update_value /= Void then
-							if l_update_value.is_natural_32 then
-								l_ustar_header.set_group_id (l_update_value.to_natural_32)
-							else
-								report_error ("Parsed gid is not a valid 32bit number: " + l_update_value)
-							end
-						end
-
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.size_pax_key)
-						if l_update_value /= Void then
-								-- PAX time format: <epoch>[.<millis>], millis is optional
-
-								-- Keep <epoch> only
-							if l_update_value.index_of ('.', 1) > 0 then
-								l_update_value := l_update_value.head (l_update_value.index_of ('.', 1) - 1)
-							end
-
-							if l_update_value.is_natural_64 then
-								l_ustar_header.set_size (l_update_value.to_natural_64)
-							else
-								report_error ("Parsed size is not a valid 64bit number: " + l_update_value)
-							end
-						end
-
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.mtime_pax_key)
-						if l_update_value /= Void then
-							if l_update_value.is_natural_64 then
-								l_ustar_header.set_mtime (l_update_value.to_natural_64)
-							else
-								report_error ("Parsed mtime is not a valid 64bit number: " + l_update_value)
-							end
-						end
-
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.linkname_pax_key)
-						if l_update_value /= Void then
-							l_ustar_header.set_linkname (create {PATH}.make_from_string (l_update_value))
-						end
-
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.uname_pax_key)
-						if l_update_value /= Void then
-							l_ustar_header.set_user_name (l_update_value)
-						end
-
-						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.gname_pax_key)
-						if l_update_value /= Void then
-							l_ustar_header.set_group_name (l_update_value)
-						end
-
 						last_parsed_header := l_ustar_header
+
+						apply_unarchiver_header_updates (global_payload_unarchiver)
+						apply_unarchiver_header_updates (extended_payload_unarchiver)
 
 						parsing_state := ps_first_header
 						parsing_finished := True
@@ -273,5 +216,90 @@ feature {NONE} -- Implementation
 					end
 				end
 			end
+		end
+
+	apply_unarchiver_header_updates (a_pax_unarchiver: PAX_UNARCHIVER)
+			-- Apply all updates that `a_pax_unarchiver' contains to `active_header'
+		require
+			has_active_header: last_parsed_header /= Void
+			no_errors: not has_error
+			correct_parsing_state: parsing_state = ps_first_header or parsing_state = ps_second_header
+		local
+			l_update_value: detachable READABLE_STRING_8
+		do
+			if attached last_parsed_header as l_header then
+					-- filename
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.name_pax_key)
+				if l_update_value /= Void then
+					l_header.set_filename (create {PATH}.make_from_string (l_update_value))
+				end
+
+					-- user id
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.uid_pax_key)
+				if l_update_value /= Void then
+					if l_update_value.is_natural_32 then
+						l_header.set_user_id (l_update_value.to_natural_32)
+					else
+						report_error ("Parsed uid is not a valid 32bit number: " + l_update_value)
+					end
+				end
+
+					-- group id
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.gid_pax_key)
+				if l_update_value /= Void then
+					if l_update_value.is_natural_32 then
+						l_header.set_group_id (l_update_value.to_natural_32)
+					else
+						report_error ("Parsed gid is not a valid 32bit number: " + l_update_value)
+					end
+				end
+
+					-- size
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.size_pax_key)
+				if l_update_value /= Void then
+					if l_update_value.is_natural_64 then
+						l_header.set_size (l_update_value.to_natural_64)
+					else
+						report_error ("Parsed size is not a valid 64bit number: " + l_update_value)
+					end
+				end
+
+					-- mtime
+					-- PAX time format: <epoch>[.<millis>], millis is optional
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.mtime_pax_key)
+				if l_update_value /= Void then
+						-- Keep <epoch> only
+					if l_update_value.index_of ('.', 1) > 0 then
+						l_update_value := l_update_value.head (l_update_value.index_of ('.', 1) - 1)
+					end
+
+					if l_update_value.is_natural_64 then
+						l_header.set_mtime (l_update_value.to_natural_64)
+					else
+						report_error ("Parsed mtime is not a valid 64bit number: " + l_update_value)
+					end
+				end
+
+					-- linkname
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.linkname_pax_key)
+				if l_update_value /= Void then
+					l_header.set_linkname (create {PATH}.make_from_string (l_update_value))
+				end
+
+					-- user name
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.uname_pax_key)
+				if l_update_value /= Void then
+					l_header.set_user_name (l_update_value)
+				end
+
+					-- group name
+				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.gname_pax_key)
+				if l_update_value /= Void then
+					l_header.set_group_name (l_update_value)
+				end
+			else
+				-- Unreachable (precondition)
+			end
+
 		end
 end
