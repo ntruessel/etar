@@ -47,37 +47,38 @@ feature -- Access: error
 			-- Error occurred?
 		do
 				--| Dbg Hint: comment next line to see all error messages.
-			Result := attached error_messages as lst and then not lst.is_empty
+			Result := not error_messages.is_empty
 			if not Result and parsing_finished then
 				Result := last_parsed_header = Void
 			end
 		end
 
-	reset_error
-			-- Reset errors.
-		do
-			error_messages := Void
-		ensure
-			has_no_error: not has_error
-		end
+	error_messages: LIST [READABLE_STRING_32]
+			-- Error messages.		
+
+feature {NONE} -- Error: Internal only
 
 	report_error (a_message: READABLE_STRING_GENERAL)
 			-- Report error message `a_message'.
-		local
-			lst: like error_messages
 		do
-			lst := error_messages
-			if lst = Void then
-				create {ARRAYED_LIST [READABLE_STRING_32]} lst.make (1)
-				error_messages := lst
-			end
-			lst.force (a_message.as_string_32)
+			error_messages.force (a_message.as_string_32)
 		ensure
 			has_error: has_error
 		end
 
-	error_messages: detachable LIST [READABLE_STRING_32]
-			-- Error messages.		
+	reset_error
+			-- Reset errors.
+		do
+			error_messages.wipe_out
+		ensure
+			has_no_error: not has_error
+		end
+
+	initialize_error
+			-- Initialize error handling structures
+		do
+			create {ARRAYED_LIST [READABLE_STRING_32]} error_messages.make (1)
+		end
 
 feature {NONE} -- Implementation
 

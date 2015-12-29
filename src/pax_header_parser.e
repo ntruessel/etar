@@ -9,9 +9,9 @@ class
 
 inherit
 	TAR_HEADER_PARSER
-	redefine
-		default_create
-	end
+		redefine
+			default_create
+		end
 
 feature {NONE} -- Initialization
 
@@ -21,6 +21,7 @@ feature {NONE} -- Initialization
 			create ustar_parser
 			create extended_payload_unarchiver
 			create global_payload_unarchiver
+			initialize_error
 --			parsing_state := ps_pax_header
 		end
 
@@ -85,12 +86,7 @@ feature {NONE} -- Implementation
 			ustar_parser.parse_block (block, a_pos)
 
 			if ustar_parser.has_error then
-				if attached ustar_parser.error_messages as l_errors then
-					across l_errors as it
-					loop
-						report_error (it.item)
-					end
-				end
+				error_messages.append (ustar_parser.error_messages)
 
 				report_error ("Parsing first header failed")
 			else
@@ -132,12 +128,7 @@ feature {NONE} -- Implementation
 				global_payload_unarchiver.unarchive_block (block, a_pos)
 
 				if global_payload_unarchiver.has_error then
-					if attached global_payload_unarchiver.error_messages as l_errors then
-						across l_errors as it
-						loop
-							report_error (it.item)
-						end
-					end
+					error_messages.append (global_payload_unarchiver.error_messages)
 
 					report_error ("Parsing global pax payload failed")
 				end
@@ -161,12 +152,7 @@ feature {NONE} -- Implementation
 				extended_payload_unarchiver.unarchive_block (block, a_pos)
 
 				if extended_payload_unarchiver.has_error then
-					if attached extended_payload_unarchiver.error_messages as l_errors then
-						across l_errors as it
-						loop
-							report_error (it.item)
-						end
-					end
+					error_messages.append (extended_payload_unarchiver.error_messages)
 
 					report_error ("Parsing extended pax payload failed")
 				end
@@ -190,12 +176,7 @@ feature {NONE} -- Implementation
 		do
 			ustar_parser.parse_block (block, a_pos)
 			if ustar_parser.has_error then
-				if attached ustar_parser.error_messages as l_errors then
-					across l_errors as it
-					loop
-						report_error (it.item)
-					end
-				end
+				error_messages.append (ustar_parser.error_messages)
 
 				report_error ("Parsing second header failed")
 			else

@@ -28,6 +28,8 @@ feature -- Initialization
 			create active_length.make (10)	-- sufficient for nearly all length values
 			create active_key.make (10)		-- sufficient for all pax defined keys
 			create active_value.make_empty	-- grows on demand after key is parsed
+
+			initialize_error
 		end
 
 feature -- Status
@@ -55,34 +57,35 @@ feature -- Access: error
 	has_error: BOOLEAN
 			-- Error occurred?
 		do
-			Result := attached error_messages as lst and then not lst.is_empty
+			Result := not error_messages.is_empty
+		end
+
+	error_messages: LIST [READABLE_STRING_32]
+			-- Error messages.		
+
+feature {NONE} -- Error: Internal only
+
+	report_error (a_message: READABLE_STRING_GENERAL)
+			-- Report error message `a_message'.
+		do
+			error_messages.force (a_message.as_string_32)
+		ensure
+			has_error: has_error
 		end
 
 	reset_error
 			-- Reset errors.
 		do
-			error_messages := Void
+			error_messages.wipe_out
 		ensure
 			has_no_error: not has_error
 		end
 
-	report_error (a_message: READABLE_STRING_GENERAL)
-			-- Report error message `a_message'.
-		local
-			lst: like error_messages
+	initialize_error
+			-- Initialize error handling structures
 		do
-			lst := error_messages
-			if lst = Void then
-				create {ARRAYED_LIST [READABLE_STRING_32]} lst.make (1)
-				error_messages := lst
-			end
-			lst.force (a_message.as_string_32)
-		ensure
-			has_error: has_error
+			create {ARRAYED_LIST [READABLE_STRING_32]} error_messages.make (1)
 		end
-
-	error_messages: detachable LIST [READABLE_STRING_32]
-			-- Error messages.
 
 feature -- Unarchiving
 
