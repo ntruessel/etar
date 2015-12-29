@@ -38,6 +38,9 @@ feature -- Status
 		do
 			Result := a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended or
 						a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global
+		ensure then
+			correct_result: Result = (a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended or
+											a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global)
 		end
 
 	get_value (a_key: STRING_8): detachable READABLE_STRING_8

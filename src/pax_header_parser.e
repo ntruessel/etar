@@ -19,7 +19,8 @@ feature {NONE} -- Initialization
 			-- Create new instance
 		do
 			create ustar_parser
-			create pax_payload_unarchiver
+			create extended_payload_unarchiver
+			create global_payload_unarchiver
 --			parsing_state := ps_pax_header
 		end
 
@@ -32,8 +33,10 @@ feature -- Parsing
 				inspect parsing_state
 				when ps_first_header then
 					parsing_finished := False
-
 					handle_first_header_block (block, a_pos)
+
+				when ps_global_payload then
+					handle_global_payload_block (block, a_pos)
 
 				when ps_extended_payload then
 					handle_extended_payload_block (block, a_pos)
@@ -51,8 +54,11 @@ feature {NONE} -- Implementation
 	ustar_parser: USTAR_HEADER_PARSER
 			-- Used to parse the headers
 
-	pax_payload_unarchiver: PAX_UNARCHIVER
-			-- Used to unarchive pax payload
+	global_payload_unarchiver: PAX_UNARCHIVER
+			-- Used to unarchive global pax payload
+
+	extended_payload_unarchiver: PAX_UNARCHIVER
+			-- Used to unarchive extended pax payload
 
 	parsing_state: INTEGER
 			-- In what parsing state are we currently? One of the following constants
@@ -90,9 +96,13 @@ feature {NONE} -- Implementation
 			else
 				if ustar_parser.parsing_finished then
 					if attached ustar_parser.parsed_header as l_first_header then
-						if pax_payload_unarchiver.can_unarchive (l_first_header) then
-								-- pax header
-							pax_payload_unarchiver.initialize (l_first_header)
+						if l_first_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global then
+								-- global header
+							global_payload_unarchiver.initialize (l_first_header)
+							parsing_state := ps_global_payload
+						elseif l_first_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended then
+								-- extended header
+							extended_payload_unarchiver.initialize (l_first_header)
 							parsing_state := ps_extended_payload
 						else
 								-- ustar header
@@ -108,32 +118,61 @@ feature {NONE} -- Implementation
 
 		end
 
-	handle_extended_payload_block (block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `block', starting from `a_pos', treating it as a extended (pax) payload block
+	handle_global_payload_block (block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Handle `block', starting from `a_pos', treating it as a global (pax) payload block
 		require
 			correct_parsing_state: parsing_state = ps_extended_payload
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
 			non_negative_length: a_pos >= 0
 		do
-			if not pax_payload_unarchiver.unarchiving_finished then
-				pax_payload_unarchiver.unarchive_block (block, a_pos)
+			if not global_payload_unarchiver.unarchiving_finished then
+				global_payload_unarchiver.unarchive_block (block, a_pos)
 
-				if pax_payload_unarchiver.has_error then
-					if attached pax_payload_unarchiver.error_messages as l_errors then
+				if global_payload_unarchiver.has_error then
+					if attached global_payload_unarchiver.error_messages as l_errors then
 						across l_errors as it
 						loop
 							report_error (it.item)
 						end
 					end
 
-					report_error ("Parsing pax payload failed")
+					report_error ("Parsing global pax payload failed")
 				end
 
-				if pax_payload_unarchiver.unarchiving_finished then
+				if global_payload_unarchiver.unarchiving_finished then
+					parsing_state := ps_first_header
+				end
+			else
+				report_error ("Remaining in global pax payload parsing stage, even though all payload is unarchived")
+			end
+		end
+
+	handle_extended_payload_block (block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Handle `block', starting from `a_pos', treating it as an extended (pax) payload block
+		require
+			correct_parsing_state: parsing_state = ps_extended_payload
+			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
+			non_negative_length: a_pos >= 0
+		do
+			if not extended_payload_unarchiver.unarchiving_finished then
+				extended_payload_unarchiver.unarchive_block (block, a_pos)
+
+				if extended_payload_unarchiver.has_error then
+					if attached extended_payload_unarchiver.error_messages as l_errors then
+						across l_errors as it
+						loop
+							report_error (it.item)
+						end
+					end
+
+					report_error ("Parsing extended pax payload failed")
+				end
+
+				if extended_payload_unarchiver.unarchiving_finished then
 					parsing_state := ps_second_header
 				end
 			else
-				report_error ("Remaining in pax payload parsing stage, even though all payload is unarchived")
+				report_error ("Remaining in extended pax payload parsing stage, even though all payload is unarchived")
 			end
 		end
 
@@ -162,12 +201,12 @@ feature {NONE} -- Implementation
 					if attached ustar_parser.parsed_header as l_ustar_header then
 
 							-- Modify header according to pax payload
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.name_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.name_pax_key)
 						if l_update_value /= Void then
 							l_ustar_header.set_filename (create {PATH}.make_from_string (l_update_value))
 						end
 
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.uid_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.uid_pax_key)
 						if l_update_value /= Void then
 							if l_update_value.is_natural_32 then
 								l_ustar_header.set_user_id (l_update_value.to_natural_32)
@@ -176,7 +215,7 @@ feature {NONE} -- Implementation
 							end
 						end
 
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.gid_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.gid_pax_key)
 						if l_update_value /= Void then
 							if l_update_value.is_natural_32 then
 								l_ustar_header.set_group_id (l_update_value.to_natural_32)
@@ -185,7 +224,7 @@ feature {NONE} -- Implementation
 							end
 						end
 
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.size_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.size_pax_key)
 						if l_update_value /= Void then
 								-- PAX time format: <epoch>[.<millis>], millis is optional
 
@@ -201,7 +240,7 @@ feature {NONE} -- Implementation
 							end
 						end
 
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.mtime_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.mtime_pax_key)
 						if l_update_value /= Void then
 							if l_update_value.is_natural_64 then
 								l_ustar_header.set_mtime (l_update_value.to_natural_64)
@@ -210,17 +249,17 @@ feature {NONE} -- Implementation
 							end
 						end
 
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.linkname_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.linkname_pax_key)
 						if l_update_value /= Void then
 							l_ustar_header.set_linkname (create {PATH}.make_from_string (l_update_value))
 						end
 
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.uname_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.uname_pax_key)
 						if l_update_value /= Void then
 							l_ustar_header.set_user_name (l_update_value)
 						end
 
-						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.gname_pax_key)
+						l_update_value := extended_payload_unarchiver.get_value ({TAR_HEADER_CONST}.gname_pax_key)
 						if l_update_value /= Void then
 							l_ustar_header.set_group_name (l_update_value)
 						end
