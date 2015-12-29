@@ -184,6 +184,13 @@ feature {NONE} -- Implementation
 
 						l_update_value := pax_payload_unarchiver.get_value ({TAR_HEADER_CONST}.size_pax_key)
 						if l_update_value /= Void then
+								-- PAX time format: <epoch>[.<millis>], millis is optional
+
+								-- Keep <epoch> only
+							if l_update_value.index_of ('.', 1) > 0 then
+								l_update_value := l_update_value.head (l_update_value.index_of ('.', 1) - 1)
+							end
+
 							if l_update_value.is_natural_64 then
 								l_ustar_header.set_size (l_update_value.to_natural_64)
 							else
