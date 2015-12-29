@@ -171,8 +171,6 @@ feature {NONE} -- Implementation
 			correct_parsing_state: parsing_state = ps_second_header
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
 			non_negative_length: a_pos >= 0
-		local
-			l_update_value: detachable READABLE_STRING_8
 		do
 			ustar_parser.parse_block (block, a_pos)
 			if ustar_parser.has_error then
