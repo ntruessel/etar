@@ -63,7 +63,7 @@ feature {NONE} -- Implementation
 			-- List the contents of `file'
 		local
 			block: MANAGED_POINTER
-			l_parser: USTAR_HEADER_PARSER
+			l_parser: PAX_HEADER_PARSER
 			i: NATURAL_64
 			l_needed_blocks: NATURAL_64
 		do
