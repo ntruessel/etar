@@ -36,11 +36,16 @@ feature {NONE} -- Initialization
 
 				-- Unarchivers
 			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (3)
-			unarchivers.extend (create {FILE_UNARCHIVER})
-			unarchivers.extend (create {DIRECTORY_UNARCHIVER})
---			unarchivers.extend (create {SKIP_UNARCHIVER})
 
 			Precursor
+
+				-- Add default unarchivers
+			add_unarchiver (create {FILE_UNARCHIVER})
+			add_unarchiver (create {DIRECTORY_UNARCHIVER})
+			add_unarchiver (create {SKIP_UNARCHIVER})
+
+				-- Error redirections
+			header_parser.register_redirector (Current, "Header parser")
 		end
 
 	make_unarchive (a_storage_backend: STORAGE_BACKEND)
@@ -86,12 +91,14 @@ feature -- Unarchiving
 			-- Add unarchiver `a_unarchiver' to `unarchivers'
 		do
 			unarchivers.force (a_unarchiver)
+			a_unarchiver.register_redirector (Current, a_unarchiver.name)
 		end
 
 	unarchive_next_entry
 			-- Unarchives the next entry
 		require
 			unarchiving_mode: mode = mode_unarchive
+			no_errors: not has_error
 		local
 			l_unarchiver: detachable UNARCHIVER
 		do
@@ -100,33 +107,44 @@ feature -- Unarchiving
 				storage_backend.read_block
 				if storage_backend.block_ready then
 					header_parser.parse_block (storage_backend.last_block, 0)
+				else
+					report_error ("Not enough blocks to parse header")
 				end
 			until
-				not storage_backend.block_ready or header_parser.parsing_finished or header_parser.has_error
+				header_parser.parsing_finished or has_error
 			loop
 				storage_backend.read_block
 				if storage_backend.block_ready then
 					header_parser.parse_block (storage_backend.last_block, 0)
+				else
+					report_error ("Not enough blocks to parse header")
 				end
 			end
 
-			if attached header_parser.parsed_header as l_header then
-				l_unarchiver := matching_unarchiver (l_header)
-				if l_unarchiver /= Void then
-						-- Parse payload
-					from
-						l_unarchiver.initialize (l_header)
-					until
-						storage_backend.block_ready or l_unarchiver.unarchiving_finished
-					loop
-						storage_backend.read_block
-						if storage_backend.block_ready then
-							l_unarchiver.unarchive_block (storage_backend.last_block, 0)
+			if not has_error then
+				if attached header_parser.parsed_header as l_header then
+					l_unarchiver := matching_unarchiver (l_header)
+					if l_unarchiver /= Void then
+							-- Parse payload
+						from
+							l_unarchiver.initialize (l_header)
+						until
+							has_error or l_unarchiver.unarchiving_finished
+						loop
+							storage_backend.read_block
+							if storage_backend.block_ready then
+								l_unarchiver.unarchive_block (storage_backend.last_block, 0)
+							else
+								report_error ("Not enough blocks for payload")
+							end
 						end
+					else
+						report_error ("No unarchiver found")
 					end
+				else
+						-- unreachable (TAR_HEADER_PARSER invariant)
+					report_error ("Failed to parse header")
 				end
-			else
-				-- Error
 			end
 		end
 
