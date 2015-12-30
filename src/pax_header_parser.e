@@ -24,6 +24,11 @@ feature {NONE} -- Initialization
 --			parsing_state := ps_pax_header
 
 			Precursor
+
+				-- Redirect error messages
+			ustar_parser.register_redirector (Current, "ustar parser")
+			extended_payload_unarchiver.register_redirector (Current, "extended payload unarchiver")
+			global_payload_unarchiver.register_redirector (Current, "global payload unarchiver")
 		end
 
 feature -- Parsing
@@ -83,14 +88,11 @@ feature {NONE} -- Implementation
 			correct_parsing_state: parsing_state = ps_first_header
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
 			non_negative_length: a_pos >= 0
+			no_errors: not has_error
 		do
 			ustar_parser.parse_block (block, a_pos)
 
-			if ustar_parser.has_error then
-				error_messages.append (ustar_parser.error_messages)
-
-				report_error ("Parsing first header failed")
-			else
+			if not has_error then
 				if ustar_parser.parsing_finished then
 					if attached ustar_parser.parsed_header as l_first_header then
 						if l_first_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global then
@@ -111,9 +113,12 @@ feature {NONE} -- Implementation
 							parsing_finished := True
 						end
 					else
+							-- Unreachable (TAR_HEADER_PARSER invariant)
 						report_error ("Parsing first header failed")
 					end
 				end
+			else
+				report_error ("Parsing first header failed")
 			end
 
 		end
@@ -124,18 +129,17 @@ feature {NONE} -- Implementation
 			correct_parsing_state: parsing_state = ps_extended_payload
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
 			non_negative_length: a_pos >= 0
+			no_errors: not has_error
 		do
 			if not global_payload_unarchiver.unarchiving_finished then
 				global_payload_unarchiver.unarchive_block (block, a_pos)
 
-				if global_payload_unarchiver.has_error then
-					error_messages.append (global_payload_unarchiver.error_messages)
-
+				if not has_error then
+					if global_payload_unarchiver.unarchiving_finished then
+						parsing_state := ps_first_header
+					end
+				else
 					report_error ("Parsing global pax payload failed")
-				end
-
-				if global_payload_unarchiver.unarchiving_finished then
-					parsing_state := ps_first_header
 				end
 			else
 				report_error ("Remaining in global pax payload parsing stage, even though all payload is unarchived")
@@ -148,19 +152,19 @@ feature {NONE} -- Implementation
 			correct_parsing_state: parsing_state = ps_extended_payload
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
 			non_negative_length: a_pos >= 0
+			no_errors: not has_error
 		do
 			if not extended_payload_unarchiver.unarchiving_finished then
 				extended_payload_unarchiver.unarchive_block (block, a_pos)
 
-				if extended_payload_unarchiver.has_error then
-					error_messages.append (extended_payload_unarchiver.error_messages)
-
+				if not has_error then
+					if extended_payload_unarchiver.unarchiving_finished then
+						parsing_state := ps_second_header
+					end
+				else
 					report_error ("Parsing extended pax payload failed")
 				end
 
-				if extended_payload_unarchiver.unarchiving_finished then
-					parsing_state := ps_second_header
-				end
 			else
 				report_error ("Remaining in extended pax payload parsing stage, even though all payload is unarchived")
 			end
@@ -172,14 +176,10 @@ feature {NONE} -- Implementation
 			correct_parsing_state: parsing_state = ps_second_header
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
 			non_negative_length: a_pos >= 0
+			no_errors: not has_error
 		do
 			ustar_parser.parse_block (block, a_pos)
-			if ustar_parser.has_error then
-				error_messages.append (ustar_parser.error_messages)
-
-				report_error ("Parsing second header failed")
-			else
-
+			if not has_error then
 				if ustar_parser.parsing_finished then
 					if attached ustar_parser.parsed_header as l_ustar_header then
 
@@ -192,9 +192,12 @@ feature {NONE} -- Implementation
 						parsing_state := ps_first_header
 						parsing_finished := True
 					else
+							-- Unreachable (TAR_HEADER_PARSER invariant)
 						report_error ("Parsing second header failed")
 					end
 				end
+			else
+				report_error ("Parsing second header failed")
 			end
 		end
 

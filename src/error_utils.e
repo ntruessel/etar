@@ -47,7 +47,7 @@ feature -- Access
 			has_no_error: not has_error
 		end
 
-	register_redirector (other: like Current; a_message_prefix: READABLE_STRING_GENERAL)
+	register_redirector (other: ERROR_UTILS; a_message_prefix: READABLE_STRING_GENERAL)
 			-- Register `other' as new target to send error messages to, prefixing all messages with `a_message_prefix' ("prefix: message")
 		do
 			redirection_target := other
@@ -71,7 +71,7 @@ feature {NONE} -- Implementation
 			has_error: has_error
 		end
 
-	redirection_target: like Current
+	redirection_target: ERROR_UTILS
 			-- Target for error message redirection
 
 	redirection_message_prefix: READABLE_STRING_GENERAL
