@@ -11,6 +11,9 @@ note
 deferred class
 	TAR_HEADER_PARSER
 
+inherit
+	ERROR_UTILS
+
 feature -- Status
 
 	parsing_finished: BOOLEAN
@@ -39,45 +42,6 @@ feature -- Result query
 			else
 				Result := Void
 			end
-		end
-
-feature -- Access: error
-
-	has_error: BOOLEAN
-			-- Error occurred?
-		do
-				--| Dbg Hint: comment next line to see all error messages.
-			Result := not error_messages.is_empty
-			if not Result and parsing_finished then
-				Result := last_parsed_header = Void
-			end
-		end
-
-	error_messages: LIST [READABLE_STRING_32]
-			-- Error messages.		
-
-feature {NONE} -- Error: Internal only
-
-	report_error (a_message: READABLE_STRING_GENERAL)
-			-- Report error message `a_message'.
-		do
-			error_messages.force (a_message.as_string_32)
-		ensure
-			has_error: has_error
-		end
-
-	reset_error
-			-- Reset errors.
-		do
-			error_messages.wipe_out
-		ensure
-			has_no_error: not has_error
-		end
-
-	initialize_error
-			-- Initialize error handling structures
-		do
-			create {ARRAYED_LIST [READABLE_STRING_32]} error_messages.make (1)
 		end
 
 feature {NONE} -- Implementation
@@ -117,4 +81,6 @@ feature {NONE} -- Utilities
 			end
 		end
 
+invariant
+	valid_header_if_no_errors: not has_error and parsing_finished implies attached last_parsed_header
 end

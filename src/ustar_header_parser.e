@@ -12,23 +12,12 @@ class
 
 inherit
 	TAR_HEADER_PARSER
-		redefine
-			default_create
-		end
 
 	OCTAL_UTILS
 		export
 			{NONE} all
-		redefine
+		undefine
 			default_create
-		end
-
-feature {NONE} -- Initialization
-
-	default_create
-			-- Create new instance
-		do
-			initialize_error
 		end
 
 feature -- Parsing
