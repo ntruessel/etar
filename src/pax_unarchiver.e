@@ -166,6 +166,9 @@ feature {NONE} -- parsing finite state machine
 			inspect c
 			when '=' then
 				if not active_key.is_empty then
+						-- Resize key if necessary
+					active_value.grow (active_length.to_integer - active_length.count - active_key.count - 3)
+
 					parsing_state := ps_value
 				else
 					report_error ("No key found, currently parsed length: " + active_length)
