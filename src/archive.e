@@ -14,6 +14,12 @@ note
 class
 	ARCHIVE
 
+inherit
+	ERROR_UTILS
+		redefine
+			default_create
+		end
+
 create
 	make_archive,
 --	make_archive_append_file,
@@ -21,17 +27,31 @@ create
 
 feature {NONE} -- Initialization
 
+	default_create
+			-- (Ab)used for internal initialization
+		do
+				-- Header utilities
+			create {PAX_HEADER_WRITER} header_writer
+			create {PAX_HEADER_PARSER} header_parser
+
+				-- Unarchivers
+			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (3)
+			unarchivers.extend (create {FILE_UNARCHIVER})
+			unarchivers.extend (create {DIRECTORY_UNARCHIVER})
+--			unarchivers.extend (create {SKIP_UNARCHIVER})
+
+			Precursor
+		end
+
 	make_unarchive (a_storage_backend: STORAGE_BACKEND)
 			-- Open archive for unarchiving (reading) from `a_storage_backend'
 		require
 			readable: a_storage_backend.is_readable
 		do
-			initialize_file_unarchivers
-			initialize_header_utilities
-
 			storage_backend := a_storage_backend
-
 			mode := mode_unarchive
+
+			default_create
 		ensure
 			unarchive_mode: mode = mode_unarchive
 		end
@@ -41,30 +61,12 @@ feature {NONE} -- Initialization
 		require
 			writable: a_storage_backend.is_writable
 		do
-			initialize_file_unarchivers
-			initialize_header_utilities
-
 			storage_backend := a_storage_backend
-
 			mode := mode_archive
+
+			default_create
 		ensure
 			archiving_mode: mode = mode_archive
-		end
-
-	initialize_file_unarchivers
-			-- Initialize `unarchivers' with file unarchivers
-		do
-			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (3)
-			unarchivers.extend (create {FILE_UNARCHIVER})
-			unarchivers.extend (create {DIRECTORY_UNARCHIVER})
---			unarchivers.extend (create {SKIP_UNARCHIVER})
-		end
-
-	initialize_header_utilities
-			-- Initialize `header_parser' and `header_writer'
-		do
-			create {PAX_HEADER_WRITER} header_writer
-			create {PAX_HEADER_PARSER} header_parser
 		end
 
 feature -- Status
