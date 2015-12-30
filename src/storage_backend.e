@@ -43,6 +43,8 @@ feature -- Access
 
 	read_block
 			-- Try to read next block
+		require
+			readable: is_readable
 		deferred
 		end
 
