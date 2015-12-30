@@ -36,8 +36,8 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
 		do
-			if active_header /= Void then
-				Result := needed_blocks (active_header.size.as_integer_32)
+			if attached active_header as l_header then
+				Result := needed_blocks (l_header.size).as_integer_32
 			else
 				-- Unreachable (precondition)
 			end
