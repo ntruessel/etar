@@ -33,6 +33,16 @@ feature -- Status
 			Result := a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file or a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file_old
 		end
 
+	required_blocks: INTEGER
+			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+		do
+			if active_header /= Void then
+				Result := needed_blocks (active_header.size.as_integer_32)
+			else
+				-- Unreachable (precondition)
+			end
+		end
+
 feature -- Output
 
 	unarchive_block (p: MANAGED_POINTER; pos: INTEGER)

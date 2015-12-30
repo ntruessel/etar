@@ -45,10 +45,7 @@ feature -- Status
 			-- Indicates how many blocks are required to unarchive this
 		require
 			has_active_header: attached active_header
-		do
-			if attached active_header as l_header then
-				Result := needed_blocks (l_header.size).as_integer_32
-			end
+		deferred
 		end
 
 	unarchived_blocks: INTEGER

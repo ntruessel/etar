@@ -33,6 +33,12 @@ feature -- Status
 			Result := a_header.typeflag = {TAR_CONST}.tar_typeflag_directory
 		end
 
+	required_blocks: INTEGER
+			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+		do
+--			Result := 0
+		end
+
 feature -- Output
 
 	unarchive_block (p: MANAGED_POINTER; pos: INTEGER)
