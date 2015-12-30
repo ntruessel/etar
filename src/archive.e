@@ -2,10 +2,7 @@ note
 	description: "[
 		This class models an archive and allows to
 		create new archives and unarchive existing archives
-		
-		It supports the following storage backends:
-			- files
-		
+
 		It supports the following modes:
 			- unarchiving (reading)
 			- archiving (writing)
@@ -18,35 +15,36 @@ class
 	ARCHIVE
 
 create
-	make_archive_file,
+	make_archive,
 --	make_archive_append_file,
-	make_unarchive_file
---	make_archive_memory,
---	make_archive_append_memory,
---	make_unarchive_memory
+	make_unarchive
 
 feature {NONE} -- Initialization
 
-	make_unarchive_file (a_file: FILE)
-			-- Open archive for unarchiving (reading) from file `a_file'
+	make_unarchive (a_storage_backend: STORAGE_BACKEND)
+			-- Open archive for unarchiving (reading) from `a_storage_backend'
+		require
+			readable: a_storage_backend.is_readable
 		do
 			initialize_file_unarchivers
 			initialize_header_utilities
 
-			storage_backend := a_file
+			storage_backend := a_storage_backend
 
 			mode := mode_unarchive
 		ensure
 			unarchive_mode: mode = mode_unarchive
 		end
 
-	make_archive_file (a_file: FILE)
-			-- Open archive for archiving (writing) to file `a_file'
+	make_archive (a_storage_backend: STORAGE_BACKEND)
+			-- Open archive for archiving (writing) to `a_storage_backend'
+		require
+			writable: a_storage_backend.is_writable
 		do
 			initialize_file_unarchivers
 			initialize_header_utilities
 
-			storage_backend := a_file
+			storage_backend := a_storage_backend
 
 			mode := mode_archive
 		ensure
@@ -56,9 +54,10 @@ feature {NONE} -- Initialization
 	initialize_file_unarchivers
 			-- Initialize `unarchivers' with file unarchivers
 		do
-			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (2)
+			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (3)
 			unarchivers.extend (create {FILE_UNARCHIVER})
 			unarchivers.extend (create {DIRECTORY_UNARCHIVER})
+--			unarchivers.extend (create {SKIP_UNARCHIVER})
 		end
 
 	initialize_header_utilities
@@ -71,7 +70,7 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	mode: INTEGER
-			-- In what mode has this instance be created
+			-- In what mode has this instance been created
 
 	mode_unarchive: INTEGER = 0
 			-- unarchive (read) mode
@@ -93,19 +92,20 @@ feature -- Unarchiving
 			unarchiving_mode: mode = mode_unarchive
 		local
 			l_unarchiver: detachable UNARCHIVER
-			l_buffer: MANAGED_POINTER
 		do
-			create l_buffer.make ({TAR_CONST}.tar_block_size)
-
 				-- parse header
 			from
-				storage_backend.read_to_managed_pointer (l_buffer, 0, l_buffer.count)
-				header_parser.parse_block (l_buffer, 0)
+				storage_backend.read_block
+				if storage_backend.block_ready then
+					header_parser.parse_block (storage_backend.last_block, 0)
+				end
 			until
-				header_parser.parsing_finished or header_parser.has_error
+				not storage_backend.block_ready or header_parser.parsing_finished or header_parser.has_error
 			loop
-				storage_backend.read_to_managed_pointer (l_buffer, 0, l_buffer.count)
-				header_parser.parse_block (l_buffer, 0)
+				storage_backend.read_block
+				if storage_backend.block_ready then
+					header_parser.parse_block (storage_backend.last_block, 0)
+				end
 			end
 
 			if attached header_parser.parsed_header as l_header then
@@ -115,10 +115,12 @@ feature -- Unarchiving
 					from
 						l_unarchiver.initialize (l_header)
 					until
-						l_unarchiver.unarchiving_finished
+						storage_backend.block_ready or l_unarchiver.unarchiving_finished
 					loop
-						storage_backend.read_to_managed_pointer (l_buffer, 0, l_buffer.count)
-						l_unarchiver.unarchive_block (l_buffer, 0)
+						storage_backend.read_block
+						if storage_backend.block_ready then
+							l_unarchiver.unarchive_block (storage_backend.last_block, 0)
+						end
 					end
 				end
 			else
@@ -128,7 +130,7 @@ feature -- Unarchiving
 
 feature {NONE} -- Implementation
 
-	storage_backend: FILE
+	storage_backend: STORAGE_BACKEND
 			-- Storage backend to use, set on initialization
 
 	unarchivers: LIST [UNARCHIVER]
