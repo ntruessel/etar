@@ -29,6 +29,9 @@ feature {NONE} -- Initialization
 
 feature -- Status
 
+	name: READABLE_STRING_GENERAL
+			-- Name that will be used when printing error messages this unarchiver reports
+
 	unarchiving_finished: BOOLEAN
 			-- Flag that indicates whether unarchiving finished
 		do

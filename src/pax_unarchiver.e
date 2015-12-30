@@ -27,6 +27,8 @@ feature -- Initialization
 			create active_key.make (10)		-- sufficient for all pax defined keys
 			create active_value.make_empty	-- grows on demand after key is parsed
 
+			name := "pax payload unarchiver"
+
 			Precursor
 		end
 

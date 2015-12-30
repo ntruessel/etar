@@ -11,6 +11,19 @@ class
 
 inherit
 	UNARCHIVER
+		redefine
+			default_create
+		end
+
+feature {NONE} -- Initialization
+
+	default_create
+			-- Create new instance
+		do
+			name := "file to disk unarchiver"
+
+			Precursor
+		end
 
 feature -- Status
 
