@@ -102,7 +102,7 @@ feature -- Status
 	block_ready: BOOLEAN
 			-- Indicate whether there is a block ready
 		do
-			-- TODO
+			Result := has_valid_block
 		end
 
 	is_readable: BOOLEAN
@@ -137,9 +137,7 @@ feature -- Access
 			else
 					-- No buffered items, read next block
 				backend.read_to_managed_pointer (block_buffer, 0, block_buffer.count)
-				if backend.bytes_read /= block_buffer.count then
-					has_valid_block := False
-				end
+				has_valid_block := backend.bytes_read = block_buffer.count
 			end
 		end
 
@@ -161,10 +159,10 @@ feature {NONE} -- Implementation
 			-- Check whether `block' only consists of NUL bytes
 		do
 			Result := block.read_special_character_8 (0, block.count).for_all_in_bounds (
-				agent (c: CHARACTER_8; i: INTEGER): BOOLEAN
+				agent (c: CHARACTER_8): BOOLEAN
 					do
 						Result := c = '%U'
-					end, 0, block.count)
+					end, 0, block.count - 1)
 		end
 
 end
