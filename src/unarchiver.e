@@ -10,10 +10,10 @@ deferred class
 	UNARCHIVER
 
 inherit
-	ANY
-	redefine
-		default_create
-	end
+	ERROR_UTILS
+		redefine
+			default_create
+		end
 
 feature {NONE} -- Initialization
 
@@ -22,6 +22,7 @@ feature {NONE} -- Initialization
 		do
 --			active_header := Void
 --			unarchived_blocks := 0
+			Precursor
 		ensure then
 			no_unarchiving_in_progress: unarchiving_finished
 		end

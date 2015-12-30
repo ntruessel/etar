@@ -11,17 +11,15 @@ class
 
 inherit
 	UNARCHIVER
-	redefine
-		default_create
-	end
+		redefine
+			default_create
+		end
 
 feature -- Initialization
 
 	default_create
 			-- Initialize unarchiver
 		do
-			Precursor
-
 				-- Initialize internals. Capacities chosen from gnutar's default pax entries
 			create entries.make_equal (3)	-- pax provides atime, mtime and ctime
 
@@ -29,7 +27,7 @@ feature -- Initialization
 			create active_key.make (10)		-- sufficient for all pax defined keys
 			create active_value.make_empty	-- grows on demand after key is parsed
 
-			initialize_error
+			Precursor
 		end
 
 feature -- Status
@@ -50,41 +48,6 @@ feature -- Status
 			-- Returns void if there is none
 		do
 			Result := entries.item (a_key)
-		end
-
-feature -- Access: error
-
-	has_error: BOOLEAN
-			-- Error occurred?
-		do
-			Result := not error_messages.is_empty
-		end
-
-	error_messages: LIST [READABLE_STRING_32]
-			-- Error messages.		
-
-feature {NONE} -- Error: Internal only
-
-	report_error (a_message: READABLE_STRING_GENERAL)
-			-- Report error message `a_message'.
-		do
-			error_messages.force (a_message.as_string_32)
-		ensure
-			has_error: has_error
-		end
-
-	reset_error
-			-- Reset errors.
-		do
-			error_messages.wipe_out
-		ensure
-			has_no_error: not has_error
-		end
-
-	initialize_error
-			-- Initialize error handling structures
-		do
-			create {ARRAYED_LIST [READABLE_STRING_32]} error_messages.make (1)
 		end
 
 feature -- Unarchiving
