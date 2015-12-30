@@ -51,7 +51,7 @@ feature -- Unarchiving
 	unarchive_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
 			-- Unarchive `a_block' starting from `a_pos'
 		do
-
+			unarchived_blocks := unarchived_blocks + 1
 		end
 
 feature {NONE} -- Implementation
