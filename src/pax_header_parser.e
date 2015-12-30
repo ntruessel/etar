@@ -18,12 +18,12 @@ feature {NONE} -- Initialization
 	default_create
 			-- Create new instance
 		do
-			Precursor
-
 			create ustar_parser
 			create extended_payload_unarchiver
 			create global_payload_unarchiver
 --			parsing_state := ps_pax_header
+
+			Precursor
 		end
 
 feature -- Parsing
