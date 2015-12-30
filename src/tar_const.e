@@ -59,6 +59,8 @@ feature -- Typeflags
 
 	tar_typeflag_pax_global:		CHARACTER_8 = 'g' -- Typeflag for pax global header
 
+	tar_header_only_typeflags:		STRING_8	= "123456"	-- All predefined header types that have no payload
+
 feature -- Miscellaneous
 	tar_block_size:	INTEGER = 512 -- Block size in tar
 
