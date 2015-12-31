@@ -60,11 +60,14 @@ feature {NONE} -- Implementation
 			readable_file: tar_file.is_readable
 		local
 			l_header_printer: HEADER_PRINT_UNARCHIVER
+			l_storage_backend: STORAGE_BACKEND
 			l_archive: ARCHIVE
 		do
 			from
 				create l_header_printer
-				create l_archive.make_unarchive (create {FILE_STORAGE_BACKEND}.make_read (tar_file))
+				create {FILE_STORAGE_BACKEND} l_storage_backend.make (tar_file)
+				l_storage_backend.open_read
+				create l_archive.make_unarchive (l_storage_backend)
 				l_archive.add_unarchiver (l_header_printer)
 
 					-- Filename
