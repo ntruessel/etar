@@ -31,7 +31,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	has_error: BOOLEAN
-			-- Error occurred?
+			-- Error occured?
 		do
 			Result := not error_messages.is_empty
 		end
@@ -81,6 +81,7 @@ feature {NONE} -- Implementation
 			-- Report error message `a_message' to `redirection_target'
 		do
 			redirection_target.report_error(redirection_message_prefix + ": " + a_message)
+			report_error_local (a_message)
 		end
 
 end

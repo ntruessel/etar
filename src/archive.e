@@ -107,11 +107,10 @@ feature -- Unarchiving
 			-- Unarchives the next entry
 		require
 			unarchiving_mode: mode = mode_unarchive
-			no_errors: not has_error
 		local
 			l_unarchiver: detachable UNARCHIVER
 		do
-			if not unarchiving_finished then
+			if not unarchiving_finished or has_error then
 					-- parse header
 				from
 					storage_backend.read_block
