@@ -54,6 +54,44 @@ feature -- Test routines
 			assert ("Contents match", same_content (l_file, easy_header_payload_blob, easy_header.size.as_integer_32))
 		end
 
+	test_root_file_unarchiver
+			-- Test FILE_UNARCHIVER with easy text-only file
+		local
+			unit_under_test: FILE_UNARCHIVER
+			p: MANAGED_POINTER
+			l_file: FILE
+		do
+			create unit_under_test
+			create p.make (root_header_payload_blob.count)
+			p.put_special_character_8 (root_header_payload_blob, 0, 0, root_header_payload_blob.count)
+
+			assert ("Correct payload size", p.count = {TAR_CONST}.tar_block_size)
+
+			assert ("Can unarchive regular file", unit_under_test.can_unarchive (root_header))
+
+			unit_under_test.initialize (root_header)
+
+			assert ("Not finished", not unit_under_test.unarchiving_finished)
+			assert ("No blocks processed", unit_under_test.unarchived_blocks = 0)
+
+			unit_under_test.unarchive_block (p, 0)
+
+			assert ("Finished", unit_under_test.unarchiving_finished)
+			assert ("One block unarchived", unit_under_test.unarchived_blocks = 1)
+
+				-- TODO: compare file metadata
+
+
+				-- Compare file contents
+			create {RAW_FILE} l_file.make_with_path (root_header.filename)
+			assert ("File unarchived and stored to disk", l_file.exists)
+
+			l_file.open_read
+			assert ("Contents match", same_content (l_file, root_header_payload_blob, root_header.size.as_integer_32))
+		end
+
+
+
 feature {NONE} -- Events
 
 	on_prepare
@@ -104,7 +142,7 @@ feature {NONE} -- Data - easy
 			-- Header for the easy test data
 		once
 			create Result.make
-			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver/easy.txt"))
+			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver/root.txt"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0c1750)
 			Result.set_group_id (0c144)
@@ -125,6 +163,27 @@ feature {NONE} -- Data - easy
 			header_template.replace_substring_all ("^", "%N")
 			Result := header_template.area
 			Result.remove_tail (1)
+		end
+
+	root_header: TAR_HEADER
+			-- Header for dataset with file that has owner root
+		once
+			create Result.make
+			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver/easy.txt"))
+			Result.set_mode (0c0644)
+			Result.set_user_id (0)
+			Result.set_group_id (0)
+			Result.set_size (0c60)
+			Result.set_mtime (0c12636054745) -- ~ Dec 21 20:58
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name ("root")
+			Result.set_group_name ("root")
+		end
+
+	root_header_payload_blob: SPECIAL [CHARACTER_8]
+			-- Payload blob for root test data
+		once
+			Result := easy_header_payload_blob
 		end
 end
 
