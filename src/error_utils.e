@@ -22,10 +22,9 @@ feature {NONE} -- Initialization
 	default_create
 			-- Initialize error handling structures
 		do
-			create {ARRAYED_LIST [READABLE_STRING_32]} error_messages.make (1)
-			report_error := agent report_error_local (?)
-			redirection_target := Current
-			redirection_message_prefix := "Local"
+			create {ARRAYED_LIST [STRING_8]} error_messages.make (1)
+			create {ARRAYED_LIST [PROCEDURE [ANY, TUPLE [STRING_8]]]} error_listeners.make (1)
+			register_error_callaback (agent error_messages.force (?))
 		end
 
 feature -- Access
@@ -36,7 +35,7 @@ feature -- Access
 			Result := not error_messages.is_empty
 		end
 
-	error_messages: LIST [READABLE_STRING_32]
+	error_messages: LIST [STRING_8]
 			-- Error messages.
 
 	reset_error
@@ -47,41 +46,31 @@ feature -- Access
 			has_no_error: not has_error
 		end
 
-	register_redirector (other: ERROR_UTILS; a_message_prefix: READABLE_STRING_GENERAL)
-			-- Register `other' as new target to send error messages to, prefixing all messages with `a_message_prefix' ("prefix: message")
+	register_error_callaback (a_callback: PROCEDURE [ANY, TUPLE [a_message: STRING_8]])
+			-- Register `a_callback' as new target to send error messages to
 		do
-			redirection_target := other
-			redirection_message_prefix := a_message_prefix
-			report_error := agent report_error_remote (?)
+			error_listeners.force (a_callback)
 		end
 
-feature {ERROR_UTILS} -- Error reporting
+feature {NONE} -- Error reporting
 
-	report_error: PROCEDURE [ANY, TUPLE [a_message: READABLE_STRING_GENERAL]]
-			-- Procedure used to report error message `a_message'
-
-
-feature {NONE} -- Implementation
-
-	report_error_local (a_message: READABLE_STRING_GENERAL)
-			-- Locally report error message `a_message'.
+	report_error (a_message: STRING_8)
+			-- Report error message `a_message'
 		do
-			error_messages.force (a_message.as_string_32)
-		ensure
-			has_error: has_error
+			across
+				error_listeners as l_listener_cursor
+			loop
+				l_listener_cursor.item (a_message)
+			end
 		end
 
-	redirection_target: ERROR_UTILS
-			-- Target for error message redirection
-
-	redirection_message_prefix: READABLE_STRING_GENERAL
-			-- Error message prefix when redirecting errors
-
-	report_error_remote (a_message: READABLE_STRING_GENERAL)
-			-- Report error message `a_message' to `redirection_target'
+	report_prefixed_error (a_prefix: STRING_8; a_message: STRING_8)
+			-- Report error message `a_prefix': `a_message'
 		do
-			redirection_target.report_error(redirection_message_prefix + ": " + a_message)
-			report_error_local (a_message)
+			report_error (a_prefix + ": " + a_message)
 		end
+
+	error_listeners: LIST [PROCEDURE [ANY, TUPLE [a_message: STRING_8]]]
+			-- All procedures that are notified on error
 
 end

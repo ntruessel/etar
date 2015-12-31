@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 
 feature -- Status
 
-	name: READABLE_STRING_GENERAL
+	name: STRING_8
 			-- Name that will be used when printing error messages this unarchiver reports
 
 	unarchiving_finished: BOOLEAN
