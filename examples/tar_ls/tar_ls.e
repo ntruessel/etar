@@ -82,6 +82,9 @@ feature {NONE} -- Implementation
 					localized_print ("%N")
 				end
 			end
+			if l_archive.has_error then
+				print_errors (l_archive)
+			end
 
 
 		end
