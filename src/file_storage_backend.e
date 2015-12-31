@@ -112,27 +112,26 @@ feature -- Status
 							if only_nul_bytes (block_buffer) then
 								Result := True
 							end
-						else
-								-- Not enough bytes available
-							Result := True
 						end
 					end
-
-				else
-						-- Not enough bytes available
-					Result := True
 				end
 
+					-- Read first block
+				create block_buffer.make (block_buffer.count)
+				read_block
 
 					-- Restore current block
 				block_buffer := l_buffer
 			end
+
+				-- On error, this archive is finished
+			Result := Result or has_error
 		end
 
 	block_ready: BOOLEAN
 			-- Indicate whether there is a block ready
 		do
-			Result := has_valid_block
+			Result := not has_error and then has_valid_block
 		end
 
 	is_readable: BOOLEAN
@@ -150,7 +149,7 @@ feature -- Status
 	is_closed: BOOLEAN
 			-- Indicates whether backend is closed
 		do
-			Result := has_error or else backend.is_closed
+			Result := backend.is_closed
 		end
 
 feature -- Access
@@ -174,6 +173,11 @@ feature -- Access
 					-- No buffered items, read next block
 				backend.read_to_managed_pointer (block_buffer, 0, block_buffer.count)
 				has_valid_block := backend.bytes_read = block_buffer.count
+
+				if not has_valid_block then
+					close
+					report_error ("Not enough bytes to read full block")
+				end
 			end
 		end
 

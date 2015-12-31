@@ -81,6 +81,13 @@ feature -- Access
 		require
 			readable: is_readable
 		deferred
+		ensure
+			error_or_ready: has_error or else block_ready
 		end
+
+invariant
+	not_readable_on_error: has_error implies not is_readable
+	not_writable_on_error: has_error implies not is_writable
+	closed_on_error: has_error implies is_closed
 
 end
