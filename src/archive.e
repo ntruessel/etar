@@ -48,6 +48,7 @@ feature {NONE} -- Initialization
 
 				-- Error redirections
 			header_parser.register_redirector (Current, "Header parser")
+			storage_backend.register_redirector (Current, "Storage backend")
 		end
 
 	make_unarchive (a_storage_backend: STORAGE_BACKEND)
