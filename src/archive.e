@@ -127,7 +127,7 @@ feature -- Unarchiving
 		local
 			l_unarchiver: detachable UNARCHIVER
 		do
-			if not unarchiving_finished or has_error then
+			if not unarchiving_finished and not has_error then
 					-- parse header
 				from
 					storage_backend.read_block
