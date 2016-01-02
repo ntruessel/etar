@@ -95,10 +95,12 @@ feature -- Status
 			-- Indicates whether the next two blocks only contain NUL bytes or the file has not enough characters to read
 		local
 			l_buffer: MANAGED_POINTER
+			l_buffer_list: ARRAYED_LIST [MANAGED_POINTER]
 		do
 			Result := backend.is_closed
 			if not Result then
 					-- Buffer current block
+				create {ARRAYED_LIST [MANAGED_POINTER]} l_buffer_list.make (2)
 				l_buffer := block_buffer
 
 					-- Read first block
@@ -107,7 +109,7 @@ feature -- Status
 
 				if block_ready then
 						-- Succeeded reading first block
-					buffer.put (block_buffer)
+					l_buffer_list.force (block_buffer)
 
 						-- Check whether it contains only NUL bytes
 					if only_nul_bytes (block_buffer) then
@@ -117,7 +119,7 @@ feature -- Status
 
 						if block_ready then
 								-- Succeeded reading second block
-							buffer.put (block_buffer)
+							l_buffer_list.force (block_buffer)
 
 							if only_nul_bytes (block_buffer) then
 								Result := True
@@ -126,12 +128,9 @@ feature -- Status
 					end
 				end
 
-					-- Read first block
-				create block_buffer.make (block_buffer.count)
-				read_block
-
 					-- Restore current block
 				block_buffer := l_buffer
+				buffer.append (l_buffer_list)
 			end
 
 				-- On error, this archive is finished
@@ -214,5 +213,4 @@ feature {NONE} -- Implementation
 						Result := c = '%U'
 					end, 0, block.count - 1)
 		end
-
 end
