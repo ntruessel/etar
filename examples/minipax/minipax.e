@@ -73,8 +73,12 @@ feature {NONE} -- Implementation
 
 	unarchive (a_archive_filename: IMMUTABLE_STRING_32)
 			-- Unarchive contents of the archive stored at `a_archive_filename'
+		local
+			l_archive: ARCHIVE
 		do
-			localized_print ("Not implemented%N")
+			create l_archive.make (create {FILE_STORAGE_BACKEND}.make_from_filename (a_archive_filename))
+			l_archive.open_unarchive
+			l_archive.unarchive
 		end
 
 
