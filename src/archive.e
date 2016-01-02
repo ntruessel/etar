@@ -105,6 +105,20 @@ feature -- Unarchiving
 			Result := has_error or storage_backend.archive_finished
 		end
 
+	unarchive
+			-- Unarchive the whole archive
+		require
+			unarchiving_mode: mode = mode_unarchive
+		do
+			from
+
+			until
+				unarchiving_finished
+			loop
+				unarchive_next_entry
+			end
+		end
+
 	unarchive_next_entry
 			-- Unarchives the next entry
 		require
