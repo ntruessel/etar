@@ -40,9 +40,10 @@ feature {NONE} -- Initialization
 			Precursor
 
 				-- Add default unarchivers
+			add_unarchiver (create {SKIP_UNARCHIVER})
 			add_unarchiver (create {FILE_UNARCHIVER})
 			add_unarchiver (create {DIRECTORY_UNARCHIVER})
-			add_unarchiver (create {SKIP_UNARCHIVER})
+
 
 				-- Error redirections
 			header_parser.register_redirector (Current, "Header parser")
