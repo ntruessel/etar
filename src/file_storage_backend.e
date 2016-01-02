@@ -16,7 +16,8 @@ inherit
 		end
 
 create
-	make
+	make_from_file,
+	make_from_filename
 
 feature {NONE} -- Initialization
 
@@ -29,11 +30,20 @@ feature {NONE} -- Initialization
 			Precursor
 		end
 
-	make (a_file: FILE)
+	make_from_file (a_file: FILE)
 			-- Create new instance for `a_file'
 			-- Will create a clone of `a_file' to prevent interference with client-side changes
 		do
 			create {RAW_FILE} backend.make_with_path (a_file.path)
+			default_create
+		ensure
+			backend_closed: backend.is_closed
+		end
+
+	make_from_filename (a_filename: READABLE_STRING_GENERAL)
+			-- Create new instance for `a_filename'
+		do
+			create {RAW_FILE} backend.make_with_name (a_filename)
 			default_create
 		ensure
 			backend_closed: backend.is_closed

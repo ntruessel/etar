@@ -65,7 +65,7 @@ feature {NONE} -- Implementation
 		do
 			from
 				create l_header_printer
-				create {FILE_STORAGE_BACKEND} l_storage_backend.make (tar_file)
+				create {FILE_STORAGE_BACKEND} l_storage_backend.make_from_file (tar_file)
 				l_storage_backend.open_read
 				create l_archive.make_unarchive (l_storage_backend)
 				l_archive.add_unarchiver (l_header_printer)
