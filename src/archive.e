@@ -198,6 +198,7 @@ feature {NONE} -- Implementation
 				if l_cursor.item.can_unarchive (a_header) then
 					Result := l_cursor.item
 				end
+				l_cursor.forth
 			end
 		end
 
