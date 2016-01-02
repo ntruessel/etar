@@ -46,8 +46,8 @@ feature {NONE} -- Initialization
 
 
 				-- Error redirections
-			header_parser.register_redirector (Current, "Header parser")
-			storage_backend.register_redirector (Current, "Storage backend")
+			header_parser.register_error_callaback (agent report_prefixed_error ("Header parser", ?))
+			storage_backend.register_error_callaback (agent report_prefixed_error ("Storage backend", ?))
 		end
 
 	make (a_storage_backend: STORAGE_BACKEND)
@@ -97,7 +97,7 @@ feature -- Unarchiving
 			-- Add unarchiver `a_unarchiver' to `unarchivers'
 		do
 			unarchivers.force (a_unarchiver)
-			a_unarchiver.register_redirector (Current, a_unarchiver.name)
+			a_unarchiver.register_error_callaback (agent report_prefixed_error (a_unarchiver.name, ?))
 		end
 
 	unarchiving_finished: BOOLEAN

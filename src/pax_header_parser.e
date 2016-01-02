@@ -26,9 +26,9 @@ feature {NONE} -- Initialization
 			Precursor
 
 				-- Redirect error messages
-			ustar_parser.register_redirector (Current, "ustar parser")
-			extended_payload_unarchiver.register_redirector (Current, "extended payload unarchiver")
-			global_payload_unarchiver.register_redirector (Current, "global payload unarchiver")
+			ustar_parser.register_error_callaback (agent report_prefixed_error ("ustar parser", ?))
+			extended_payload_unarchiver.register_error_callaback (agent report_prefixed_error ("extended payload unarchiver", ?))
+			global_payload_unarchiver.register_error_callaback (agent report_prefixed_error ("global payload unarchiver", ?))
 		end
 
 feature -- Parsing
