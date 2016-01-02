@@ -77,6 +77,8 @@ feature {NONE} -- Implementation
 			l_archive: ARCHIVE
 		do
 			create l_archive.make (create {FILE_STORAGE_BACKEND}.make_from_filename (a_archive_filename))
+			l_archive.add_unarchiver (create {FILE_UNARCHIVER})
+			l_archive.add_unarchiver (create {DIRECTORY_UNARCHIVER})
 			l_archive.open_unarchive
 			l_archive.unarchive
 		end

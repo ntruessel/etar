@@ -33,16 +33,14 @@ feature {NONE} -- Initialization
 			create {PAX_HEADER_PARSER} header_parser
 
 				-- Unarchivers
-			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (3)
+			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (5)
 
 --			unarchiving_finished := False
 
 			Precursor
 
 				-- Add default unarchivers
-			add_unarchiver (create {SKIP_UNARCHIVER})
-			add_unarchiver (create {FILE_UNARCHIVER})
-			add_unarchiver (create {DIRECTORY_UNARCHIVER})
+			add_unarchiver (create {SKIP_UNARCHIVER}) -- Fallback
 
 
 				-- Error redirections
