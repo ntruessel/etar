@@ -21,9 +21,7 @@ inherit
 		end
 
 create
-	make_archive,
---	make_archive_append_file,
-	make_unarchive
+	make
 
 feature {NONE} -- Initialization
 
@@ -51,30 +49,34 @@ feature {NONE} -- Initialization
 			storage_backend.register_redirector (Current, "Storage backend")
 		end
 
-	make_unarchive (a_storage_backend: STORAGE_BACKEND)
-			-- Open archive for unarchiving (reading) from `a_storage_backend'
-		require
-			readable: a_storage_backend.is_readable
+	make (a_storage_backend: STORAGE_BACKEND)
+			-- Creat new archive with backend `a_storage_backend'
 		do
 			storage_backend := a_storage_backend
-			mode := mode_unarchive
 
 			default_create
 		ensure
-			unarchive_mode: mode = mode_unarchive
+			storage_backend_set: storage_backend = a_storage_backend
 		end
 
-	make_archive (a_storage_backend: STORAGE_BACKEND)
-			-- Open archive for archiving (writing) to `a_storage_backend'
-		require
-			writable: a_storage_backend.is_writable
-		do
-			storage_backend := a_storage_backend
-			mode := mode_archive
+feature -- Status setting
 
-			default_create
+	open_archive
+			-- Open for archiving
+		do
+			storage_backend.open_write
+			mode := mode_archive
 		ensure
-			archiving_mode: mode = mode_archive
+			archive_mode: mode = mode_archive
+		end
+
+	open_unarchive
+			-- Open for unarchiving
+		do
+			storage_backend.open_read
+			mode := mode_unarchive
+		ensure
+			unarchive_mode: mode = mode_unarchive
 		end
 
 feature -- Status
@@ -100,7 +102,7 @@ feature -- Unarchiving
 	unarchiving_finished: BOOLEAN
 			-- Indicate whether unarchiving finished
 		do
-			Result := storage_backend.archive_finished
+			Result := has_error or storage_backend.archive_finished
 		end
 
 	unarchive_next_entry

@@ -36,17 +36,7 @@ feature {NONE} -- Initialization
 				i > n
 			loop
 				create {RAW_FILE} f.make_with_name (args.argument (i))
-				if (f.exists and f.is_readable) then
-					list_contents (f)
-				else
-					if (not f.exists) then
-						print_error ({STRING_32} "File %"" + f.path.name + "%" does not exist.")
-					elseif (not f.is_readable) then
-						print_error ({STRING_32} "File %"" + f.path.name + "%" is not readable.")
-					else
-						print_error ("Unknown error.")
-					end
-				end
+				list_contents (f)
 				i := i + 1
 
 			end
@@ -60,14 +50,12 @@ feature {NONE} -- Implementation
 			readable_file: tar_file.is_readable
 		local
 			l_header_printer: HEADER_PRINT_UNARCHIVER
-			l_storage_backend: STORAGE_BACKEND
 			l_archive: ARCHIVE
 		do
 			from
 				create l_header_printer
-				create {FILE_STORAGE_BACKEND} l_storage_backend.make_from_file (tar_file)
-				l_storage_backend.open_read
-				create l_archive.make_unarchive (l_storage_backend)
+				create l_archive.make (create {FILE_STORAGE_BACKEND}.make_from_file (tar_file))
+				l_archive.open_unarchive
 				l_archive.add_unarchiver (l_header_printer)
 
 					-- Filename
