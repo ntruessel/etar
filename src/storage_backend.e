@@ -74,6 +74,8 @@ feature -- Access
 		require
 			has_block: block_ready
 		deferred
+		ensure
+			correct_size: Result.count = {TAR_CONST}.tar_block_size
 		end
 
 	read_block
