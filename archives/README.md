@@ -1,6 +1,10 @@
+# Example Archives
+## ustar Format
 * devnode.tar: single device node (-> header only)
 * link.tar: single symlink (-> header only)
-* etar.tar: complete archive of the examples folder
-* pax.tar: pax-format archive with folders and files
+* ustar.tar: complete archive of the doc folder
 * error.tar: link.tar with header that has wrong checksum
+
+## pax Format
+* pax.tar: complete archive of the doc folder
 * pax-error.tar: pax.tar with wrong mtime format
