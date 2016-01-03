@@ -180,6 +180,7 @@ feature -- Writing
 			create l_block.make_from_pointer (l_template.area.base_address, {TAR_CONST}.tar_block_size)
 			write_block (l_block)
 			write_block (l_block)
+			backend.flush
 			close
 		end
 
