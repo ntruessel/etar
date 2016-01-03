@@ -85,13 +85,27 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	archive (a_archive_filename: IMMUTABLE_STRING_32; a_filenames: ARRAY [IMMUTABLE_STRING_32])
+	archive (a_archive_filename: IMMUTABLE_STRING_32; a_filenames: ITERABLE [IMMUTABLE_STRING_32])
 			-- Archive `a_filenames' to the archive stored at `a_archive_filename' (creating it if it does not exist, overwriting otherwise)
 		local
 			l_archive: ARCHIVE
+			l_file: FILE
 		do
 			create l_archive.make (create {FILE_STORAGE_BACKEND}.make_from_filename (a_archive_filename))
 			l_archive.open_archive
+
+			across
+				a_filenames as l_cur
+			loop
+				create {RAW_FILE} l_file.make_with_name (l_cur.item)
+				if l_file.is_directory then
+					-- TODO
+				elseif l_file.is_plain then
+					l_archive.add_entry (create {FILE_ARCHIVABLE}.make (l_file))
+				else
+					-- Warn about unsupported file type
+				end
+			end
 
 			l_archive.finalize
 		end
