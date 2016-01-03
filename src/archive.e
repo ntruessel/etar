@@ -203,12 +203,23 @@ feature -- Archiving
 		local
 			l_block: MANAGED_POINTER
 		do
+			create l_block.make ({TAR_CONST}.tar_block_size)
 			from
-				create l_block.make ({TAR_CONST}.tar_block_size)
+				header_writer.set_active_header (a_entry.header)
+			until
+				header_writer.finished_writing
+			loop
+				header_writer.write_block_to_managed_pointer (l_block, 0)
+				storage_backend.write_block (l_block)
+			end
+
+			from
+
 			until
 				a_entry.finished_writing
 			loop
 				a_entry.write_block_to_managed_pointer (l_block, 0)
+				storage_backend.write_block (l_block)
 			end
 		end
 
