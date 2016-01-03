@@ -36,7 +36,7 @@ feature -- Status
 
 	header: TAR_HEADER
 			-- Header that belongs to the payload
-		once
+		do
 			create Result.make
 			Result.set_filename (directory.path)
 			Result.set_mode (directory.protection.to_natural_16)

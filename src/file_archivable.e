@@ -39,7 +39,7 @@ feature -- Status
 
 	header: TAR_HEADER
 			-- Header that belongs to the payload
-		once
+		do
 			create Result.make
 
 			Result.set_filename (file.path)
