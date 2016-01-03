@@ -12,14 +12,10 @@ class
 
 inherit
 	TAR_HEADER_WRITER
-	redefine
-		default_create
-	end
+		redefine
+			default_create
+		end
 
-	ANY
-	redefine
-		default_create
-	end
 
 feature {NONE} -- Initialization
 

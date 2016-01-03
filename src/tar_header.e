@@ -19,6 +19,7 @@ inherit
 
 	ANY
 		redefine
+			default_create,
 			is_equal
 		end
 
@@ -26,15 +27,13 @@ inherit
 		export
 			{NONE} all
 		redefine
+			default_create,
 			is_equal
 		end
 
-create
-	make
-
 feature {NONE} -- Initialization
 
-	make
+	default_create
 			-- Create an empty TAR_HEADER
 		do
 			create filename.make_empty

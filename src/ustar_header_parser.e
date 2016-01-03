@@ -44,7 +44,7 @@ feature -- Parsing
 			reset_error
 
 				-- Parse `block'.
-			create l_header.make
+			create l_header
 
 				-- parse "filename"
 				-- FIXME: Implement filename splitting

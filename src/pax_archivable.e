@@ -44,7 +44,7 @@ feature -- Status
 	header: TAR_HEADER
 			-- Header that belongs to the payload
 		do
-			create Result.make
+			create Result
 
 			Result.set_filename (create {PATH}.make_from_string ({TAR_CONST}.pax_header_filename))
 			Result.set_user_id ({TAR_CONST}.pax_header_uid)
