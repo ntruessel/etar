@@ -91,6 +91,8 @@ feature {NONE} -- Implementation
 
 	do_internal_initialization
 			-- Initialize subclass specific internals after initialize has done its job
+		require
+			header_attached: attached active_header
 		deferred
 		end
 
