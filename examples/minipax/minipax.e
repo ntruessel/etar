@@ -33,6 +33,8 @@ feature {NONE} -- Initialization
 			if n = 2 and then args.argument (1) ~ "-f" then
 					-- List mode
 				l_archive_filename := args.argument (2)
+
+				list (l_archive_filename)
 			elseif n = 3 and then args.argument (1) ~ "-r" then
 					-- Read mode (unarchiving)
 				if args.argument (2) ~ "-f" then
@@ -61,8 +63,26 @@ feature {NONE} -- Implementation
 
 	list (a_archive_filename: IMMUTABLE_STRING_32)
 			-- List contents of the archive stored at `a_archive_filename'
+		local
+			l_archive: ARCHIVE
+			l_header_save_unarchiver: HEADER_SAVE_UNARCHIVER
+			l_pp: HEADER_LIST_PRETTY_PRINTER
+			l_header_pp: LIST [READABLE_STRING_GENERAL]
 		do
-			localized_print ("Not implemented%N")
+			create l_archive.make (create {FILE_STORAGE_BACKEND}.make_from_filename (a_archive_filename))
+			create l_header_save_unarchiver
+			l_archive.add_unarchiver (l_header_save_unarchiver)
+			l_archive.open_unarchive
+			l_archive.unarchive
+
+			create l_pp
+			l_header_pp := l_pp.pretty_print (l_header_save_unarchiver.headers)
+			across
+				l_header_pp as l_cur
+			loop
+				localized_print (l_cur.item)
+				localized_print ("%N")
+			end
 		end
 
 	archive (a_archive_filename: IMMUTABLE_STRING_32; a_filenames: ARRAY [IMMUTABLE_STRING_32])
