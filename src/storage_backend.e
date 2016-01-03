@@ -67,7 +67,7 @@ feature -- Status
 		deferred
 		end
 
-feature -- Access
+feature -- Reading
 
 	last_block: MANAGED_POINTER
 			-- Last block that was read
@@ -85,6 +85,25 @@ feature -- Access
 		deferred
 		ensure
 			error_or_ready: has_error or else block_ready
+		end
+
+feature -- Writing
+
+	write_block (a_block: MANAGED_POINTER)
+			-- Write `a_block'
+		require
+			writable: is_writable
+			correct_size: a_block.count = {TAR_CONST}.tar_block_size
+		deferred
+		end
+
+	finalize
+			-- Finalize archive (write two 0 blocks and close)
+		require
+			writable: is_writable
+		deferred
+		ensure
+			closed: is_closed
 		end
 
 invariant

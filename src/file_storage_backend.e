@@ -133,7 +133,7 @@ feature -- Status
 			Result := backend.is_closed
 		end
 
-feature -- Access
+feature -- Reading
 
 	last_block: MANAGED_POINTER
 			-- Return last block that was read
@@ -159,6 +159,28 @@ feature -- Access
 					report_error ("Not enough bytes to read full block")
 				end
 			end
+		end
+
+feature -- Writing
+
+	write_block (a_block: MANAGED_POINTER)
+			-- Write `a_block'
+		do
+			backend.put_managed_pointer (a_block, 0, a_block.count)
+		end
+
+	finalize
+			-- Finalize archive (write two 0 blocks)
+		local
+			l_block: MANAGED_POINTER
+			l_template: STRING_8
+		do
+			l_template := "%U"
+			l_template.multiply ({TAR_CONST}.tar_block_size)
+			create l_block.make_from_pointer (l_template.area.base_address, {TAR_CONST}.tar_block_size)
+			write_block (l_block)
+			write_block (l_block)
+			close
 		end
 
 feature {NONE} -- Implementation
