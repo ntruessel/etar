@@ -86,9 +86,14 @@ feature {NONE} -- Implementation
 		end
 
 	archive (a_archive_filename: IMMUTABLE_STRING_32; a_filenames: ARRAY [IMMUTABLE_STRING_32])
-			-- Archive `a_filenames' to the archive stored at `a_archive_filename' (creating it if it does not exist)
+			-- Archive `a_filenames' to the archive stored at `a_archive_filename' (creating it if it does not exist, overwriting otherwise)
+		local
+			l_archive: ARCHIVE
 		do
-			localized_print ("Not implemented%N")
+			create l_archive.make (create {FILE_STORAGE_BACKEND}.make_from_filename (a_archive_filename))
+			l_archive.open_archive
+
+			l_archive.finalize
 		end
 
 	unarchive (a_archive_filename: IMMUTABLE_STRING_32)
@@ -116,7 +121,7 @@ Usage:
         Read mode: minipax unarchives the contents of the specified archive
     - minipax -w -f archive file...
         Write mode: minipax archives the given list of files, creating the
-                    archive if it does not exist, appending to it otherwise
+                    archive if it does not exist, overriding it otherwise
 
 			]")
 		end
