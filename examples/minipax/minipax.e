@@ -85,26 +85,46 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	archive (a_archive_filename: IMMUTABLE_STRING_32; a_filenames: ITERABLE [IMMUTABLE_STRING_32])
+	archive (a_archive_filename: IMMUTABLE_STRING_32; a_filenames: ARRAY [IMMUTABLE_STRING_32])
 			-- Archive `a_filenames' to the archive stored at `a_archive_filename' (creating it if it does not exist, overwriting otherwise)
 		local
 			l_archive: ARCHIVE
 			l_file: FILE
+			l_dir: DIRECTORY
+			l_to_archive: QUEUE [PATH]
 		do
 			create l_archive.make (create {FILE_STORAGE_BACKEND}.make_from_filename (a_archive_filename))
 			l_archive.open_archive
 
-			across
-				a_filenames as l_cur
+			from
+				create {ARRAYED_QUEUE [PATH]} l_to_archive.make (a_filenames.count)
+				across
+					a_filenames as l_cur
+				loop
+					l_to_archive.force (create {PATH}.make_from_string (l_cur.item))
+				end
+			until
+				l_to_archive.is_empty
 			loop
-				create {RAW_FILE} l_file.make_with_name (l_cur.item)
+				create {RAW_FILE} l_file.make_with_path (l_to_archive.item)
+
 				if l_file.is_directory then
-					-- TODO
+					l_archive.add_entry (create {DIRECTORY_ARCHIVABLE}.make (l_file))
+
+					create l_dir.make_with_path (l_to_archive.item)
+					across
+						l_dir.entries as l_cur
+					loop
+						if l_cur.item.name /~ "." and l_cur.item.name /~ ".." then
+							l_to_archive.force (l_to_archive.item + l_cur.item)
+						end
+					end
 				elseif l_file.is_plain then
 					l_archive.add_entry (create {FILE_ARCHIVABLE}.make (l_file))
 				else
-					-- Warn about unsupported file type
+					-- Warn about unsupported filetype
 				end
+				l_to_archive.remove
 			end
 
 			l_archive.finalize
