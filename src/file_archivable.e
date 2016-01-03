@@ -27,12 +27,6 @@ feature {NONE} -- Initialization
 		do
 			create {RAW_FILE} file.make_with_path (a_file.path)
 			file.open_read
-
-			if (file.is_closed) then
-				file.open_read
-			else
-				file.start
-			end
 		end
 
 feature -- Status
@@ -73,6 +67,7 @@ feature -- Output
 				-- Close file
 				file.close
 			end
+			written_blocks := written_blocks + 1
 		end
 
 	write_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
