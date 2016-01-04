@@ -1,28 +1,3 @@
-\chapter{ARCHIVE}
-The \lstinline;ARCHIVE; class is the central piece of this library. It allows
-clients to manipulate archives.
-
-\section{Initialization}
-To create a new instance of the \lstinline;ARCHIVE; class, the client has to use
-the make feature and provide a \lstinline;STORAGE_BACKEND; which will then be
-used to do I/O. A client then can either open the archive for archiving or for
-unarchiving. It is not possible to archive and unarchive simultaneously.
-
-\section{Archiving}
-To use the archiving mode, one has to use the \lstinline;open_archive; feature
-of \lstinline;ARCHIVE;. Then, one can add entries using \lstinline;add_entry;.
-Once all entries are written, the user has to call finalize, which will write
-the end-of-archive indicator and then close the archive.
-
-\section{Unarchiving}
-To use the unarchiving mode, one has to call \lstinline;open_unarchive; after
-creation. Next, the client may register arbitrarily many \lstinline;UNARCHIVER;s
-using \lstinline;add_unarchiver;. Once all of them were added, the client may
-either use \lstinline;unarchive; which will then unarchive all entries and close
-the archive or \lstinline;unarchive_next_entry; until
-\lstinline;unarchiving_finished; becomes \lstinline;True;. In the latter case,
-the client has to call \lstinline;close; himself.
-
 \chapter{STORAGE\_BACKEND}
 \lstinline;STORAGE_BACKEND; provides a unified interface for different storage
 methods an archive could use. Currently the only implementation is
@@ -37,6 +12,10 @@ A \lstinline;FILE_STORAGE_BACKEND; is either created from a file with
 \section{Implementing a Custom STORAGE\_BACKEND}
 To implement a custom \lstinline;STORAGE_BACKEND;, one has to implement the
 following features:
+
+\subsection{Creation Procedures}
+If \lstinline;default_create; is redefined, \lstinline;Precursor; must be
+called. Every other creation procedure should call \lstinline;default_create;.
 
 \subsection{open\_read}
 \lstinline;open_read;\\
