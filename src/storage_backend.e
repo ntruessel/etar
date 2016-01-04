@@ -111,10 +111,4 @@ feature -- Writing
 		ensure
 			closed: is_closed
 		end
-
-invariant
-	not_readable_on_error: has_error implies not is_readable
-	not_writable_on_error: has_error implies not is_writable
-	closed_on_error: has_error implies is_closed
-
 end
