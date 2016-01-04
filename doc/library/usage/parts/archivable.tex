@@ -1,0 +1,63 @@
+\chapter{ARCHIVABLE}
+Everything that one wants to add to an archive has to inherit from
+\lstinline;ARCHIVABLE;, which provides an interface that \lstinline;ARCHIVE;
+uses to write it. The etar library provides two implementations.
+
+\section{FILE\_ARCHIVABLE}
+\lstinline;FILE_ARCHIVABLE; allows to archive plain files. A client has to
+provide a \lstinline;FILE; for which the \lstinline;FILE_ARCHIVABLE; will be
+created.
+
+\section{DIRECTORY\_ARCHIVABLE}
+\lstinline;DIRECTORY_ARCHIVABLE; allows to archive a directory (without its
+contents!). On creation the client has to provide a \lstinline;FILE; (!) (for
+which \lstinline;is_directory; holds).
+
+\section{Implementing a custom ARCHIVABLE}
+To implement a custom \lstinline;ARCHIVABLE;, one has to implement the following
+features:
+
+\subsection{Creation Procedures}
+There is nothing to consider for creation procedures.
+
+\subsection{required\_blocks}
+\lstinline;required_blocks: INTEGER; \\
+Has to return how many blocks are needed to archive the payload.
+
+\subsection{header}
+\lstinline;header: TAR_HEADER; \\
+Has to return a \lstinline;TAR_HEADER; object suitable for the archivable type
+and the payload.
+
+\subsection{write\_block\_to\_managed\_pointer}
+\lstinline|write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)| \\
+Has to write the next block to \lstinline;p; (writing should start at position
+\lstinline;a_pos;). This feature has to increase \lstinline;written_blocks; by
+one.
+In case the payload does not fill a whole block, it has to be padded to full
+block size (\lstinline|{TAR_CONST}.tar_block_size|).
+
+\subsection{write\_to\_managed\_pointer}
+\lstinline|write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)| \\
+Has to write the whole payload (padded to
+\lstinline|{TAR_CONST}.tar_block_size|) bytes. Calling this feature must not
+change the state of blockwise writing.
+
+\subsection{Utility Features}
+To implement the features listed above, the following utility features are
+provided:
+
+\subsubsection{Padding}
+To pad a block to some size, one can use
+\lstinline|pad (p: MANAGED_POINTER; a_pos, n: INTEGER)|\\
+It pads a given block \lstinline;p; with \lstinline;n; zero-bytes, starting
+from position \lstinline;a_pos;. If \lstinline|n| is zero, nothing will be
+padded (but it's legal to call it with \lstinline|n = 0|).
+
+\subsection{End of Payload}
+To determine whether the last payload block was written, one can compare
+\lstinline;required_blocks; with \lstinline;written_blocks;
+
+\subsection{Bytes to Blocks}
+The feature \lstinline|needed_blocks (n: INTEGER): INTEGER)| can be used to
+determine how many blocks are required to store \lstinline;n; bytes.

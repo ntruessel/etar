@@ -16,9 +16,17 @@
 \lstset{%
 	language=Eiffel,
 	basicstyle=\ttfamily,
-	keywordstyle=\bfseries\color{blue},
+	keywordstyle=\color{blue},
 	showstringspaces=false, tabsize=4,
-	deletekeywords={BOOLEAN},
+	deletekeywords={},
+	morekeywords={%
+		True, False,
+		MANAGED_POINTER, FILE
+		TAR_HEADER, TAR_CONST, ARCHIVE,
+		FILE_STORAGE_BACKEND, STORAGE_BACKEND,
+		ARCHIVABLE, FILE_ARCHIVABLE, DIRECTORY_ARCHIVABLE,
+		UNARCHIVER, FILE_UNARCHIVER, DIRECTORY_UNARCHIVER
+	},
 }
 
 \begin{document}
@@ -44,26 +52,7 @@ API still unstable
 
 \include{parts/archive}
 \include{parts/storage_backend}
-
-\chapter{ARCHIVABLE}
-Everything that one wants to add to an archive has to inherit from
-\lstinline;ARCHIVABLE;, which provides an interface that \lstinline;ARCHIVE;
-uses to write it. The etar library provides two implementations.
-
-\section{FILE\_ARCHIVABLE}
-\lstinline;FILE_ARCHIVABLE; allows to archive plain files. A client has to
-provide a \lstinline;FILE; for which the \lstinline;FILE_ARCHIVABLE; will be
-created.
-
-\section{DIRECTORY\_ARCHIVABLE}
-\lstinline;DIRECTORY_ARCHIVABLE; allows to archive a directory (without its
-contents!). On creation the client has to provide a \lstiinline;FILE; (!) (for
-which \lstinline;is_directory; holds).
-
-\section{Implementing a custom ARCHIVABLE}
-To implement a custom \lstinline;ARCHIVABLE;, one has to implement the following
-features:
-
+\include{parts/archivable}
 
 
 \chapter{UNARCHIVER}
