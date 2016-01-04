@@ -79,6 +79,14 @@ feature -- Status setting
 			correct_mode: is_unarchiving_mode
 		end
 
+	close
+			-- Close archive
+		do
+			storage_backend.close
+		ensure
+			closed: storage_backend.is_closed
+		end
+
 feature -- Status
 
 	is_unarchiving_mode: BOOLEAN
@@ -136,7 +144,7 @@ feature -- Unarchiving
 			loop
 				unarchive_next_entry
 			end
-			storage_backend.close
+			close
 		end
 
 	unarchive_next_entry

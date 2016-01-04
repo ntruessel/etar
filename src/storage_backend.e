@@ -50,16 +50,22 @@ feature -- Status
 		require
 			readable: is_readable
 		deferred
+		ensure
+			no_blocks_on_error: Result implies not has_error
 		end
 
 	is_readable: BOOLEAN
 			-- Indicate whether this instance can be read from
 		deferred
+		ensure
+			no_error_if_readable: Result implies not has_error
 		end
 
 	is_writable: BOOLEAN
 			-- Indicate whether blocks can be written to this instance
 		deferred
+		ensure
+			no_error_if_writable: Result implies not has_error
 		end
 
 	is_closed: BOOLEAN
@@ -84,7 +90,7 @@ feature -- Reading
 			readable: is_readable
 		deferred
 		ensure
-			error_or_ready: has_error or else block_ready
+			error_or_ready: has_error or block_ready
 		end
 
 feature -- Writing
