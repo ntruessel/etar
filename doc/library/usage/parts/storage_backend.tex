@@ -3,9 +3,7 @@
 methods an archive could use. Currently the only implementation is
 \lstinline;FILE_STORAGE_BACKEND;, providing support for archives that are stored
 in a file.
-
-\section{FILE\_STORAGE\_BACKEND}
-A \lstinline;FILE_STORAGE_BACKEND; is either created from a file with
+\section{FILE\_STORAGE\_BACKEND} A \lstinline;FILE_STORAGE_BACKEND; is either created from a file with
 \lstinline;make_from_file; or from a filename with
 \lstinline;make_from_filename;.
 
@@ -75,3 +73,12 @@ Write \lstinline;block; to the backend (starting from the beginning).
 \subsection{finalize}
 \lstinline;finalize;\\
 Write the end-of-archive indicator and close backend.
+
+\subsection{Utilties}
+\subsubsection{Error Reporting}
+To report an error one can use
+\lstinline|report_error (s: READABLE_STRING_GENERAL)|
+%\lstinline|report_error (s: STRING_8)|
+
+\subsubsection{Error Checking}
+\lstinline|has_error: BOOLEAN| indicates whether an error occured.
