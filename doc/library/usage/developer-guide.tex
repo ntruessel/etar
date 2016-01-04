@@ -13,6 +13,10 @@
 \usepackage{booktabs}
 \usepackage{listings}
 
+\usepackage[backend=biber]{biblatex}
+
+\addbibresource{resources.bib}
+
 \lstset{%
 	language=Eiffel,
 	basicstyle=\ttfamily,
@@ -51,10 +55,12 @@ archive there are two consecutive blocks with all zero bytes.
 API still unstable
 
 \include{parts/archive}
+\include{parts/tar_header}
 \include{parts/storage_backend}
 \include{parts/archivable}
 
-
 \chapter{UNARCHIVER}
+
+\printbibliography[heading=bibintoc]
 
 \end{document}

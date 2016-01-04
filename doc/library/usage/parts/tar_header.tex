@@ -1,0 +1,63 @@
+\chapter{TAR\_HEADER}
+A \lstinline|TAR_HEADER| instance contains all metadata, tarfiles store. The
+parts about size, mtime and typeflag are based on \cite[Shell \& Utilities - pax]{POSIX:2008}.
+
+\section{Metadata}
+\subsection{filename}
+path to the file
+
+\subsection{mode}
+Traditional UNIX style mode (0777, 0644, \dots).
+
+\subsection{user\_id}
+User ID of the file owner.
+
+\subsection{group\_id}
+Group ID of the file group.
+
+\subsection{size}
+For files this contains the size in bytes. In case the header does not belong
+to a file, this is either zero or unspecified by the posix standard, so leaving
+it at its default value (0) is a good choice.
+
+The only exception are directories, for which a non-zero size indicates the
+maximal number of bytes that this directory is able to hold (if supported by
+the OS). If the size is zero there is no such limit (or no OS support).
+
+\subsection{mtime}
+Modification time of the file at archiving time, measured in unix time (seconds
+since 00:00:00 UTC on 1 January 1970).
+
+\subsection{typeflag}
+Indicates what payload type this header follows. The following values are
+standardized:
+\begin{itemize}
+	\item['0'] Regular files ('\%U' is allowed for backward compatibilty but
+		should not be used)
+	\item['1'] Hardlink (only allowed if the content was archived in an earlier
+		entry)
+	\item['2'] Symlink
+	\item['3'] Character special device
+	\item['4'] Block special device
+	\item['5'] Directory
+	\item['6'] FIFO
+	\item['7'] Reserved for files to which an implementation has associated some
+		high-performance attribute. May treat it as regular file.
+	\item['A'-'Z'] Reserved for custom implementations
+	\item Everything else is reserved for future standardization.
+\end{itemize}
+
+\subsection{linkname}
+Target (pointee) of a link-type entry.
+
+\subsection{user\_name}
+Username of the file owner.
+
+\subsection{group\_name}
+Groupname of the file group.
+
+\subsection{device\_major}
+Device major number of a character or block device.
+
+\subsection{device\_minor}
+Device minor number of a character or block device.
