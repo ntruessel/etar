@@ -42,9 +42,30 @@ archive there are two consecutive blocks with all zero bytes.
 \section{Error Handling}
 API still unstable
 
+\include{parts/archive}
 \include{parts/storage_backend}
 
 \chapter{ARCHIVABLE}
+Everything that one wants to add to an archive has to inherit from
+\lstinline;ARCHIVABLE;, which provides an interface that \lstinline;ARCHIVE;
+uses to write it. The etar library provides two implementations.
+
+\section{FILE\_ARCHIVABLE}
+\lstinline;FILE_ARCHIVABLE; allows to archive plain files. A client has to
+provide a \lstinline;FILE; for which the \lstinline;FILE_ARCHIVABLE; will be
+created.
+
+\section{DIRECTORY\_ARCHIVABLE}
+\lstinline;DIRECTORY_ARCHIVABLE; allows to archive a directory (without its
+contents!). On creation the client has to provide a \lstiinline;FILE; (!) (for
+which \lstinline;is_directory; holds).
+
+\section{Implementing a custom ARCHIVABLE}
+To implement a custom \lstinline;ARCHIVABLE;, one has to implement the following
+features:
+
+
+
 \chapter{UNARCHIVER}
 
 \end{document}
