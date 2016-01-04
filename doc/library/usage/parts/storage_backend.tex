@@ -1,0 +1,98 @@
+\chapter{ARCHIVE}
+The \lstinline;ARCHIVE; class is the central piece of this library. It allows
+clients to manipulate archives.
+
+\section{Initialization}
+To create a new instance of the \lstinline;ARCHIVE; class, the client has to use
+the make feature and provide a \lstinline;STORAGE_BACKEND; which will then be
+used to do I/O. A client then can either open the archive for archiving or for
+unarchiving. It is not possible to archive and unarchive simultaneously.
+
+\section{Archiving}
+To use the archiving mode, one has to use the \lstinline;open_archive; feature
+of \lstinline;ARCHIVE;. Then, one can add entries using \lstinline;add_entry;.
+Once all entries are written, the user has to call finalize, which will write
+the end-of-archive indicator and then close the archive.
+
+\section{Unarchiving}
+To use the unarchiving mode, one has to call \lstinline;open_unarchive; after
+creation. Next, the client may register arbitrarily many \lstinline;UNARCHIVER;s
+using \lstinline;add_unarchiver;. Once all of them were added, the client may
+either use \lstinline;unarchive; which will then unarchive all entries and close
+the archive or \lstinline;unarchive_next_entry; until
+\lstinline;unarchiving_finished; becomes \lstinline;True;. In the latter case,
+the client has to call \lstinline;close; himself.
+
+\chapter{STORAGE\_BACKEND}
+\lstinline;STORAGE_BACKEND; provides a unified interface for different storage
+methods an archive could use. Currently the only implementation is
+\lstinline;FILE_STORAGE_BACKEND;, providing support for archives that are stored
+in a file.
+
+\section{FILE\_STORAGE\_BACKEND}
+A \lstinline;FILE_STORAGE_BACKEND; is either created from a file with
+\lstinline;make_from_file; or from a filename with
+\lstinline;make_from_filename;.
+
+\section{Implementing a Custom STORAGE\_BACKEND}
+To implement a custom \lstinline;STORAGE_BACKEND;, one has to implement the
+following features:
+
+\subsection{open\_read}
+\lstinline;open_read;\\
+Open backend for read access. Reading should start from the beginning.
+
+\subsection{open\_write}
+\lstinline;open_write;\\
+Open backend for write access. Writing should start from the beginning.
+
+\subsection{close}
+\lstinline;close;\\
+Close backend.
+
+\subsection{archive\_finished}
+\lstinline;archive_finished: BOOLEAN;\\
+Indicate whether the next two blocks contain the end-of-archive indicator
+(only zero bytes). The next \lstinline;read_block; calls should not skip these
+two blocks but read them again (not necessarily from the backend again, the
+implementation is free to chache these blocks).
+\lstinline;archive_finished; should return \lstinline;True; too, if an error
+occured (or occurs while checking for the end-of-archive indicator), does not
+have enough blocks available or if the backend is closed.
+
+\subsection{block\_ready}
+\lstinline;block_ready: BOOLEAN;\\
+Indicate whether there is a block that can be read with \lstinline;last_block;
+\lstinline;False; if an error occured.
+
+
+\subsection{is\_readable}
+\lstinline;is_readable: BOOLEAN;\\
+Indicates whether this backend can be read from. If an error occured, this has
+to return \lstinline;False;
+
+\subsection{is\_writable}
+\lstinline;is_writable: BOOLEAN;\\
+Indicates whether this backend can be written to. If an error occured, this has
+to return \lstinline;False;
+
+\subsection{is\_closed}
+\lstinline;is_closed: BOOLEAN;\\
+Indicates whether this backend is closed.
+
+\subsection{read\_block}
+\lstinline;read_block;\\
+Read next block from backend. If there are not enough bytes for a full block, an
+error should be reported.
+
+\subsection{last\_block}
+\lstinline;last_block: MANAGED_POINTER;\\
+Last block that was read.
+
+\subsection{write\_block}
+\lstinline;write_block (block: MANAGED_POINTER);\\
+Write \lstinline;block; to the backend (starting from the beginning).
+
+\subsection{finalize}
+\lstinline;finalize;\\
+Write the end-of-archive indicator and close backend.

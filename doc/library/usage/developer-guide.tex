@@ -1,0 +1,50 @@
+\documentclass[a4paper]{report}
+
+\usepackage[T1]{fontenc}
+
+\usepackage[margin=3.5cm, includeheadfoot]{geometry}
+\usepackage{adjustbox}
+
+\usepackage[scale=0.85]{sourcecodepro}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit}
+
+\usepackage{booktabs}
+\usepackage{listings}
+
+\lstset{%
+	language=Eiffel,
+	basicstyle=\ttfamily,
+	keywordstyle=\bfseries\color{blue},
+	showstringspaces=false, tabsize=4,
+	deletekeywords={BOOLEAN},
+}
+
+\begin{document}
+
+\chapter{Overview}
+The etar library provides support for archiving data using the pax/tar format.
+
+\section{Concepts}
+\subsection{Archive}
+An archive is a series of blocks of size 512 bytes. An entry consists of exactly
+one header block, followed by zero or more payload blocks. At the end of the
+archive there are two consecutive blocks with all zero bytes.
+
+\begin{figure}[h]
+	\begin{center}
+		\input{figures/archive.tikz}
+	\end{center}
+	\caption{Structure of an archive}
+\end{figure}
+
+\section{Error Handling}
+API still unstable
+
+\include{parts/storage_backend}
+
+\chapter{ARCHIVABLE}
+\chapter{UNARCHIVER}
+
+\end{document}
