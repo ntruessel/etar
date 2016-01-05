@@ -42,7 +42,7 @@ feature {NONE} -- Data - pax header template
 	pax_header: TAR_HEADER
 			-- Return a template for a pax_header (without size)
 		do
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ({TAR_CONST}.pax_header_filename))
 			Result.set_mode ({TAR_CONST}.pax_header_mode)
 			Result.set_user_id ({TAR_CONST}.pax_header_uid)
@@ -56,7 +56,7 @@ feature {NONE} -- Data - easy
 	"[
 		18 path=/dev/sda1
 		30 mtime=1451293316.085474313
-		
+
 	]"
 			-- Payload string for easy testset
 	easy_payload_blob: SPECIAL [CHARACTER_8]

@@ -59,7 +59,7 @@ feature {NONE} -- Data - easy
 	easy_header: TAR_HEADER
 			-- Header for the easy test data
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver/easy_dir"))
 			Result.set_mode (0c0755)
 			Result.set_user_id (0c1750)

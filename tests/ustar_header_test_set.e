@@ -205,7 +205,7 @@ feature {NONE} -- Data - easy
 	easy_header: TAR_HEADER
 			-- Header corresponding to testset easy
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("home/nicolas/out.ps"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0c1750)
@@ -239,7 +239,7 @@ feature {NONE} -- Data - link
 	link_header: TAR_HEADER
 			-- Header corresponding to testset link
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string (".zshrc"))
 			Result.set_mode (0c0777)
 			Result.set_user_id (0c1750)
@@ -272,7 +272,7 @@ feature {NONE} -- Data - Device node
 	devnode_header: TAR_HEADER
 			-- Header corresponding to testset devnode
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("dev/sda1"))
 			Result.set_mode (0c0660)
 			Result.set_user_id (0c0)
@@ -306,7 +306,7 @@ feature {NONE} -- Data - split
 	split_header: TAR_HEADER
 			-- Header corresponding to testset split
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("a_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_directory/a_not_so_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_filename"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0c1750)

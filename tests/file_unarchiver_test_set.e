@@ -141,7 +141,7 @@ feature {NONE} -- Data - easy
 	easy_header: TAR_HEADER
 			-- Header for the easy test data
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver/root.txt"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0c1750)
@@ -168,7 +168,7 @@ feature {NONE} -- Data - easy
 	root_header: TAR_HEADER
 			-- Header for dataset with file that has owner root
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("test_files/unarchiver/easy.txt"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0)
