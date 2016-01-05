@@ -16,7 +16,6 @@ class
 	TAR_HEADER
 
 inherit
-
 	ANY
 		redefine
 			default_create,
