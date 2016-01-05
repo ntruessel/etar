@@ -73,11 +73,11 @@ feature -- Unarchiving
 			nothing_unarchived: unarchived_blocks = 0
 		end
 
-	unarchive_block (p: MANAGED_POINTER; pos: INTEGER)
-			-- Unarchive next block, stored in `p' starting at `pos'
+	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Unarchive next block, stored in `p' starting at `a_pos'
 		require
-			non_negative_position: pos >= 0
-			enough_payload: p.count >= pos + {TAR_CONST}.tar_block_size
+			non_negative_position: a_pos >= 0
+			enough_payload: p.count >= a_pos + {TAR_CONST}.tar_block_size
 			header_attached: attached active_header
 			not_finished: not unarchiving_finished
 		deferred
