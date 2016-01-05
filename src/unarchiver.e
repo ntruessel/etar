@@ -15,6 +15,13 @@ inherit
 			default_create
 		end
 
+	TAR_UTILS
+		export
+			{NONE} all
+		redefine
+			default_create
+		end
+
 feature {NONE} -- Initialization
 
 	default_create
@@ -22,7 +29,7 @@ feature {NONE} -- Initialization
 		do
 --			active_header := Void
 --			unarchived_blocks := 0
-			Precursor
+			Precursor {ERROR_UTILS}
 		ensure then
 			no_unarchiving_in_progress: unarchiving_finished
 		end
@@ -94,17 +101,6 @@ feature {NONE} -- Implementation
 		require
 			header_attached: attached active_header
 		deferred
-		end
-
-feature {NONE} -- Utilites
-
-	needed_blocks (n: NATURAL_64): NATURAL_64
-			-- Indicate how many blocks are needed to represent `n' bytes
-		do
-			Result := (n + {TAR_CONST}.tar_block_size.as_natural_64 - 1) // {TAR_CONST}.tar_block_size.as_natural_64
-		ensure
-			bytes_fit: n <= Result * {TAR_CONST}.tar_block_size.as_natural_64
-			smallest_fit: Result * {TAR_CONST}.tar_block_size.as_natural_64 < n + {TAR_CONST}.tar_block_size.as_natural_64
 		end
 
 feature {NONE} -- Utilities stolen from file_info

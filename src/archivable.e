@@ -9,6 +9,14 @@ note
 deferred class
 	ARCHIVABLE
 
+inherit
+	ANY
+
+	TAR_UTILS
+		export
+			{NONE} all
+		end
+
 feature -- Status
 
 	finished_writing: BOOLEAN
@@ -73,34 +81,6 @@ feature -- Output
 		do
 			create Result.make (required_blocks * {TAR_CONST}.tar_block_size)
 			write_to_managed_pointer (Result, 0)
-		end
-
-feature {NONE} -- Utilites
-
-	needed_blocks (n: INTEGER): INTEGER
-			-- Indicate how many blocks are needed to represent `n' bytes
-		require
-			non_negative_bytes: n >= 0
-		do
-			Result := (n + {TAR_CONST}.tar_block_size - 1) // {TAR_CONST}.tar_block_size
-		ensure
-			bytes_fit: n <= Result * {TAR_CONST}.tar_block_size
-			smallest_fit: (Result - 1) * {TAR_CONST}.tar_block_size < n
-		end
-
-	pad (p: MANAGED_POINTER; a_pos, n: INTEGER)
-			-- pad `p' with `n' NUL-bytes starting at `a_pos'
-		require
-			non_negative_position: a_pos >= 0
-			non_negative_length: n >= 0
-			enough_space: p.count >= a_pos + n
-		local
-			l_padding: SPECIAL[CHARACTER_8]
-		do
-			if n > 0 then
-				create l_padding.make_filled ('%U', n)
-				p.put_special_character_8 (l_padding, 0, a_pos, n)
-			end
 		end
 
 invariant

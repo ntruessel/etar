@@ -38,7 +38,7 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Indicates how many payload blocks this instance needs
 		do
-			Result := needed_blocks (payload.count)
+			Result := needed_blocks (payload.count.as_natural_64).as_integer_32
 		end
 
 	header: TAR_HEADER
@@ -66,7 +66,7 @@ feature -- Output
 
 			if l_remaining_bytes <= {TAR_CONST}.tar_block_size then
 				-- Fill remaining space of block with '%U'
-				pad (p, a_pos + l_remaining_bytes, {TAR_CONST}.tar_block_size - l_remaining_bytes)
+				pad_block (p, a_pos + l_remaining_bytes, {TAR_CONST}.tar_block_size - l_remaining_bytes)
 			end
 
 			written_blocks := written_blocks + 1
@@ -78,7 +78,7 @@ feature -- Output
 			p.put_special_character_8 (payload.area, 0, a_pos, payload.count)
 
 			-- pad to full block
-			pad (p, a_pos + payload.count, required_blocks * {TAR_CONST}.tar_block_size - payload.count)
+			pad_block (p, a_pos + payload.count, required_blocks * {TAR_CONST}.tar_block_size - payload.count)
 		end
 
 feature -- Modification

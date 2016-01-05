@@ -13,7 +13,7 @@ class
 inherit
 	TAR_HEADER_PARSER
 
-	OCTAL_UTILS
+	TAR_UTILS
 		export
 			{NONE} all
 		undefine
@@ -238,34 +238,9 @@ feature {NONE} -- Implementation
 
 	is_checksum_verified (block: MANAGED_POINTER; pos: INTEGER): BOOLEAN
 			-- Verify the checksum of `block' (block starting at `pos')
-		local
-			checksum: NATURAL_64
-			i: INTEGER
-			l_space_code: NATURAL_8
-			l_lower, l_upper: INTEGER
 		do
-				-- Sum all bytes
-			l_space_code := (' ').natural_32_code.as_natural_8
-			l_lower := {TAR_HEADER_CONST}.chksum_offset
-			l_upper := l_lower + {TAR_HEADER_CONST}.chksum_length
-			from
-				i := 0
-				checksum := 0
-			until
-				i >= {TAR_CONST}.tar_block_size
-			loop
-				if
-					i < l_lower or l_upper <= i
-				then
-					checksum := checksum + block.read_natural_8 (pos + i)
-				else
-					checksum := checksum + l_space_code
-				end
-				i := i + 1
-			end
-
 				--| Parse checksum
 			Result := attached next_block_octal_natural_64_string (block, pos + {TAR_HEADER_CONST}.chksum_offset, {TAR_HEADER_CONST}.chksum_length) as checksum_string and then
-					octal_string_to_natural_64 (checksum_string) = checksum
+					octal_string_to_natural_64 (checksum_string) = checksum (block, pos)
 		end
 end

@@ -15,7 +15,7 @@ class
 inherit
 	TAR_HEADER_WRITER
 
-	OCTAL_UTILS
+	TAR_UTILS
 		export
 			{NONE} all
 		end
@@ -122,7 +122,9 @@ feature -- Output
 						p, a_pos + {TAR_HEADER_CONST}.devminor_offset)
 
 					-- Put checksum
-				put_checksum (p, a_pos)
+				put_natural (checksum (p, a_pos),
+						{TAR_HEADER_CONST}.chksum_length,
+						p, a_pos + {TAR_HEADER_CONST}.chksum_offset)
 			else
 				check false end -- Unreachable (see precondition)
 			end
@@ -220,38 +222,6 @@ feature {NONE} -- Utilities
 			s := natural_64_to_octal_string (n)
 			pad (s, length - s.count - 1)
 			p.put_special_character_8 (s.area, 0, a_pos, s.count)
-		end
-
-	put_checksum (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Calculate the checksum for the ustar header in `p' starting at `a_pos'
-		local
-			checksum: NATURAL_64
-			s: STRING_8
-			i: INTEGER
-		do
-			-- Put all spaces in checksum
-			create s.make_filled (' ', {TAR_HEADER_CONST}.chksum_length)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_HEADER_CONST}.chksum_offset,
-					{TAR_HEADER_CONST}.chksum_length)
-
-			-- Sum all bytes
-			from
-				i := 0
-				checksum := 0
-			until
-				i >= {TAR_CONST}.tar_block_size
-			loop
-				checksum := checksum + p.read_natural_8 (a_pos + i)
-				i := i + 1
-			end
-
-			-- Write checksum
-			s := natural_64_to_octal_string (checksum)
-			pad (s, {TAR_HEADER_CONST}.chksum_length - s.count - 1)
-			p.put_special_character_8 (s.area,
-					0, a_pos + {TAR_HEADER_CONST}.chksum_offset,
-					{TAR_HEADER_CONST}.chksum_length)
 		end
 
 feature -- Path helpers		

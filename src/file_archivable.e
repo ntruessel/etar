@@ -34,7 +34,7 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Indicate how much space is needed to represent this ARCHIVABLE
 		do
-			Result := needed_blocks (file.file_info.size)
+			Result := needed_blocks (file.file_info.size.as_natural_64).as_integer_32
 		end
 
 	header: TAR_HEADER
@@ -62,7 +62,7 @@ feature -- Output
 			file.read_to_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
 			if (file.end_of_file) then
 				-- Fill with '%U'
-				pad (p, pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
+				pad_block (p, pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
 
 				-- Close file
 				file.close
@@ -92,7 +92,7 @@ feature -- Output
 			-- Fill with '%U'
 			if (i /= required_blocks) then
 				i := i - 1
-				pad (p, pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
+				pad_block (p, pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
 			end
 
 			-- Close file
