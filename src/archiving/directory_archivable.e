@@ -56,13 +56,6 @@ feature -- Output
 			-- do_nothing (impossible to call)
 		end
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the whole representation to `p', starting at `a_pos'
-			-- Does not modify blockwise writing status
-		do
-			-- do_nothing
-		end
-
 feature {NONE} -- Implementation
 
 	directory: FILE

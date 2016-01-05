@@ -72,15 +72,6 @@ feature -- Output
 			written_blocks := written_blocks + 1
 		end
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Writes whole payload to `p', starting at `a_pos'
-		do
-			p.put_special_character_8 (payload.area, 0, a_pos, payload.count)
-
-			-- pad to full block
-			pad_block (p, a_pos + payload.count, required_blocks * {TAR_CONST}.tar_block_size - payload.count)
-		end
-
 feature -- Modification
 
 	put (a_key: STRING_8; a_value: STRING_8)

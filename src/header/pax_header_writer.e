@@ -46,42 +46,6 @@ feature -- Status
 
 feature -- Output
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the whole `active_header' to `p', starting at `a_pos'
-			-- Does not modify blockwise writing state
-		local
-			i: INTEGER
-			l_ustar_writer: USTAR_HEADER_WRITER
-		do
-			create l_ustar_writer
-
-			if attached active_header as l_ustar_header then
-				i := 0
-
-				if attached pax_archivable as l_pax_archivable then
-						-- Pax header
-					l_ustar_writer.set_active_header (l_pax_archivable.header)
-					from
-					until
-						l_ustar_writer.finished_writing
-					loop
-						l_ustar_writer.write_block_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
-						i := i + 1
-					end
-
-						-- Pax payload
-					l_pax_archivable.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
-					i := i + l_pax_archivable.required_blocks
-
-				end
-					-- Ustar header
-				l_ustar_writer.set_active_header (l_ustar_header)
-				l_ustar_writer.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
-			else
-				-- Unreachable (precondition)
-			end
-		end
-
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write next block to `p', starting at `a_pos'
 		do

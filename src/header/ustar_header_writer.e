@@ -42,8 +42,8 @@ feature -- Status
 
 feature -- Output
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write `active_header' to `p' starting at `a_pos'
+	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write next block to `p' starting at `a_pos'
 		local
 			l_split_filename: TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 		do
@@ -128,13 +128,6 @@ feature -- Output
 			else
 				check false end -- Unreachable (see precondition)
 			end
-
-		end
-
-	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write next block to `p' starting at `a_pos'
-		do
-			write_to_managed_pointer (p, a_pos)
 			written_blocks := written_blocks + 1
 		end
 
@@ -226,8 +219,6 @@ feature {NONE} -- Utilities
 
 feature -- Path helpers		
 
-
-
 	unify_and_split_filename (a_path: PATH): TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 			-- Split `a_path' into filename and prefix, such that prefix + '/' + filename equals the UTF-8
 			-- representation of `a_path' using unix directory separator
@@ -276,5 +267,4 @@ feature -- Path helpers
 			correct_result_with_prefix: (not Result.filename_prefix.is_empty and not Result.filename.is_empty) implies (Result.filename_prefix + "/" + Result.filename ~ unify_utf_8_path (a_path))
 			correct_result_with_prefix_without_filename: (not Result.filename_prefix.is_empty and Result.filename.is_empty) implies (Result.filename_prefix ~ unify_utf_8_path (a_path))
 		end
-
 end

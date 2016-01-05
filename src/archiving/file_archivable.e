@@ -70,37 +70,6 @@ feature -- Output
 			written_blocks := written_blocks + 1
 		end
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the whole file to `p' starting at `a_pos'
-			-- Does not change the state of blockwise writing
-		local
-			l_file: FILE
-			i: INTEGER
-		do
-			-- Write blocks until there are no more blocks to write
-			from
-				create {RAW_FILE} l_file.make_with_path (file.path)
-				l_file.open_read
-				i := 0
-			until
-				i >= required_blocks and l_file.bytes_read /= {TAR_CONST}.tar_block_size
-			loop
-				l_file.read_to_managed_pointer (p, a_pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
-				i := i + 1
-			end
-
-			-- Fill with '%U'
-			if (i /= required_blocks) then
-				i := i - 1
-				pad_block (p, a_pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
-			end
-
-			-- Close file
-			l_file.close
-		ensure then
-			file_pointer_unchanged: (old file.file_pointer) = file.file_pointer
-		end
-
 feature {NONE} -- Implementation
 
 	file: FILE

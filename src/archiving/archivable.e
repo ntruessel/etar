@@ -64,25 +64,6 @@ feature -- Output
 			block_size: Result.count = {TAR_CONST}.tar_block_size
 		end
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the whole object to `p' (starting from `a_pos')
-			-- This will not change the position used for block based writing
-			-- keep in mind that this might use quite a lot of memory for large objects
-		require
-			non_negative_position: a_pos >= 0
-			enough_space: p.count >= a_pos + required_blocks * {TAR_CONST}.tar_block_size
-		deferred
-		end
-
-	write_to_new_managed_pointer: MANAGED_POINTER
-			-- Write the whole object to a new managed pointer
-			-- This will not change the position used for block based writing
-			-- keep in mind that this might use quite a lot of memory for large objects
-		do
-			create Result.make (required_blocks * {TAR_CONST}.tar_block_size)
-			write_to_managed_pointer (Result, 0)
-		end
-
 invariant
 	non_negative_written_blocks: written_blocks >= 0
 
