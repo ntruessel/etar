@@ -24,12 +24,13 @@
 	showstringspaces=false, tabsize=4,
 	deletekeywords={},
 	morekeywords={%
-		True, False,
-		MANAGED_POINTER, FILE
+		True, False, Precursor,
+		MANAGED_POINTER, FILE, RAW_FILE, NATURAL_64, READABLE_STRING_GENERAL,
 		TAR_HEADER, TAR_CONST, ARCHIVE,
 		FILE_STORAGE_BACKEND, STORAGE_BACKEND,
 		ARCHIVABLE, FILE_ARCHIVABLE, DIRECTORY_ARCHIVABLE,
-		UNARCHIVER, FILE_UNARCHIVER, DIRECTORY_UNARCHIVER
+		UNARCHIVER, FILE_UNARCHIVER, DIRECTORY_UNARCHIVER,
+		HEADER_SAVE_UNARCHIVER, HEADER_PRINT_UNARCHIVER
 	},
 }
 
@@ -58,28 +59,7 @@ API still unstable
 \include{parts/tar_header}
 \include{parts/storage_backend}
 \include{parts/archivable}
-
-\chapter{UNARCHIVER}
-\lstinline;UNARCHIVE; is the central piece for unarchiving. \lstinline;ARCHIVE;
-will parse the header and search for the last registered (!)
-\lstinline;UNARCHIVER; that can unarchive the payload that belongs to the
-header. This \lstinline;UNARCHIVER; will then be initialized with the header
-and be passed blocks until it indicates that unarchiving finished.
-
-etar provides two predefined \lstinline;UNARCHIVER;s
-
-\section{FILE\_UNARCHIVER}
-\lstinline;FILE\_UNARCHIVER; accepts all headers that have a typeflag for a
-regular file ('0' and '\%U'). It will create a \lstinline;RAW_FILE; and copy all
-payload blocks to it until \lstinline;size; bytes are written (indicated by the
-header). Additionally it will try to set the metadata according to the header.
-
-\section{DIRECTORY\_UNARCHIVER}
-\lstinline;DIRECTORY\_UNARCHIVER; accepts all headers that have the directory
-typeflag ('5'). It will create a new directory and try to set the metadata
-according to the header.
-
-\section{Implementing a Custom UNARCHIVER}
+\include{parts/unarchiver}
 
 \printbibliography[heading=bibintoc]
 
