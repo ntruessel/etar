@@ -45,8 +45,8 @@ feature -- Status
 
 feature -- Output
 
-	unarchive_block (p: MANAGED_POINTER; pos: INTEGER)
-			-- Unarchive block `p' starting at `pos'
+	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Unarchive block `p' starting at `a_pos'
 		local
 			remaining_bytes: NATURAL_64
 		do
@@ -55,11 +55,11 @@ feature -- Output
 				remaining_bytes := l_header.size - (unarchived_blocks * {TAR_CONST}.tar_block_size).as_natural_64
 				if remaining_bytes <= {TAR_CONST}.tar_block_size.as_natural_64 then
 					-- Last block
-					l_file.put_managed_pointer (p, pos, remaining_bytes.as_integer_32)
+					l_file.put_managed_pointer (p, a_pos, remaining_bytes.as_integer_32)
 					finalize_file
 				else
 					-- Standard block
-					l_file.put_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
+					l_file.put_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
 				end
 				unarchived_blocks := unarchived_blocks + 1
 			else

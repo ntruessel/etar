@@ -64,13 +64,13 @@ feature -- Output
 			block_size: Result.count = {TAR_CONST}.tar_block_size
 		end
 
-	write_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
-			-- Write the whole object to `p' (starting from `pos')
+	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write the whole object to `p' (starting from `a_pos')
 			-- This will not change the position used for block based writing
 			-- keep in mind that this might use quite a lot of memory for large objects
 		require
-			non_negative_position: pos >= 0
-			enough_space: p.count >= pos + required_blocks * {TAR_CONST}.tar_block_size
+			non_negative_position: a_pos >= 0
+			enough_space: p.count >= a_pos + required_blocks * {TAR_CONST}.tar_block_size
 		deferred
 		end
 

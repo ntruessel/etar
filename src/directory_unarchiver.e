@@ -41,8 +41,8 @@ feature -- Status
 
 feature -- Output
 
-	unarchive_block (p: MANAGED_POINTER; pos: INTEGER)
-			-- Unarchive block `p' starting at `pos'
+	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Unarchive block `p' starting at `a_pos'
 			-- Since directories are header only entries, there is nothing to do
 		do
 			-- do_nothing

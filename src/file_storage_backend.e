@@ -216,14 +216,14 @@ feature {NONE} -- Implementation
 			error_or_one_more_entry: has_error or else buffer.count = old buffer.count + 1
 		end
 
-	only_nul_bytes (block: MANAGED_POINTER): BOOLEAN
-			-- Check whether `block' only consists of NUL bytes
+	only_nul_bytes (a_block: MANAGED_POINTER): BOOLEAN
+			-- Check whether `a_block' only consists of NUL bytes
 		do
-			Result := block.read_special_character_8 (0, block.count).for_all_in_bounds (
+			Result := a_block.read_special_character_8 (0, a_block.count).for_all_in_bounds (
 				agent (c: CHARACTER_8): BOOLEAN
 					do
 						Result := c = '%U'
-					end, 0, block.count - 1)
+					end, 0, a_block.count - 1)
 		end
 
 invariant

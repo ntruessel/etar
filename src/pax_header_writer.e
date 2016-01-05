@@ -47,7 +47,7 @@ feature -- Status
 feature -- Output
 
 	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the whole `active_header' to `p', starting at `pos'
+			-- Write the whole `active_header' to `p', starting at `a_pos'
 			-- Does not modify blockwise writing state
 		local
 			i: INTEGER
@@ -83,7 +83,7 @@ feature -- Output
 		end
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write next block to `p', starting at `pos'
+			-- Write next block to `p', starting at `a_pos'
 		do
 			if attached pax_archivable as l_pax_archivable then
 				if written_blocks = 0 then
@@ -204,17 +204,7 @@ feature {NONE} -- Implementation
 		end
 
 	pax_archivable: detachable PAX_ARCHIVABLE
-
-	needed_blocks (n: INTEGER): INTEGER
-			-- Indicate how many blocks are needed to represent `n' bytes
-		require
-			non_negative_bytes: n >= 0
-		do
-			Result := (n + {TAR_CONST}.tar_block_size - 1) // {TAR_CONST}.tar_block_size
-		ensure
-			bytes_fit: n <= Result * {TAR_CONST}.tar_block_size
-			smallest_fit: (Result - 1) * {TAR_CONST}.tar_block_size < n
-		end
+			-- pax payload, attached if the current header does not fit into at ustar header
 
 invariant
 	active_header_writable: attached active_header as l_header implies ustar_writer.can_write (l_header)

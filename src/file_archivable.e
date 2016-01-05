@@ -55,14 +55,14 @@ feature -- Status
 
 feature -- Output
 
-	write_block_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
-			-- Write the next block to `p' starting at `pos'
+	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write the next block to `p' starting at `a_pos'
 		do
 			-- Write next block
-			file.read_to_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
+			file.read_to_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
 			if (file.end_of_file) then
 				-- Fill with '%U'
-				pad_block (p, pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
+				pad_block (p, a_pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
 
 				-- Close file
 				file.close
@@ -70,8 +70,8 @@ feature -- Output
 			written_blocks := written_blocks + 1
 		end
 
-	write_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
-			-- Write the whole file to `p' starting at `pos'
+	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write the whole file to `p' starting at `a_pos'
 			-- Does not change the state of blockwise writing
 		local
 			l_file: FILE
@@ -85,14 +85,14 @@ feature -- Output
 			until
 				i >= required_blocks and l_file.bytes_read /= {TAR_CONST}.tar_block_size
 			loop
-				l_file.read_to_managed_pointer (p, pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
+				l_file.read_to_managed_pointer (p, a_pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
 				i := i + 1
 			end
 
 			-- Fill with '%U'
 			if (i /= required_blocks) then
 				i := i - 1
-				pad_block (p, pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
+				pad_block (p, a_pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
 			end
 
 			-- Close file
