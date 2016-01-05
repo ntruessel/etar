@@ -23,14 +23,6 @@ inherit
 			is_equal
 		end
 
-	OCTAL_UTILS
-		export
-			{NONE} all
-		redefine
-			default_create,
-			is_equal
-		end
-
 feature {NONE} -- Initialization
 
 	default_create
