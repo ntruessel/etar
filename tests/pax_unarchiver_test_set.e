@@ -54,8 +54,8 @@ feature {NONE} -- Data - easy
 
 	easy_payload_string: STRING_8 =
 	"[
-		18 path=/dev/sda1
-		30 mtime=1451293316.085474313
+18 path=/dev/sda1
+30 mtime=1451293316.085474313
 
 	]"
 			-- Payload string for easy testset
