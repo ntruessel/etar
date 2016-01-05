@@ -40,7 +40,7 @@ feature -- Test writing
 			assert ("can write valid header (easy)", unit_under_test.can_write (easy_header))
 			assert ("has correct size (easy)", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length (easy)", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content (easy)", compare_special (easy_header_blob, output))
@@ -51,7 +51,7 @@ feature -- Test writing
 			assert ("can write valid header (link)", unit_under_test.can_write (link_header))
 			assert ("has correct size (link)", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length (link)", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content (link)", compare_special (link_header_blob, output))
@@ -62,7 +62,7 @@ feature -- Test writing
 			assert ("can write valid header (devnode)", unit_under_test.can_write (devnode_header))
 			assert ("has correct size (devnode)", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length (devnode)", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content (devnode)", compare_special (devnode_header_blob, output))
@@ -73,7 +73,7 @@ feature -- Test writing
 			assert ("can write valid header (split)", unit_under_test.can_write (split_header))
 			assert ("has correct size (split)", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length (split)", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content (split)", compare_special (split_header_blob, output))
@@ -92,7 +92,7 @@ feature -- Test writing
 			assert ("can write valid header", unit_under_test.can_write (long_filename_header))
 			assert ("has correct size", unit_under_test.required_blocks = 3)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, 3 * {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, 3 * {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = 3 * {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_special (long_filename_header_blob, output))

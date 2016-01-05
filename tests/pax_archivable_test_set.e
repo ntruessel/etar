@@ -23,7 +23,7 @@ feature -- Test routines
 		do
 			create unit_under_test.make_empty
 			unit_under_test.put ("mtime", "1451293316.085474313")
-			p := unit_under_test.write_to_new_managed_pointer
+			p := write_archivable_to_new_managed_pointer (unit_under_test)
 
 			assert ("Single block", p.count = {TAR_CONST}.tar_block_size and unit_under_test.required_blocks = 1)
 			assert ("Correct size", unit_under_test.header.size = 30)
@@ -37,7 +37,7 @@ feature -- Test routines
 			p: MANAGED_POINTER
 		do
 			create unit_under_test.make_from_payload (long_payload_string)
-			p := unit_under_test.write_to_new_managed_pointer
+			p := write_archivable_to_new_managed_pointer (unit_under_test)
 
 			assert ("Double block", p.count = {TAR_CONST}.tar_block_size * 2 and unit_under_test.required_blocks = 2)
 			assert ("Correct size", unit_under_test.header.size = ({TAR_CONST}.tar_block_size * 1 +  {TAR_CONST}.tar_block_size // 2).as_natural_64)
@@ -51,7 +51,7 @@ feature -- Test routines
 			p: MANAGED_POINTER
 		do
 			create unit_under_test.make_from_payload (blocksize_payload_string)
-			p := unit_under_test.write_to_new_managed_pointer
+			p := write_archivable_to_new_managed_pointer (unit_under_test)
 
 			assert ("Single block", p.count = {TAR_CONST}.tar_block_size and unit_under_test.required_blocks = 1)
 			assert ("Correct size", unit_under_test.header.size = ({TAR_CONST}.tar_block_size * 1).as_natural_64)
@@ -68,7 +68,7 @@ feature -- Test routines
 			unit_under_test.put ("key", "000")
 				-- This entry should first have length 9, then length 10 and finally length 11
 
-			p := unit_under_test.write_to_new_managed_pointer
+			p := write_archivable_to_new_managed_pointer (unit_under_test)
 
 			assert ("Single block", p.count = {TAR_CONST}.tar_block_size and unit_under_test.required_blocks = 1)
 			assert ("Correct size", unit_under_test.header.size = 11)

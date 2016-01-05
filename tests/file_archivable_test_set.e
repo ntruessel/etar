@@ -26,8 +26,8 @@ feature -- Test routines
 			create unit_under_test.make (easy_file)
 
 			header_writer.set_active_header (unit_under_test.header)
-			p := header_writer.write_to_new_managed_pointer
-			p.append (unit_under_test.write_to_new_managed_pointer)
+			p := write_header_to_new_managed_poitner (header_writer)
+			p.append (write_archivable_to_new_managed_pointer (unit_under_test))
 
 
 			assert ("Correct size", p.count = 2 * {TAR_CONST}.tar_block_size)
@@ -60,7 +60,6 @@ feature {NONE} -- Data - easy
 		once
 			create {RAW_FILE} Result.make_with_name ("test_files/README.md")
 		end
-
 end
 
 
