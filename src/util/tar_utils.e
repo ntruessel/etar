@@ -74,4 +74,50 @@ feature -- Header Checksum
 			end
 		end
 
+feature -- Metadata
+
+	get_uid_from_username (a_username: STRING): INTEGER
+			-- Return the uid that belongs to `a_username'
+		do
+			Result := c_get_uid_from_username (a_username.plus ("%U").area.base_address)
+		end
+
+	get_gid_from_groupname (a_groupname: STRING): INTEGER
+			-- Return the gid that belongs to `a_username'
+		do
+			Result := c_get_gid_from_groupname (a_groupname.plus ("%U").area.base_address)
+		end
+
+feature {NONE} -- external
+
+	c_get_uid_from_username (a_username: POINTER): INTEGER
+			-- Return the uid that belongs to `a_username'
+		external
+			"C inline use <pwd.h>, <sys/types.h>"
+		alias
+			"{
+				struct passwd *pw = getpwnam($a_username);
+				if (pw != (struct passwd *) 0) {
+					return (EIF_INTEGER) pw->pw_uid;
+				} else {
+					return (EIF_INTEGER) -1;
+				}
+			}"
+		end
+
+	c_get_gid_from_groupname (a_groupname: POINTER): INTEGER
+			-- Return the gid that belongs to `a_groupname'
+		external
+			"C inline use <grp.h>, <sys/types.h>"
+		alias
+			"{
+				struct group *gr = getgrnam($a_groupname);
+				if (gr != (struct group *) 0) {
+					return (EIF_INTEGER) gr->gr_gid;
+				} else {
+					return (EIF_INTEGER) -1;
+				}
+			}"
+		end
+
 end
