@@ -38,13 +38,13 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Indicates how many payload blocks this instance needs
 		do
-			Result := needed_blocks (payload.count)
+			Result := needed_blocks (payload.count.as_natural_64).as_integer_32
 		end
 
 	header: TAR_HEADER
 			-- Header that belongs to the payload
 		do
-			create Result.make
+			create Result
 
 			Result.set_filename (create {PATH}.make_from_string ({TAR_CONST}.pax_header_filename))
 			Result.set_user_id ({TAR_CONST}.pax_header_uid)
@@ -66,19 +66,10 @@ feature -- Output
 
 			if l_remaining_bytes <= {TAR_CONST}.tar_block_size then
 				-- Fill remaining space of block with '%U'
-				pad (p, a_pos + l_remaining_bytes, {TAR_CONST}.tar_block_size - l_remaining_bytes)
+				pad_block (p, a_pos + l_remaining_bytes, {TAR_CONST}.tar_block_size - l_remaining_bytes)
 			end
 
 			written_blocks := written_blocks + 1
-		end
-
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Writes whole payload to `p', starting at `a_pos'
-		do
-			p.put_special_character_8 (payload.area, 0, a_pos, payload.count)
-
-			-- pad to full block
-			pad (p, a_pos + payload.count, required_blocks * {TAR_CONST}.tar_block_size - payload.count)
 		end
 
 feature -- Modification

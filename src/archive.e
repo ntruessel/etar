@@ -33,16 +33,14 @@ feature {NONE} -- Initialization
 			create {PAX_HEADER_PARSER} header_parser
 
 				-- Unarchivers
-			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (3)
+			create {ARRAYED_LIST [UNARCHIVER]} unarchivers.make (5)
 
 --			unarchiving_finished := False
 
 			Precursor
 
 				-- Add default unarchivers
-			add_unarchiver (create {SKIP_UNARCHIVER})
-			add_unarchiver (create {FILE_UNARCHIVER})
-			add_unarchiver (create {DIRECTORY_UNARCHIVER})
+			add_unarchiver (create {SKIP_UNARCHIVER}) -- Fallback
 
 
 				-- Error redirections
@@ -54,6 +52,7 @@ feature {NONE} -- Initialization
 			-- Creat new archive with backend `a_storage_backend'
 		do
 			storage_backend := a_storage_backend
+			mode := mode_closed
 
 			default_create
 		ensure
@@ -68,7 +67,7 @@ feature -- Status setting
 			storage_backend.open_write
 			mode := mode_archive
 		ensure
-			archive_mode: mode = mode_archive
+			correct_mode: is_archiving_mode
 		end
 
 	open_unarchive
@@ -77,18 +76,43 @@ feature -- Status setting
 			storage_backend.open_read
 			mode := mode_unarchive
 		ensure
-			unarchive_mode: mode = mode_unarchive
+			correct_mode: is_unarchiving_mode
+		end
+
+	close
+			-- Close archive
+		do
+			storage_backend.close
+		ensure
+			closed: storage_backend.is_closed
 		end
 
 feature -- Status
 
+	is_unarchiving_mode: BOOLEAN
+			-- Is this archive in unarchiving mode?
+		do
+			Result := mode = mode_unarchive
+		end
+
+	is_archiving_mode: BOOLEAN
+			-- Is this archive in archiving mode?
+		do
+			Result := mode = mode_archive
+		end
+
+feature {NONE} -- Status (internal)
+
 	mode: INTEGER
 			-- In what mode has this instance been created
 
-	mode_unarchive: INTEGER = 0
+	mode_closed: INTEGER = 0
+			-- closed mode
+
+	mode_unarchive: INTEGER = 1
 			-- unarchive (read) mode
 
-	mode_archive: INTEGER = 1
+	mode_archive: INTEGER = 2
 			-- archive (write) mode
 
 feature -- Unarchiving
@@ -102,6 +126,8 @@ feature -- Unarchiving
 
 	unarchiving_finished: BOOLEAN
 			-- Indicate whether unarchiving finished
+		require
+			correct_mode: is_unarchiving_mode
 		do
 			Result := has_error or storage_backend.archive_finished
 		end
@@ -109,7 +135,7 @@ feature -- Unarchiving
 	unarchive
 			-- Unarchive the whole archive
 		require
-			unarchiving_mode: mode = mode_unarchive
+			correct_mode: is_unarchiving_mode
 		do
 			from
 
@@ -118,12 +144,13 @@ feature -- Unarchiving
 			loop
 				unarchive_next_entry
 			end
+			close
 		end
 
 	unarchive_next_entry
 			-- Unarchives the next entry
 		require
-			unarchiving_mode: mode = mode_unarchive
+			correct_mode: is_unarchiving_mode
 		local
 			l_unarchiver: detachable UNARCHIVER
 		do
@@ -174,6 +201,42 @@ feature -- Unarchiving
 				end
 			end
 		end
+
+feature -- Archiving
+
+	add_entry (a_entry: ARCHIVABLE)
+			-- Add `a_entry' to the archive
+		require
+			correct_mode: is_archiving_mode
+		local
+			l_block: MANAGED_POINTER
+		do
+			create l_block.make ({TAR_CONST}.tar_block_size)
+			from
+				header_writer.set_active_header (a_entry.header)
+			until
+				header_writer.finished_writing
+			loop
+				header_writer.write_block_to_managed_pointer (l_block, 0)
+				storage_backend.write_block (l_block)
+			end
+
+			from
+
+			until
+				a_entry.finished_writing
+			loop
+				a_entry.write_block_to_managed_pointer (l_block, 0)
+				storage_backend.write_block (l_block)
+			end
+		end
+
+	finalize
+			-- Write archive delimiter
+		do
+			storage_backend.finalize
+		end
+
 
 feature {NONE} -- Implementation
 

@@ -54,29 +54,6 @@ feature -- Setup
 
 feature -- Output
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write `active_header' to `p', starting at position `pos'. This does not affect blockwise writing.
-		require
-			valid_position: a_pos >= 0
-			enough_space: p.count >= a_pos + required_blocks * {TAR_CONST}.tar_block_size
-			has_active_header: attached active_header
-		deferred
-		ensure
-			same_blocks_written: written_blocks = old written_blocks
-		end
-
-	write_to_new_managed_pointer: MANAGED_POINTER
-			-- Write `active_header' to a new managed pointer with exactly the right size. Does not affect blockwise writing
-		require
-			has_active_header: attached active_header
-		do
-			create Result.make (required_blocks * {TAR_CONST}.tar_block_size)
-			write_to_managed_pointer (Result, 0)
-		ensure
-			minimal_size: Result.count = required_blocks * {TAR_CONST}.tar_block_size
-			same_blocks_written: written_blocks = old written_blocks
-		end
-
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write next block of `active_header' to `p', starting at positin `a_pos'
 		require

@@ -12,14 +12,10 @@ class
 
 inherit
 	TAR_HEADER_WRITER
-	redefine
-		default_create
-	end
+		redefine
+			default_create
+		end
 
-	ANY
-	redefine
-		default_create
-	end
 
 feature {NONE} -- Initialization
 
@@ -50,44 +46,8 @@ feature -- Status
 
 feature -- Output
 
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the whole `active_header' to `p', starting at `pos'
-			-- Does not modify blockwise writing state
-		local
-			i: INTEGER
-			l_ustar_writer: USTAR_HEADER_WRITER
-		do
-			create l_ustar_writer
-
-			if attached active_header as l_ustar_header then
-				i := 0
-
-				if attached pax_archivable as l_pax_archivable then
-						-- Pax header
-					l_ustar_writer.set_active_header (l_pax_archivable.header)
-					from
-					until
-						l_ustar_writer.finished_writing
-					loop
-						l_ustar_writer.write_block_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
-						i := i + 1
-					end
-
-						-- Pax payload
-					l_pax_archivable.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
-					i := i + l_pax_archivable.required_blocks
-
-				end
-					-- Ustar header
-				l_ustar_writer.set_active_header (l_ustar_header)
-				l_ustar_writer.write_to_managed_pointer (p, a_pos + i * {TAR_CONST}.tar_block_size)
-			else
-				-- Unreachable (precondition)
-			end
-		end
-
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write next block to `p', starting at `pos'
+			-- Write next block to `p', starting at `a_pos'
 		do
 			if attached pax_archivable as l_pax_archivable then
 				if written_blocks = 0 then
@@ -208,17 +168,7 @@ feature {NONE} -- Implementation
 		end
 
 	pax_archivable: detachable PAX_ARCHIVABLE
-
-	needed_blocks (n: INTEGER): INTEGER
-			-- Indicate how many blocks are needed to represent `n' bytes
-		require
-			non_negative_bytes: n >= 0
-		do
-			Result := (n + {TAR_CONST}.tar_block_size - 1) // {TAR_CONST}.tar_block_size
-		ensure
-			bytes_fit: n <= Result * {TAR_CONST}.tar_block_size
-			smallest_fit: (Result - 1) * {TAR_CONST}.tar_block_size < n
-		end
+			-- pax payload, attached if the current header does not fit into at ustar header
 
 invariant
 	active_header_writable: attached active_header as l_header implies ustar_writer.can_write (l_header)

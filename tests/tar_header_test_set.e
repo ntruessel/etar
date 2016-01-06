@@ -21,7 +21,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_path: PATH
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- Relative path
 			create l_path.make_from_string ("test_files")
@@ -40,7 +40,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_mode: NATURAL_16
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 				-- Simple setting
 			l_mode := 0c777
@@ -130,7 +130,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			uid: NATURAL_32
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- Root
 			uid := 0
@@ -149,7 +149,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			gid: NATURAL_32
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- Zero
 			gid := 0
@@ -168,7 +168,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_size: NATURAL_64
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- Zero
 			l_size := 0
@@ -187,7 +187,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_mtime: NATURAL_64
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- Zero
 			l_mtime := 0
@@ -206,7 +206,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_typeflag: CHARACTER_8
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- block
 			l_typeflag := {TAR_CONST}.tar_typeflag_block_special
@@ -225,7 +225,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_username, l_username_copy: STRING
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			l_username := "nicolas"
 			unit_under_test.set_user_name (l_username)
@@ -243,7 +243,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_groupname, l_groupname_copy: STRING
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			l_groupname := "users"
 			unit_under_test.set_group_name (l_groupname)
@@ -261,7 +261,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_devmajor: NATURAL_32
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- Zero
 			l_devmajor := 0
@@ -280,7 +280,7 @@ feature -- Test routines
 			unit_under_test: TAR_HEADER
 			l_devminor: NATURAL_32
 		do
-			create unit_under_test.make
+			create unit_under_test
 
 			-- Zero
 			l_devminor := 0

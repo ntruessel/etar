@@ -1,0 +1,31 @@
+\begin{tikzpicture} [
+		every node/.style={inner sep=1mm, node distance=1mm, minimum height=1.5em,
+			font=\scriptsize, anchor=west, rectangle},
+		entry/.style={draw=black},
+		header/.style={draw=black, fill=yellow!50},
+		payload/.style={draw=black, fill=green!50!orange!25},
+		null/.style={draw=black, fill=cyan!50}
+	]
+	\node (hdr1) [header] {Header};
+	\node (pl11) [payload, right=of hdr1.east] {Payload 1};
+	\node (d1) [right=of pl11.east] {\dots};
+	\node (pl1n) [payload, right=of d1.east] {Payload n};
+	\node (e1) [entry, fit={(hdr1) (pl11) (d1) (pl1n)}] {};
+
+	\node (hdr2) [header, right=of e1.east, xshift=1mm] {Header};
+	\node (e2) [entry, fit={(hdr2)}] {};
+
+	\node (hdr3) [header, right=of e2.east, xshift=1mm] {Header};
+	\node (pl31) [payload, right=of hdr3.east] {Payload 1};
+	\node (d3) [right=of pl31.east] {\dots};
+	\node (pl3n) [payload, right=of d3.east] {Payload m};
+	\node (e3) [entry, fit={(hdr3) (pl31) (d3) (pl3n)}] {};
+
+	\node (n1) [null, right=of e3.east, xshift=1mm] {0};
+	\node (n2) [null, right=of n1.east] {0};
+
+	\node (n) [entry, fit={(n1) (n2)}] {};
+
+	\node (archive) [entry, fit={(e1) (e2) (e3) (n)}] {};
+
+\end{tikzpicture}

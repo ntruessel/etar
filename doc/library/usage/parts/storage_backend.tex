@@ -1,0 +1,84 @@
+\chapter{STORAGE\_BACKEND}
+\lstinline;STORAGE_BACKEND; provides a unified interface for different storage
+methods an archive could use. Currently the only implementation is
+\lstinline;FILE_STORAGE_BACKEND;, providing support for archives that are stored
+in a file.
+\section{FILE\_STORAGE\_BACKEND} A \lstinline;FILE_STORAGE_BACKEND; is either created from a file with
+\lstinline;make_from_file; or from a filename with
+\lstinline;make_from_filename;.
+
+\section{Implementing a Custom STORAGE\_BACKEND}
+To implement a custom \lstinline;STORAGE_BACKEND;, one has to implement the
+following features:
+
+\subsection{Creation Procedures}
+If \lstinline;default_create; is redefined, \lstinline;Precursor; must be
+called. Every other creation procedure should call \lstinline;default_create;.
+
+\subsection{open\_read}
+\lstinline;open_read;\\
+Open backend for read access. Reading should start from the beginning.
+
+\subsection{open\_write}
+\lstinline;open_write;\\
+Open backend for write access. Writing should start from the beginning.
+
+\subsection{close}
+\lstinline;close;\\
+Close backend.
+
+\subsection{archive\_finished}
+\lstinline;archive_finished: BOOLEAN;\\
+Indicate whether the next two blocks contain the end-of-archive indicator
+(only zero bytes). The next \lstinline;read_block; calls should not skip these
+two blocks but read them again (not necessarily from the backend again, the
+implementation is free to chache these blocks).
+\lstinline;archive_finished; should return \lstinline;True; too, if an error
+occured (or occurs while checking for the end-of-archive indicator), does not
+have enough blocks available or if the backend is closed.
+
+\subsection{block\_ready}
+\lstinline;block_ready: BOOLEAN;\\
+Indicate whether there is a block that can be read with \lstinline;last_block;.
+\lstinline;False; if an error occured.
+
+
+\subsection{is\_readable}
+\lstinline;is_readable: BOOLEAN;\\
+Indicates whether this backend can be read from. If an error occured, this has
+to return \lstinline;False;
+
+\subsection{is\_writable}
+\lstinline;is_writable: BOOLEAN;\\
+Indicates whether this backend can be written to. If an error occured, this has
+to return \lstinline;False;
+
+\subsection{is\_closed}
+\lstinline;is_closed: BOOLEAN;\\
+Indicates whether this backend is closed.
+
+\subsection{read\_block}
+\lstinline;read_block;\\
+Read next block from backend. If there are not enough bytes for a full block, an
+error should be reported.
+
+\subsection{last\_block}
+\lstinline;last_block: MANAGED_POINTER;\\
+Last block that was read.
+
+\subsection{write\_block}
+\lstinline;write_block (block: MANAGED_POINTER);\\
+Write \lstinline;block; to the backend (starting from the beginning).
+
+\subsection{finalize}
+\lstinline;finalize;\\
+Write the end-of-archive indicator and close backend.
+
+\subsection{Utilties}
+\subsubsection{Error Reporting}
+To report an error one can use
+\lstinline|report_error (s: READABLE_STRING_GENERAL)|
+%\lstinline|report_error (s: STRING_8)|
+
+\subsubsection{Error Checking}
+\lstinline|has_error: BOOLEAN| indicates whether an error occured.

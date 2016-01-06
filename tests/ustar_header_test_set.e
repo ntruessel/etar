@@ -41,7 +41,7 @@ feature -- Test writing methods
 			assert ("can write valid header", unit_under_test.can_write (easy_header))
 			assert ("has correct size", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_special (easy_header_blob, output))
@@ -62,7 +62,7 @@ feature -- Test writing methods
 			assert ("can write valid header", unit_under_test.can_write (link_header))
 			assert ("has correct size", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_special (link_header_blob, output))
@@ -83,7 +83,7 @@ feature -- Test writing methods
 			assert ("can write valid header", unit_under_test.can_write (devnode_header))
 			assert ("has correct size", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_special (devnode_header_blob, output))
@@ -104,7 +104,7 @@ feature -- Test writing methods
 			assert ("can write valid header", unit_under_test.can_write (split_header))
 			assert ("has correct size", unit_under_test.required_blocks = 1)
 
-			output := unit_under_test.write_to_new_managed_pointer.read_special_character_8 (0, {TAR_CONST}.tar_block_size)
+			output := write_header_to_new_managed_poitner (unit_under_test).read_special_character_8 (0, {TAR_CONST}.tar_block_size)
 
 			assert ("correct output length", output.count = {TAR_CONST}.tar_block_size)
 			assert ("correct output content", compare_special (split_header_blob, output))
@@ -205,7 +205,7 @@ feature {NONE} -- Data - easy
 	easy_header: TAR_HEADER
 			-- Header corresponding to testset easy
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("home/nicolas/out.ps"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0c1750)
@@ -239,7 +239,7 @@ feature {NONE} -- Data - link
 	link_header: TAR_HEADER
 			-- Header corresponding to testset link
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string (".zshrc"))
 			Result.set_mode (0c0777)
 			Result.set_user_id (0c1750)
@@ -272,7 +272,7 @@ feature {NONE} -- Data - Device node
 	devnode_header: TAR_HEADER
 			-- Header corresponding to testset devnode
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("dev/sda1"))
 			Result.set_mode (0c0660)
 			Result.set_user_id (0c0)
@@ -306,7 +306,7 @@ feature {NONE} -- Data - split
 	split_header: TAR_HEADER
 			-- Header corresponding to testset split
 		once
-			create Result.make
+			create Result
 			Result.set_filename (create {PATH}.make_from_string ("a_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_directory/a_not_so_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_filename"))
 			Result.set_mode (0c0644)
 			Result.set_user_id (0c1750)

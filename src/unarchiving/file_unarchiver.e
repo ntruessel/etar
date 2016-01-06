@@ -45,8 +45,8 @@ feature -- Status
 
 feature -- Output
 
-	unarchive_block (p: MANAGED_POINTER; pos: INTEGER)
-			-- Unarchive block `p' starting at `pos'
+	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Unarchive block `p' starting at `a_pos'
 		local
 			remaining_bytes: NATURAL_64
 		do
@@ -55,11 +55,11 @@ feature -- Output
 				remaining_bytes := l_header.size - (unarchived_blocks * {TAR_CONST}.tar_block_size).as_natural_64
 				if remaining_bytes <= {TAR_CONST}.tar_block_size.as_natural_64 then
 					-- Last block
-					l_file.put_managed_pointer (p, pos, remaining_bytes.as_integer_32)
+					l_file.put_managed_pointer (p, a_pos, remaining_bytes.as_integer_32)
 					finalize_file
 				else
 					-- Standard block
-					l_file.put_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
+					l_file.put_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
 				end
 				unarchived_blocks := unarchived_blocks + 1
 			else
@@ -92,17 +92,7 @@ feature {NONE} -- Implementation
 				l_file.flush
 				l_file.close
 
-				l_file.change_mode (l_header.mode)
-				l_file.set_date (l_header.mtime.as_integer_32)
-
-				-- Check username with id first
-				if (file_owner (l_header.user_id.as_integer_32) ~ l_header.user_name) then
-					l_file.change_owner (l_header.user_id.as_integer_32)
-				end
-				-- Check groupname with id first
-				if (file_group (l_header.group_id.as_integer_32) ~ l_header.group_name) then
-					l_file.change_group (l_header.group_id.as_integer_32)
-				end
+				file_set_metadata (l_file, l_header)
 			else
 				check false end -- Unreachable
 				-- FIXME: Better error handling
@@ -110,6 +100,6 @@ feature {NONE} -- Implementation
 		end
 
 	active_file: detachable FILE
-			-- File that is currently unarchived	
+			-- File that is currently unarchived
 
 end

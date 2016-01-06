@@ -22,11 +22,11 @@ feature -- Status
 
 feature -- Parsing
 
-	parse_block (block: MANAGED_POINTER; pos: INTEGER)
-			-- parse `block' (starting from `pos')
+	parse_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- parse `a_block' (starting from `a_pos')
 		require
-			block_size_large_enough: pos + {TAR_CONST}.tar_block_size <= block.count
-			non_negative_length: pos >= 0
+			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
+			non_negative_length: a_pos >= 0
 		deferred
 		end
 
@@ -52,28 +52,28 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Utilities
 
-	next_block_string (block: MANAGED_POINTER; pos, length: INTEGER): STRING
-			-- Parse a string in `block' from `pos' with length at most `length'
+	next_block_string (a_block: MANAGED_POINTER; a_pos, a_length: INTEGER): STRING
+			-- Parse a string in `a_block' from `a_pos' with length at most `a_length'
 			-- A string is a sequence of characters, stopping at the first '%U'
-			-- that occurs. In case no '%U' occurs, it ends after at `length'
+			-- that occurs. In case no '%U' occurs, it ends after at `a_length'
 			-- characters
 			-- FIXME: Slow implementation
 		require
-			enough_characters: pos + length <= block.count
-			non_negative_pos: pos >= 0
-			positive_length: length > 0
+			enough_characters: a_pos + a_length <= a_block.count
+			non_negative_pos: a_pos >= 0
+			positive_length: a_length > 0
 		local
 			c: CHARACTER_8
 			i: INTEGER
 		do
-			create Result.make (length) -- Might be inefficient due to many resizes
+			create Result.make (a_length) -- Might be inefficient due to many resizes
 			from
 				i := 0
 				c := ' ' -- dummy character different from %U
 			until
-				i >= length or c = '%U'
+				i >= a_length or c = '%U'
 			loop
-				c := block.read_character (pos + i)
+				c := a_block.read_character (a_pos + i)
 				if c /= '%U' then
 					Result.append_character (c)
 				end

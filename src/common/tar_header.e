@@ -2,12 +2,6 @@ note
 	description: "[
 		Header of a tar entry.
 		Contains the metadata about the following payload.
-		
-		Writes pax interchange format compliant headers to files,
-		and parses them.
-		
-		Compare http://pubs.opengroup.org/onlinepubs/9699919799/
-		for the pax/ustar specification
 	]"
 	date: "$Date$"
 	revision: "$Revision$"
@@ -16,25 +10,15 @@ class
 	TAR_HEADER
 
 inherit
-
 	ANY
 		redefine
+			default_create,
 			is_equal
 		end
-
-	OCTAL_UTILS
-		export
-			{NONE} all
-		redefine
-			is_equal
-		end
-
-create
-	make
 
 feature {NONE} -- Initialization
 
-	make
+	default_create
 			-- Create an empty TAR_HEADER
 		do
 			create filename.make_empty

@@ -73,6 +73,7 @@ feature {NONE} -- Implementation
 			if l_archive.has_error then
 				print_errors (l_archive)
 			end
+			l_archive.close
 
 
 		end

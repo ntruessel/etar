@@ -1,2 +1,14 @@
+# Compilation output
 EIFGENs
+
+# Directories used for unarchiving
 tests/test_files/unarchiver
+tmp/
+
+# Tex
+*.log
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.run.xml

@@ -33,23 +33,23 @@ feature {NONE} -- Initialization
 
 feature -- Parsing
 
-	parse_block (block: MANAGED_POINTER; a_pos: INTEGER)
-			-- parse `block' (starting from `a_pos')
+	parse_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- parse `a_block' (starting from `a_pos')
 		do
 			if not has_error then
 				inspect parsing_state
 				when ps_first_header then
 					parsing_finished := False
-					handle_first_header_block (block, a_pos)
+					handle_first_header_block (a_block, a_pos)
 
 				when ps_global_payload then
-					handle_global_payload_block (block, a_pos)
+					handle_global_payload_block (a_block, a_pos)
 
 				when ps_extended_payload then
-					handle_extended_payload_block (block, a_pos)
+					handle_extended_payload_block (a_block, a_pos)
 
 				when ps_second_header then
-					handle_second_header_block (block, a_pos)
+					handle_second_header_block (a_block, a_pos)
 				else
 					report_error ("Unknown parsing state")
 				end
@@ -82,15 +82,15 @@ feature {NONE} -- Implementation
 	ps_second_header: INTEGER = 3
 			-- parsing state: next block to be parsed belongs to ustar header
 
-	handle_first_header_block (block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `block', starting from `a_pos', treating it as a first header block
+	handle_first_header_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Handle `a_block', starting from `a_pos', treating it as a first header block
 		require
 			correct_parsing_state: parsing_state = ps_first_header
-			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
+			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
 			non_negative_length: a_pos >= 0
 			no_errors: not has_error
 		do
-			ustar_parser.parse_block (block, a_pos)
+			ustar_parser.parse_block (a_block, a_pos)
 
 			if not has_error then
 				if ustar_parser.parsing_finished then
@@ -123,16 +123,16 @@ feature {NONE} -- Implementation
 
 		end
 
-	handle_global_payload_block (block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `block', starting from `a_pos', treating it as a global (pax) payload block
+	handle_global_payload_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Handle `a_block', starting from `a_pos', treating it as a global (pax) payload block
 		require
 			correct_parsing_state: parsing_state = ps_extended_payload
-			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
+			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
 			non_negative_length: a_pos >= 0
 			no_errors: not has_error
 		do
 			if not global_payload_unarchiver.unarchiving_finished then
-				global_payload_unarchiver.unarchive_block (block, a_pos)
+				global_payload_unarchiver.unarchive_block (a_block, a_pos)
 
 				if not has_error then
 					if global_payload_unarchiver.unarchiving_finished then
@@ -146,16 +146,16 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	handle_extended_payload_block (block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `block', starting from `a_pos', treating it as an extended (pax) payload block
+	handle_extended_payload_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Handle `a_block', starting from `a_pos', treating it as an extended (pax) payload block
 		require
 			correct_parsing_state: parsing_state = ps_extended_payload
-			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
+			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
 			non_negative_length: a_pos >= 0
 			no_errors: not has_error
 		do
 			if not extended_payload_unarchiver.unarchiving_finished then
-				extended_payload_unarchiver.unarchive_block (block, a_pos)
+				extended_payload_unarchiver.unarchive_block (a_block, a_pos)
 
 				if not has_error then
 					if extended_payload_unarchiver.unarchiving_finished then
@@ -170,15 +170,15 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	handle_second_header_block (block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `block', starting from `a_pos', treating it as a second header block
+	handle_second_header_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Handle `a_block', starting from `a_pos', treating it as a second header block
 		require
 			correct_parsing_state: parsing_state = ps_second_header
-			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= block.count
+			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
 			non_negative_length: a_pos >= 0
 			no_errors: not has_error
 		do
-			ustar_parser.parse_block (block, a_pos)
+			ustar_parser.parse_block (a_block, a_pos)
 			if not has_error then
 				if ustar_parser.parsing_finished then
 					if attached ustar_parser.parsed_header as l_ustar_header then

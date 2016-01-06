@@ -27,12 +27,6 @@ feature {NONE} -- Initialization
 		do
 			create {RAW_FILE} file.make_with_path (a_file.path)
 			file.open_read
-
-			if (file.is_closed) then
-				file.open_read
-			else
-				file.start
-			end
 		end
 
 feature -- Status
@@ -40,13 +34,13 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Indicate how much space is needed to represent this ARCHIVABLE
 		do
-			Result := needed_blocks (file.file_info.size)
+			Result := needed_blocks (file.file_info.size.as_natural_64).as_integer_32
 		end
 
 	header: TAR_HEADER
 			-- Header that belongs to the payload
-		once
-			create Result.make
+		do
+			create Result
 
 			Result.set_filename (file.path)
 			Result.set_mode (file.protection.as_natural_16)
@@ -61,49 +55,19 @@ feature -- Status
 
 feature -- Output
 
-	write_block_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
-			-- Write the next block to `p' starting at `pos'
+	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write the next block to `p' starting at `a_pos'
 		do
 			-- Write next block
-			file.read_to_managed_pointer (p, pos, {TAR_CONST}.tar_block_size)
+			file.read_to_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
 			if (file.end_of_file) then
 				-- Fill with '%U'
-				pad (p, pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
+				pad_block (p, a_pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
 
 				-- Close file
 				file.close
 			end
-		end
-
-	write_to_managed_pointer (p: MANAGED_POINTER; pos: INTEGER)
-			-- Write the whole file to `p' starting at `pos'
-			-- Does not change the state of blockwise writing
-		local
-			l_file: FILE
-			i: INTEGER
-		do
-			-- Write blocks until there are no more blocks to write
-			from
-				create {RAW_FILE} l_file.make_with_path (file.path)
-				l_file.open_read
-				i := 0
-			until
-				i >= required_blocks and l_file.bytes_read /= {TAR_CONST}.tar_block_size
-			loop
-				l_file.read_to_managed_pointer (p, pos + {TAR_CONST}.tar_block_size * i, {TAR_CONST}.tar_block_size)
-				i := i + 1
-			end
-
-			-- Fill with '%U'
-			if (i /= required_blocks) then
-				i := i - 1
-				pad (p, pos + {TAR_CONST}.tar_block_size * i + l_file.bytes_read, {TAR_CONST}.tar_block_size - l_file.bytes_read)
-			end
-
-			-- Close file
-			l_file.close
-		ensure then
-			file_pointer_unchanged: (old file.file_pointer) = file.file_pointer
+			written_blocks := written_blocks + 1
 		end
 
 feature {NONE} -- Implementation

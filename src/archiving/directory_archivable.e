@@ -36,8 +36,8 @@ feature -- Status
 
 	header: TAR_HEADER
 			-- Header that belongs to the payload
-		once
-			create Result.make
+		do
+			create Result
 			Result.set_filename (directory.path)
 			Result.set_mode (directory.protection.to_natural_16)
 			Result.set_user_id (directory.user_id.to_natural_32)
@@ -54,13 +54,6 @@ feature -- Output
 			-- Write the next block to `p', starting at `a_pos'
 		do
 			-- do_nothing (impossible to call)
-		end
-
-	write_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the whole representation to `p', starting at `a_pos'
-			-- Does not modify blockwise writing status
-		do
-			-- do_nothing
 		end
 
 feature {NONE} -- Implementation
