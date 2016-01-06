@@ -26,8 +26,8 @@ feature -- Test routines
 			l_file: FILE
 		do
 			create unit_under_test
-			create p.make (easy_header_payload_blob.count)
-			p.put_special_character_8 (easy_header_payload_blob, 0, 0, easy_header_payload_blob.count)
+			create p.make (easy_payload_blob.count)
+			p.put_special_character_8 (easy_payload_blob, 0, 0, easy_payload_blob.count)
 
 			assert ("Correct payload size", p.count = {TAR_CONST}.tar_block_size)
 
@@ -51,7 +51,7 @@ feature -- Test routines
 			assert ("File unarchived and stored to disk", l_file.exists)
 
 			l_file.open_read
-			assert ("Contents match", same_content (l_file, easy_header_payload_blob, easy_header.size.as_integer_32))
+			assert ("Contents match", same_content (l_file, easy_payload_blob, easy_header.size.as_integer_32))
 		end
 
 	test_root_file_unarchiver
@@ -62,8 +62,8 @@ feature -- Test routines
 			l_file: FILE
 		do
 			create unit_under_test
-			create p.make (root_header_payload_blob.count)
-			p.put_special_character_8 (root_header_payload_blob, 0, 0, root_header_payload_blob.count)
+			create p.make (root_payload_blob.count)
+			p.put_special_character_8 (root_payload_blob, 0, 0, root_payload_blob.count)
 
 			assert ("Correct payload size", p.count = {TAR_CONST}.tar_block_size)
 
@@ -87,7 +87,7 @@ feature -- Test routines
 			assert ("File unarchived and stored to disk", l_file.exists)
 
 			l_file.open_read
-			assert ("Contents match", same_content (l_file, root_header_payload_blob, root_header.size.as_integer_32))
+			assert ("Contents match", same_content (l_file, root_payload_blob, root_header.size.as_integer_32))
 		end
 
 
@@ -108,21 +108,22 @@ feature {NONE} -- Events
 feature {NONE} -- Utilites
 
 	same_content (a_file: FILE; a_template: SPECIAL[CHARACTER_8]; n: INTEGER): BOOLEAN
-			-- Compare whether contents in a_special (up to `n'-th character)
+			-- Compare whether contents in a_special (up to `n'-th character or file end)
 		require
-			file_open_for_reading: a_file.is_open_read
+			file_open_for_reading: a_file.is_open_read and not a_file.is_open_append
 			template_large_enough: a_template.count >= n
-			file_large_enough: a_file.count >= n
 		local
 			i: INTEGER
 		do
 			from
 				Result := True
 				i := 0
+				if a_file.readable then
+					a_file.read_character
+				end
 			until
-				i >= n
+				i >= n or not a_file.readable
 			loop
-				a_file.read_character
 				if (a_file.last_character /= a_template[i]) then
 					Result := False
 					print ("Different contents at character ")
@@ -133,7 +134,11 @@ feature {NONE} -- Utilites
 					print (a_template[i])
 				end
 				i := i + 1
+				if a_file.readable then
+					a_file.read_character
+				end
 			end
+			Result := Result and (not a_file.readable implies a_template[i] = '%U')
 		end
 
 feature {NONE} -- Data - easy
@@ -153,7 +158,7 @@ feature {NONE} -- Data - easy
 			Result.set_group_name ("users")
 		end
 
-	easy_header_payload_blob: SPECIAL[CHARACTER_8]
+	easy_payload_blob: SPECIAL[CHARACTER_8]
 			-- Payload blob for easy test data
 		local
 			header_template: STRING_8
@@ -180,10 +185,10 @@ feature {NONE} -- Data - easy
 			Result.set_group_name ("root")
 		end
 
-	root_header_payload_blob: SPECIAL [CHARACTER_8]
+	root_payload_blob: SPECIAL [CHARACTER_8]
 			-- Payload blob for root test data
 		once
-			Result := easy_header_payload_blob
+			Result := easy_payload_blob
 		end
 end
 

@@ -74,4 +74,102 @@ feature -- Header Checksum
 			end
 		end
 
+feature -- Metadata manipulation
+
+	file_set_metadata (a_file: FILE; a_header: TAR_HEADER)
+			-- Set all of `a_file's metadata according to `a_header'
+		require
+			file_exists: a_file.exists
+		do
+			file_set_mode (a_file, a_header.mode.as_integer_32)
+			file_set_mtime (a_file, a_header.mtime.as_integer_32)
+
+			if file_owner (a_header.user_id.as_integer_32) ~ a_header.user_name then
+				file_set_uid (a_file, a_header.user_id.as_integer_32)
+			end
+
+			if file_group (a_header.group_id.as_integer_32) ~ a_header.group_name then
+				file_set_gid (a_file, a_header.group_id.as_integer_32)
+			end
+
+		end
+
+	file_set_mode (a_file: FILE; a_mode: INTEGER)
+			-- Set `a_file's permissions ot `a_mode' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.change_mode (a_mode)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+	file_set_mtime (a_file: FILE; a_mtime: INTEGER)
+			-- Set `a_file's mtime to `a_mtime' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.set_date (a_mtime)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+	file_set_uid (a_file: FILE; a_uid: INTEGER)
+			-- Set `a_file's uid to `a_uid' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.change_owner (a_uid)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+	file_set_gid (a_file: FILE; a_gid: INTEGER)
+			-- Set `a_file's gid to `a_gid' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.change_group (a_gid)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+feature {NONE} -- Utilities stolen from file_info
+
+	file_owner (uid: INTEGER): STRING
+			-- Convert UID to login name if possible
+		external
+			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
+		alias
+			"eif_file_owner"
+		end
+
+	file_group (gid: INTEGER): STRING
+			-- Convert GID to group name if possible
+		external
+			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
+		alias
+			"eif_file_group"
+		end
+
 end
