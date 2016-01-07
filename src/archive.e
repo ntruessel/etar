@@ -212,8 +212,9 @@ feature -- Archiving
 			l_block: MANAGED_POINTER
 		do
 			create l_block.make ({TAR_CONST}.tar_block_size)
+
 			from
-				header_writer.set_active_header (a_entry.header)
+				header_writer.set_active_header (sanitized_header (a_entry.header))
 			until
 				header_writer.finished_writing
 			loop
@@ -270,4 +271,27 @@ feature {NONE} -- Implementation
 
 	header_writer: TAR_HEADER_WRITER
 			-- Writer to use for header writing
+
+	sanitized_header (a_header: TAR_HEADER): TAR_HEADER
+			-- Remove dangerous values from `a_header'
+			-- Currently only removes absolute filenames and parent directories
+		local
+			l_safe_path: PATH
+		do
+			Result := a_header
+			create l_safe_path.make_empty
+			across
+				Result.filename.components as l_path_cursor
+			loop
+				if l_path_cursor.item.has_root or l_path_cursor.item.is_current_symbol or l_path_cursor.item.is_parent_symbol then
+					create l_safe_path.make_empty
+				else
+					l_safe_path := l_safe_path + l_path_cursor.item
+				end
+			end
+			Result.set_filename (l_safe_path)
+		ensure
+			relative_filename: Result.filename.is_relative
+			no_parent_or_current_symbols: across Result.filename.components as l_path_cursor all not l_path_cursor.item.is_current_symbol and not l_path_cursor.item.is_parent_symbol end
+		end
 end
