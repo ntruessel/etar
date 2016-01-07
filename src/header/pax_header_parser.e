@@ -95,11 +95,11 @@ feature {NONE} -- Implementation
 			if not has_error then
 				if ustar_parser.parsing_finished then
 					if attached ustar_parser.parsed_header as l_first_header then
-						if l_first_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global then
+						if l_first_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global and l_first_header.size > 0 then
 								-- global header
 							global_payload_unarchiver.initialize (l_first_header)
 							parsing_state := ps_global_payload
-						elseif l_first_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended then
+						elseif l_first_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended and l_first_header.size > 0 then
 								-- extended header
 							extended_payload_unarchiver.initialize (l_first_header)
 							parsing_state := ps_extended_payload
@@ -126,7 +126,7 @@ feature {NONE} -- Implementation
 	handle_global_payload_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
 			-- Handle `a_block', starting from `a_pos', treating it as a global (pax) payload block
 		require
-			correct_parsing_state: parsing_state = ps_extended_payload
+			correct_parsing_state: parsing_state = ps_global_payload
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
 			non_negative_length: a_pos >= 0
 			no_errors: not has_error
