@@ -52,6 +52,28 @@ feature -- Test routines
 			assert ("leading root (b)", l_res.filename ~ "890123456789012345678901234567890123456789012345678901234567890")
 		end
 
+	test_checksum_calculation
+			-- test checksum calculation
+		local
+			unit_under_test: TAR_UTILS
+			l_util_string: STRING
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+			create p.make ({TAR_CONST}.tar_block_size)
+
+			l_util_string := " "
+			l_util_string.multiply (p.count)
+			p.put_special_character_8 (l_util_string.area, 0, 0, p.count)
+			assert ("all spaces", unit_under_test.checksum (p, 0).as_integer_32 = (' ').code * p.count)
+
+			l_util_string := "0"
+			l_util_string.multiply (p.count)
+			p.put_special_character_8 (l_util_string.area, 0, 0, p.count)
+
+			assert ("all zeros", unit_under_test.checksum (p, 0).as_integer_32 = (' ').code * {TAR_CONST}.chksum_length + ('0').code * ({TAR_CONST}.tar_block_size - {TAR_CONST}.chksum_length))
+
+		end
 end
 
 
