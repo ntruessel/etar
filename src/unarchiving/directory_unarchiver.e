@@ -58,7 +58,7 @@ feature {NONE} -- Implementation
 			if attached active_header as header then
 				create l_directory.make_with_path (header.filename)
 				if not l_directory.exists then
-					l_directory.create_dir
+					l_directory.recursive_create_dir
 				end
 				set_metadata (l_directory)
 			end
