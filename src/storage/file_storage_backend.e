@@ -85,6 +85,7 @@ feature -- Status setting
 			-- Close backend
 		do
 			if not has_error then
+				backend.flush
 				backend.close
 			end
 		end
