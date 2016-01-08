@@ -37,6 +37,25 @@ feature -- Test routines
 			assert ("correct mtime", unit_under_test.get_value ("mtime") ~ "1451293316.085474313")
 		end
 
+	test_pax_unarchiver_error
+			-- Test pax unarchiver with testset containing errors
+		local
+			unit_under_test: PAX_UNARCHIVER
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+			create p.make_from_pointer (error_payload_blob.base_address, error_payload_blob.count)
+
+			unit_under_test.initialize (error_header)
+			assert ("Not finished after setting header", not unit_under_test.unarchiving_finished)
+
+			unit_under_test.unarchive_block (p, 0)
+
+			assert ("Finished", unit_under_test.unarchiving_finished)
+			assert ("Has error", unit_under_test.has_error)
+		end
+
+
 feature {NONE} -- Data - pax header template
 
 	pax_header: TAR_HEADER
@@ -71,6 +90,28 @@ feature {NONE} -- Data - easy
 		once
 			Result := pax_header
 			Result.set_size (easy_payload_string.count.as_natural_64)
+		end
+
+feature {NONE} -- Data - error
+
+	error_payload_string: STRING_8 =
+	"[
+17 path=/dev/sda131 mtime=1451293316.085474313
+
+	]"
+			-- Payload string for error testset
+	error_payload_blob: SPECIAL [CHARACTER_8]
+			-- Payload blob for error testset
+		once
+			create Result.make_filled ('%U', needed_blocks (error_payload_string.count) * {TAR_CONST}.tar_block_size)
+			Result.copy_data (error_payload_string.area, 0, 0, error_payload_string.count)
+		end
+
+	error_header: TAR_HEADER
+			-- Return header for error testset
+		once
+			Result := pax_header
+			Result.set_size (error_payload_string.count.as_natural_64)
 		end
 end
 
