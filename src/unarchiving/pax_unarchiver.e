@@ -15,7 +15,10 @@ inherit
 			default_create
 		end
 
-feature -- Initialization
+create
+	make_reset
+
+feature {NONE} -- Initialization
 
 	default_create
 			-- Initialize unarchiver
@@ -32,14 +35,12 @@ feature -- Initialization
 			Precursor
 		end
 
-	required_blocks: INTEGER
-			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+	make_reset (a_reset_on_initialization: BOOLEAN)
+			-- Create new pax unarchiver that resets entries from past headers iff `a_reset_on_initialization' is true
 		do
-			if attached active_header as l_header then
-				Result := needed_blocks (l_header.size).as_integer_32
-			else
-				-- Unreachable (precondition)
-			end
+			reset_entries := a_reset_on_initialization
+
+			default_create
 		end
 
 feature -- Status
@@ -60,6 +61,16 @@ feature -- Status
 			-- Returns void if there is none
 		do
 			Result := entries.item (a_key)
+		end
+
+	required_blocks: INTEGER
+			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+		do
+			if attached active_header as l_header then
+				Result := needed_blocks (l_header.size).as_integer_32
+			else
+				-- Unreachable (precondition)
+			end
 		end
 
 feature -- Unarchiving
@@ -112,7 +123,9 @@ feature {NONE} -- Implementation
 	do_internal_initialization
 			-- Initialize subclass specific internals after initialize has done its job
 		do
-			entries.wipe_out
+			if reset_entries then
+				entries.wipe_out
+			end
 			reset_error
 			reset_parser
 		end
@@ -145,6 +158,9 @@ feature {NONE} -- parsing finite state machine
 
 	ps_value: INTEGER = 2
 			-- parsing state: next block to be parsed belongs to ustar header
+
+	reset_entries: BOOLEAN
+			-- reset entries when initializing new header?
 
 	handle_length_character (c: CHARACTER_8)
 			-- Handle `c', treating it as a length character
@@ -204,7 +220,11 @@ feature {NONE} -- parsing finite state machine
 				active_value.append_character (c)
 			elseif parsed_characters = active_length.to_integer then
 				if c = '%N' then
-					entries.force (active_value.twin, active_key.twin)
+					if active_value.is_empty then
+						entries.remove (active_key)
+					else
+						entries.force (active_value.twin, active_key.twin)
+					end
 					reset_parser
 				else
 					report_error ("Entry not delimited by newline. Key: " + active_key)
@@ -223,6 +243,7 @@ feature {NONE} -- parsing finite state machine
 			active_length.wipe_out
 			active_key.wipe_out
 			active_value.wipe_out
+			parsed_characters := 0
 		end
 
 invariant

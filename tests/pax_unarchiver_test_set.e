@@ -21,7 +21,7 @@ feature -- Test routines
 			unit_under_test: PAX_UNARCHIVER
 			p: MANAGED_POINTER
 		do
-			create unit_under_test
+			create unit_under_test.make_reset (False)
 			create p.make_from_pointer (easy_payload_blob.base_address, easy_payload_blob.count)
 
 			unit_under_test.initialize (easy_header)
@@ -43,7 +43,7 @@ feature -- Test routines
 			unit_under_test: PAX_UNARCHIVER
 			p: MANAGED_POINTER
 		do
-			create unit_under_test
+			create unit_under_test.make_reset (True)
 			create p.make_from_pointer (error_payload_blob.base_address, error_payload_blob.count)
 
 			unit_under_test.initialize (error_header)

@@ -19,8 +19,8 @@ feature {NONE} -- Initialization
 			-- Create new instance
 		do
 			create ustar_parser
-			create extended_payload_unarchiver
-			create global_payload_unarchiver
+			create extended_payload_unarchiver.make_reset (True)
+			create global_payload_unarchiver.make_reset (False)
 --			parsing_state := ps_pax_header
 
 			Precursor

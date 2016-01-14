@@ -655,7 +655,7 @@ feature {NONE} -- Data - global header union
 			Result.set_user_id (0c1750)
 			Result.set_group_id (0c144)
 			Result.set_size (1450701253)
-			Result.set_mtime (1450701253)
+			Result.set_mtime (1450708269)
 			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
 			Result.set_user_name ("nicolas")
 			Result.set_group_name ("users")
