@@ -131,6 +131,9 @@ feature {NONE} -- parsing finite state machine
 	active_value: STRING_8
 			-- Value field entry for which parsing is in progress
 
+	parsed_characters: INTEGER
+			-- Indiates how many characters have been parsed so far
+
 	parsing_state: INTEGER
 			-- In what parsing state are we currently? One of the following constants
 
@@ -149,24 +152,22 @@ feature {NONE} -- parsing finite state machine
 			no_errors: not has_error
 			correct_state: parsing_state = ps_length
 		do
-			inspect c
-			when ' ' then
+			parsed_characters := parsed_characters + 1
+
+			if c = ' ' then
 				if not active_length.is_empty then
 					parsing_state := ps_key
 				else
 					report_error ("No length parsed, first character was space")
 				end
-			when '=' then
-				report_error ("No key found - instead found equals sign, currently parsed length: " + active_length)
-			when '%N' then
-				report_error ("No key found - instead found newline character, currently parsed length: " + active_length)
+			elseif c.is_digit then
+				active_length.append_character (c)
 			else
-				if c.is_digit then
-					active_length.append_character (c)
-				else
-					report_error ("Detected non-digit character in payload entry")
-				end
+				report_error ("Detected non-digit character in length entry, currently parsed length: " + active_length)
 			end
+		ensure
+			more_parsed_characters: parsed_characters = old parsed_characters + 1
+			correct_successor_state: parsing_state = ps_length or parsing_state = ps_key
 		end
 
 	handle_key_character (c: CHARACTER_8)
@@ -175,6 +176,8 @@ feature {NONE} -- parsing finite state machine
 			no_errors: not has_error
 			correct_state: parsing_state = ps_key
 		do
+			parsed_characters := parsed_characters + 1
+
 			inspect c
 			when '=' then
 				if not active_key.is_empty then
@@ -185,8 +188,6 @@ feature {NONE} -- parsing finite state machine
 				else
 					report_error ("No key found, currently parsed length: " + active_length)
 				end
-			when '%N' then
-				report_error ("No value found - instead found newline character, currently parsed key: " + active_key)
 			else
 				active_key.append_character (c)
 			end
@@ -198,16 +199,18 @@ feature {NONE} -- parsing finite state machine
 			no_errors: not has_error
 			correct_state: parsing_state = ps_value
 		do
-			inspect c
-			when '%N' then
-				if active_length.count + active_key.count + active_value.count + 3 = active_length.to_integer then
+			parsed_characters := parsed_characters + 1
+			if parsed_characters < active_length.to_integer then
+				active_value.append_character (c)
+			elseif parsed_characters = active_length.to_integer then
+				if c = '%N' then
 					entries.force (active_value.twin, active_key.twin)
 					reset_parser
 				else
-					report_error ("Entry was finished before/after indicated length. Key: " + active_key)
+					report_error ("Entry not delimited by newline. Key: " + active_key)
 				end
 			else
-				active_value.append_character (c)
+				report_error ("Incorrect entry length. Key: " + active_key)
 			end
 		end
 
