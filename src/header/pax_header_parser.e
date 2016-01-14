@@ -19,8 +19,8 @@ feature {NONE} -- Initialization
 			-- Create new instance
 		do
 			create ustar_parser
-			create extended_payload_unarchiver.make_reset (True)
-			create global_payload_unarchiver.make_reset (False)
+			create extended_payload_unarchiver
+			create global_payload_unarchiver
 --			parsing_state := ps_pax_header
 
 			Precursor
@@ -40,6 +40,7 @@ feature -- Parsing
 				inspect parsing_state
 				when ps_first_header then
 					parsing_finished := False
+					extended_payload_unarchiver.reset_entries
 					handle_first_header_block (a_block, a_pos)
 
 				when ps_global_payload then
@@ -107,7 +108,7 @@ feature {NONE} -- Implementation
 								-- ustar header
 							last_parsed_header := l_first_header
 
-							apply_unarchiver_header_updates (global_payload_unarchiver)
+							apply_header_updates
 
 							parsing_state := ps_first_header
 							parsing_finished := True
@@ -186,8 +187,7 @@ feature {NONE} -- Implementation
 							-- Modify header according to pax payload
 						last_parsed_header := l_ustar_header
 
-						apply_unarchiver_header_updates (global_payload_unarchiver)
-						apply_unarchiver_header_updates (extended_payload_unarchiver)
+						apply_header_updates
 
 						parsing_state := ps_first_header
 						parsing_finished := True
@@ -201,8 +201,9 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	apply_unarchiver_header_updates (a_pax_unarchiver: PAX_UNARCHIVER)
-			-- Apply all updates that `a_pax_unarchiver' contains to `active_header'
+
+	apply_header_updates
+			-- Apply all updates that the unarchivers contain to `active_header'
 		require
 			has_active_header: last_parsed_header /= Void
 			no_errors: not has_error
@@ -212,13 +213,13 @@ feature {NONE} -- Implementation
 		do
 			if attached last_parsed_header as l_header then
 					-- filename
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.name_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.name_pax_key)
 				if l_update_value /= Void then
 					l_header.set_filename (create {PATH}.make_from_string (l_update_value))
 				end
 
 					-- user id
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.uid_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.uid_pax_key)
 				if l_update_value /= Void then
 					if l_update_value.is_natural_32 then
 						l_header.set_user_id (l_update_value.to_natural_32)
@@ -228,7 +229,7 @@ feature {NONE} -- Implementation
 				end
 
 					-- group id
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.gid_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.gid_pax_key)
 				if l_update_value /= Void then
 					if l_update_value.is_natural_32 then
 						l_header.set_group_id (l_update_value.to_natural_32)
@@ -238,7 +239,7 @@ feature {NONE} -- Implementation
 				end
 
 					-- size
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.size_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.size_pax_key)
 				if l_update_value /= Void then
 					if l_update_value.is_natural_64 then
 						l_header.set_size (l_update_value.to_natural_64)
@@ -249,7 +250,7 @@ feature {NONE} -- Implementation
 
 					-- mtime
 					-- PAX time format: <epoch>[.<millis>], millis is optional
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.mtime_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.mtime_pax_key)
 				if l_update_value /= Void then
 						-- Keep <epoch> only
 					if l_update_value.index_of ('.', 1) > 0 then
@@ -264,25 +265,40 @@ feature {NONE} -- Implementation
 				end
 
 					-- linkname
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.linkname_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.linkname_pax_key)
 				if l_update_value /= Void then
 					l_header.set_linkname (create {PATH}.make_from_string (l_update_value))
 				end
 
 					-- user name
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.uname_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.uname_pax_key)
 				if l_update_value /= Void then
 					l_header.set_user_name (l_update_value)
 				end
 
 					-- group name
-				l_update_value := a_pax_unarchiver.get_value ({TAR_HEADER_CONST}.gname_pax_key)
+				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.gname_pax_key)
 				if l_update_value /= Void then
 					l_header.set_group_name (l_update_value)
 				end
 			else
 				-- Unreachable (precondition)
 			end
+		end
 
+
+	get_unarchiver_update_value (a_key: READABLE_STRING_8): detachable READABLE_STRING_8
+			-- Get value to `a_key' from unarchivers if valid
+		do
+			Result := extended_payload_unarchiver.get_value (a_key)
+			if Result = Void then
+				Result := global_payload_unarchiver.get_value (a_key)
+			end
+
+			if Result /= Void and then Result.is_empty then
+				Result := Void
+			end
+		ensure
+			void_or_non_empty: Result = Void or else not Result.is_empty
 		end
 end
