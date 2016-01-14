@@ -296,6 +296,59 @@ feature -- Test parsing
 			assert ("headers match", unit_under_test.parsed_header ~ global_pax_union_header)
 		end
 
+	test_pax_parser_global_reset
+			-- Test pax header parser with global + extended header, where extended header resets (-> global value ignored) a value
+		local
+			unit_under_test: PAX_HEADER_PARSER
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+			create p.make_from_pointer (global_extended_reset_header_blob.base_address, 5 * {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+			assert ("Not finished yet", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, {TAR_CONST}.tar_block_size)
+			assert ("Not finished yet 2", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, 2 * {TAR_CONST}.tar_block_size)
+			assert ("Not finished yet 3", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, 3 * {TAR_CONST}.tar_block_size)
+			assert ("Not finished yet 4", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, {TAR_CONST}.tar_block_size * 4)
+			assert ("Finished after 5 blocks", unit_under_test.parsing_finished)
+			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
+			assert ("headers match", unit_under_test.parsed_header ~ global_extended_reset_header)
+		end
+
+	test_pax_parser_double_header
+			-- Test pax header parser with double header testset, testing whether extended header values are applied only to a single header
+		local
+			unit_under_test: PAX_HEADER_PARSER
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+			create p.make_from_pointer (double_header_blob.base_address, 4 * {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+			assert ("Not finished yet", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, {TAR_CONST}.tar_block_size)
+			assert ("Not finished yet 2", not unit_under_test.parsing_finished)
+
+			unit_under_test.parse_block (p, 2 * {TAR_CONST}.tar_block_size)
+			assert ("Finished after 3 blocks", unit_under_test.parsing_finished)
+			assert ("parsing successfull 1", unit_under_test.parsed_header /= Void)
+			assert ("headers match 1", unit_under_test.parsed_header ~ double_header_1)
+
+			unit_under_test.parse_block (p, 3 * {TAR_CONST}.tar_block_size)
+			assert ("Finished after block 4", unit_under_test.parsing_finished)
+			assert ("parsing successfull 2", unit_under_test.parsed_header /= Void)
+			assert ("headers match 2", unit_under_test.parsed_header ~ double_header_2)
+		end
+
 feature {NONE} -- Data (ustar) - easy
 
 	easy_header_blob: SPECIAL[CHARACTER_8]
@@ -656,6 +709,98 @@ feature {NONE} -- Data - global header union
 			Result.set_group_id (0c144)
 			Result.set_size (1450701253)
 			Result.set_mtime (1450708269)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name ("nicolas")
+			Result.set_group_name ("users")
+		end
+
+feature {NONE} -- Data - resetting fields
+
+	global_extended_reset_header_blob: SPECIAL [CHARACTER_8]
+			-- Return blob for global_extended_reset_header
+		local
+			header_template: STRING_8
+		once
+			-- Templates use $ instead of %U (because like this all characters are the same width)
+			--                   Filename                                                                                            Mode    uid     gid     size        mtime       chksum T Linkname                                                                                            mag  Ve username                        groupname                       dmajor  dminor  prefix                                                                                                                                                     unused
+			--                  |                                                                                                  ||      ||      ||      ||          ||          ||      |||                                                                                                  ||    ||||                              ||                              ||      ||      ||                                                                                                                                                         ||           |
+			--         Offset:  0       8      16      24      32      40      48      56      64      72      80      88      96     104     112     120     128     136     144     152     160     168     176     184     192     200     208     216     224     232     240     248     256     264     272     280     288     296     304     312     320     328     336     344     352     360     368     376     384     392     400     408     416     424     432     440     448     456     464     472     480     488     496     504     512
+			--                  |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
+			header_template := "./PaxHeader$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000644$0000000$0000000$00000000035$00000000000$0011213$g$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+			                   %29 mtime=1250708269.16920698^$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+			                   %./PaxHeader$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000644$0000000$0000000$00000000011$00000000000$0011226$x$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+			                   %9 mtime=^$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+			                   %home/nicolas/out.ps$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000644$0001750$0000144$00001215414$12615214330$0015465$0$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00nicolas$$$$$$$$$$$$$$$$$$$$$$$$$users$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+			header_template.replace_substring_all ("$", "%U")
+			header_template.replace_substring_all ("^", "%N")
+			Result := header_template.area
+			Result.remove_tail (1)
+		end
+
+	global_extended_reset_header: TAR_HEADER
+			-- Header corresponding to testset global header reset in extended header
+		once
+			create Result
+			Result.set_filename (create {PATH}.make_from_string ("home/nicolas/out.ps"))
+			Result.set_mode (0c0644)
+			Result.set_user_id (0c1750)
+			Result.set_group_id (0c144)
+			Result.set_size (0c1215414)
+			Result.set_mtime (0c12615214330)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name ("nicolas")
+			Result.set_group_name ("users")
+		end
+
+feature {NONE} -- Data - non-propagation of extended headers
+
+
+	double_header_blob: SPECIAL [CHARACTER_8]
+			-- Return blob for double_header
+		local
+			header_template: STRING_8
+		once
+			-- Templates use $ instead of %U (because like this all characters are the same width)
+			--                   Filename                                                                                            Mode    uid     gid     size        mtime       chksum T Linkname                                                                                            mag  Ve username                        groupname                       dmajor  dminor  prefix                                                                                                                                                     unused
+			--                  |                                                                                                  ||      ||      ||      ||          ||          ||      |||                                                                                                  ||    ||||                              ||                              ||      ||      ||                                                                                                                                                         ||           |
+			--         Offset:  0       8      16      24      32      40      48      56      64      72      80      88      96     104     112     120     128     136     144     152     160     168     176     184     192     200     208     216     224     232     240     248     256     264     272     280     288     296     304     312     320     328     336     344     352     360     368     376     384     392     400     408     416     424     432     440     448     456     464     472     480     488     496     504     512
+			--                  |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
+			header_template := "./PaxHeader$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000644$0000000$0000000$00000000035$00000000000$0011234$x$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+			                   %29 mtime=1250708269.16920698^$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+			                   %home/nicolas/out.ps$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000644$0001750$0000144$00001215414$12615214330$0015465$0$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00nicolas$$$$$$$$$$$$$$$$$$$$$$$$$users$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%
+			                   %home/nicolas/out.ps$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$0000644$0001750$0000144$00001215414$12615214330$0015465$0$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00nicolas$$$$$$$$$$$$$$$$$$$$$$$$$users$$$$$$$$$$$$$$$$$$$$$$$$$$$0000000$0000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+			header_template.replace_substring_all ("$", "%U")
+			header_template.replace_substring_all ("^", "%N")
+			Result := header_template.area
+			Result.remove_tail (1)
+		end
+
+	double_header_1: TAR_HEADER
+			-- Header corresponding to testset double header #1
+		once
+			create Result
+			Result.set_filename (create {PATH}.make_from_string ("home/nicolas/out.ps"))
+			Result.set_mode (0c0644)
+			Result.set_user_id (0c1750)
+			Result.set_group_id (0c144)
+			Result.set_size (0c1215414)
+			Result.set_mtime (1250708269)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name ("nicolas")
+			Result.set_group_name ("users")
+		end
+
+
+	double_header_2: TAR_HEADER
+			-- Header corresponding to testset double header #2
+		once
+			create Result
+			Result.set_filename (create {PATH}.make_from_string ("home/nicolas/out.ps"))
+			Result.set_mode (0c0644)
+			Result.set_user_id (0c1750)
+			Result.set_group_id (0c144)
+			Result.set_size (0c1215414)
+			Result.set_mtime (0c12615214330)
 			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
 			Result.set_user_name ("nicolas")
 			Result.set_group_name ("users")
