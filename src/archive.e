@@ -249,7 +249,7 @@ feature -- Archiving
 				header_writer.finished_writing
 			loop
 				header_writer.write_block_to_managed_pointer (l_block, 0)
-				storage_backend.write_block (l_block)
+				storage_backend.write_block (l_block, 0)
 			end
 
 			from
@@ -258,7 +258,7 @@ feature -- Archiving
 				a_entry.finished_writing
 			loop
 				a_entry.write_block_to_managed_pointer (l_block, 0)
-				storage_backend.write_block (l_block)
+				storage_backend.write_block (l_block, 0)
 			end
 		end
 

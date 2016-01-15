@@ -95,11 +95,12 @@ feature -- Reading
 
 feature -- Writing
 
-	write_block (a_block: MANAGED_POINTER)
-			-- Write `a_block'
+	write_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write `a_block' (starts at `a_pos')
 		require
 			writable: is_writable
-			correct_size: a_block.count = {TAR_CONST}.tar_block_size
+			non_negative_pos: a_pos >= 0
+			enough_space: a_block.count >= a_pos + {TAR_CONST}.tar_block_size
 		deferred
 		end
 
