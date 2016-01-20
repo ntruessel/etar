@@ -20,11 +20,6 @@ feature {NONE} -- Initialization
 
 	make
 			-- Run minitar
-		local
-			args: ARGUMENTS_32
-			n: INTEGER
-			l_archive_filename: IMMUTABLE_STRING_32
-			l_filenames: ARRAY [IMMUTABLE_STRING_32]
 		do
 			create options
 			options.parse (execution_environment.arguments)
