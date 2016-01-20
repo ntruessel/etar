@@ -54,40 +54,16 @@ feature {NONE} -- Implementation
 			-- Setup internal structures after initialize has run
 		local
 			l_directory: DIRECTORY
-		do
-			if attached active_header as header then
-				create l_directory.make_with_path (header.filename)
-				if not l_directory.exists then
-					l_directory.create_dir
-				end
-				set_metadata (l_directory)
-			end
-		end
-
-	set_metadata (a_directory: DIRECTORY)
-			-- Set the correct metadata for `a_directory' according to `header'
-		require
-			directory_exists: a_directory.exists
-		local
-			l_file: FILE -- Since DIRECTORY does not support metadata setting
+			l_file: FILE
 		do
 			if attached active_header as l_header then
-				create {RAW_FILE} l_file.make_with_path (a_directory.path)
-				l_file.change_mode (l_header.mode)
-				l_file.set_date (l_header.mtime.as_integer_32)
-
-				-- Check username with id first
-				if (file_owner (l_header.user_id.as_integer_32) ~ l_header.user_name) then
-					l_file.change_owner (l_header.user_id.as_integer_32)
+				create l_directory.make_with_path (l_header.filename)
+				if not l_directory.exists then
+					l_directory.recursive_create_dir
 				end
 
-				-- Check groupname with id first
-				if (file_group (l_header.group_id.as_integer_32) ~ l_header.group_name) then
-					l_file.change_group (l_header.group_id.as_integer_32)
-				end
-			else
-				check false end -- Unreachable
-				-- FIXME: Better error handling
+				create {RAW_FILE} l_file.make_with_path (l_directory.path)
+				file_set_metadata (l_file, l_header)
 			end
 		end
 end

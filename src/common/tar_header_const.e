@@ -9,8 +9,6 @@ class
 	TAR_HEADER_CONST
 
 feature -- ustar field offsets and lengths (bytes)
-		-- FIXME: Group this constants logically (TUPLE?)
-		-- FIXME: Contains a lot of redundancy
 
 	name_offset: 		INTEGER 	=   0			-- filename field offset
 	name_length: 		INTEGER 	= 100 			-- filename field length
@@ -34,7 +32,7 @@ feature -- ustar field offsets and lengths (bytes)
 	mtime_offset: 		INTEGER 	= 136 			-- last modified field offset
 	mtime_length: 		INTEGER 	=  12 			-- last modified field length
 	mtime_pax_key:		STRING_8	= "mtime"		-- last modified pax extended header key
-	
+
 	chksum_offset: 		INTEGER 	= 148 			-- checksum field offset
 	chksum_length: 		INTEGER 	=   8 			-- checksum field length
 

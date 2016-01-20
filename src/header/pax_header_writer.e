@@ -31,7 +31,6 @@ feature -- Status
 			-- Indicates how many blocks are needed to write `active_header'
 		do
 			if attached pax_archivable as l_pax_archivable then
-					-- FIXME: Relies on ustar_writer implemenation (exploits that both headers are the same size)
 				Result := 2 * ustar_writer.required_blocks + l_pax_archivable.required_blocks
 			else
 				Result := ustar_writer.required_blocks

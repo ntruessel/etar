@@ -184,6 +184,24 @@ feature -- Test parsing methods
 			assert ("headers match", unit_under_test.parsed_header ~ split_header)
 		end
 
+	test_space_header_parse
+			-- Test whether USTAR_HEADER_PARSER parses the spaces blob correctly
+		note
+			testing: "covers/{USTAR_HEADER_PARSER}"
+		local
+			unit_under_test: USTAR_HEADER_PARSER
+			p: MANAGED_POINTER
+		do
+			create unit_under_test
+			create p.make_from_pointer (spaces_header_blob.base_address, {TAR_CONST}.tar_block_size)
+
+			unit_under_test.parse_block (p, 0)
+
+			assert ("finished parsing after singe block", unit_under_test.parsing_finished)
+			assert ("parsing successfull", unit_under_test.parsed_header /= Void)
+			assert ("headers match", unit_under_test.parsed_header ~ spaces_header)
+		end
+
 feature {NONE} -- Data - easy
 
 	easy_header_blob: SPECIAL[CHARACTER_8]
@@ -317,6 +335,39 @@ feature {NONE} -- Data - split
 			Result.set_group_name ("users")
 			Result.set_device_major (0c0)
 			Result.set_device_minor (0c0)
+		end
+
+feature {NONE} -- Data - spaces
+
+	spaces_header_blob: SPECIAL[CHARACTER_8]
+			-- Return blob for spaces_header
+		local
+			header_template: STRING_8
+		once
+			-- Templates use $ instead of %U (because like this all characters are the same width)
+			--                   Filename                                                                                            Mode    uid     gid     size        mtime       chksum T Linkname                                                                                            mag  Ve username                        groupname                       dmajor  dminor  prefix                                                                                                                                                     unused
+			--                  |                                                                                                  ||      ||      ||      ||          ||          ||      |||                                                                                                  ||    ||||                              ||                              ||      ||      ||                                                                                                                                                         ||           |
+			--         Offset:  0       8      16      24      32      40      48      56      64      72      80      88      96     104     112     120     128     136     144     152     160     168     176     184     192     200     208     216     224     232     240     248     256     264     272     280     288     296     304     312     320     328     336     344     352     360     368     376     384     392     400     408     416     424     432     440     448     456     464     472     480     488     496     504     512
+			--                  |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
+			header_template := "home/nicolas/out.ps$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 000644$ 001750$ 000144$ 0001215414$12615214330$ 015305$0$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ustar$00nicolas$$$$$$$$$$$$$$$$$$$$$$$$$users$$$$$$$$$$$$$$$$$$$$$$$$$$$  00000$ 000000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+			header_template.replace_substring_all ("$", "%U")
+			Result := header_template.area
+			Result.remove_tail (1)
+		end
+
+	spaces_header: TAR_HEADER
+			-- Header corresponding to testset spaces
+		once
+			create Result
+			Result.set_filename (create {PATH}.make_from_string ("home/nicolas/out.ps"))
+			Result.set_mode (0c0644)
+			Result.set_user_id (0c1750)
+			Result.set_group_id (0c144)
+			Result.set_size (0c1215414)
+			Result.set_mtime (0c12615214330)
+			Result.set_typeflag ({TAR_CONST}.tar_typeflag_regular_file)
+			Result.set_user_name ("nicolas")
+			Result.set_group_name ("users")
 		end
 
 end

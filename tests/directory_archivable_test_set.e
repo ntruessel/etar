@@ -13,6 +13,7 @@ class
 inherit
 	TAR_TEST_SET_BASE
 
+
 feature -- Test routines
 
 	test_directory_archivable_easy
@@ -56,8 +57,12 @@ feature {NONE} -- Data - easy
 
 	easy_directory: FILE
 			-- Return the easy file
+		local
+			l_util: TAR_UTILS
 		once
 			create {RAW_FILE} Result.make_with_name ("test_files")
+			create l_util
+			l_util.file_set_mtime (Result, 0c12640212237)
 		end
 end
 

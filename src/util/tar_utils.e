@@ -88,6 +88,153 @@ feature -- Metadata
 			Result := c_get_gid_from_groupname (a_groupname.plus ("%U").area.base_address)
 		end
 
+feature -- Metadata manipulation
+
+	file_set_metadata (a_file: FILE; a_header: TAR_HEADER)
+			-- Set all of `a_file's metadata according to `a_header'
+		require
+			file_exists: a_file.exists
+		do
+			file_set_mode (a_file, a_header.mode.as_integer_32)
+			file_set_mtime (a_file, a_header.mtime.as_integer_32)
+
+			if file_owner (a_header.user_id.as_integer_32) ~ a_header.user_name then
+				file_set_uid (a_file, a_header.user_id.as_integer_32)
+			end
+
+			if file_group (a_header.group_id.as_integer_32) ~ a_header.group_name then
+				file_set_gid (a_file, a_header.group_id.as_integer_32)
+			end
+
+		end
+
+	file_set_mode (a_file: FILE; a_mode: INTEGER)
+			-- Set `a_file's permissions ot `a_mode' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.change_mode (a_mode)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+	file_set_mtime (a_file: FILE; a_mtime: INTEGER)
+			-- Set `a_file's mtime to `a_mtime' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.set_date (a_mtime)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+	file_set_uid (a_file: FILE; a_uid: INTEGER)
+			-- Set `a_file's uid to `a_uid' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.change_owner (a_uid)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+	file_set_gid (a_file: FILE; a_gid: INTEGER)
+			-- Set `a_file's gid to `a_gid' or silently exit on error
+		require
+			file_exists: a_file.exists
+		local
+			l_failed: BOOLEAN
+		do
+			if not l_failed then
+				a_file.change_group (a_gid)
+			end
+		rescue
+			l_failed := true
+			retry
+		end
+
+feature -- Filename normalization
+
+	unify_utf_8_path (a_path: PATH): STRING_8
+			-- Turns `a_path' into a UTF-8 string using unix directory separators
+		do
+			create Result.make (a_path.utf_8_name.count)
+			across
+				a_path.components as ic
+			loop
+				if not Result.is_empty and Result /~ "/" then
+					Result.append_character ('/')
+				end
+				Result.append (ic.item.utf_8_name)
+			end
+		end
+
+	unify_and_split_filename (a_path: PATH): TUPLE [filename_prefix: STRING_8; filename: STRING_8]
+			-- Split `a_path' into filename and prefix, such that prefix + '/' + filename equals the UTF-8
+			-- representation of `a_path' using unix directory separator
+		local
+			l_filename: STRING_8
+			l_filename_prefix: STRING_8
+			l_split_index: INTEGER
+		do
+			l_filename := unify_utf_8_path (a_path)
+			l_filename_prefix := ""
+
+			if l_filename.count > {TAR_HEADER_CONST}.name_length then
+				l_split_index := l_filename.index_of ('/', l_filename.count - {TAR_HEADER_CONST}.name_length)
+				if l_split_index = 1 then
+					l_split_index := l_filename.index_of ('/', 2)
+				end
+				if l_split_index = 0 then
+					l_filename_prefix := l_filename;
+					l_filename := ""
+				else
+					l_filename_prefix := l_filename.substring (1, l_split_index - 1)
+					l_filename := l_filename.substring (l_split_index +1 , l_filename.count)
+				end
+			end
+
+			Result := [l_filename_prefix, l_filename]
+		ensure
+			correct_length: Result.filename.count <= {TAR_HEADER_CONST}.name_length
+			correct_result_without_prefix: Result.filename_prefix.is_empty implies (Result.filename ~ unify_utf_8_path (a_path))
+			correct_result_with_prefix: (not Result.filename_prefix.is_empty and not Result.filename.is_empty) implies (Result.filename_prefix + "/" + Result.filename ~ unify_utf_8_path (a_path))
+			correct_result_with_prefix_without_filename: (not Result.filename_prefix.is_empty and Result.filename.is_empty) implies (Result.filename_prefix ~ unify_utf_8_path (a_path))
+		end
+
+feature {NONE} -- Utilities stolen from file_info
+
+	file_owner (uid: INTEGER): STRING
+			-- Convert UID to login name if possible
+		external
+			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
+		alias
+			"eif_file_owner"
+		end
+
+	file_group (gid: INTEGER): STRING
+			-- Convert GID to group name if possible
+		external
+			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
+		alias
+			"eif_file_group"
+		end
+
 feature {NONE} -- external
 
 	c_get_uid_from_username (a_username: POINTER): INTEGER

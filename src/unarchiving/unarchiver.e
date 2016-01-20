@@ -42,7 +42,7 @@ feature -- Status
 	unarchiving_finished: BOOLEAN
 			-- Flag that indicates whether unarchiving finished
 		do
-			Result := attached active_header implies unarchived_blocks = required_blocks
+			Result := has_error or attached active_header implies unarchived_blocks = required_blocks
 		end
 
 	active_header: detachable TAR_HEADER
@@ -101,24 +101,6 @@ feature {NONE} -- Implementation
 		require
 			header_attached: attached active_header
 		deferred
-		end
-
-feature {NONE} -- Utilities stolen from file_info
-
-	file_owner (uid: INTEGER): STRING
-			-- Convert UID to login name if possible
-		external
-			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
-		alias
-			"eif_file_owner"
-		end
-
-	file_group (gid: INTEGER): STRING
-			-- Convert GID to group name if possible
-		external
-			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
-		alias
-			"eif_file_group"
 		end
 
 invariant
