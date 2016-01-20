@@ -154,6 +154,55 @@ feature -- Metadata manipulation
 			retry
 		end
 
+feature -- Filename normalization
+
+	unify_utf_8_path (a_path: PATH): STRING_8
+			-- Turns `a_path' into a UTF-8 string using unix directory separators
+		do
+			create Result.make (a_path.utf_8_name.count)
+			across
+				a_path.components as ic
+			loop
+				if not Result.is_empty and Result /~ "/" then
+					Result.append_character ('/')
+				end
+				Result.append (ic.item.utf_8_name)
+			end
+		end
+
+	unify_and_split_filename (a_path: PATH): TUPLE [filename_prefix: STRING_8; filename: STRING_8]
+			-- Split `a_path' into filename and prefix, such that prefix + '/' + filename equals the UTF-8
+			-- representation of `a_path' using unix directory separator
+		local
+			l_filename: STRING_8
+			l_filename_prefix: STRING_8
+			l_split_index: INTEGER
+		do
+			l_filename := unify_utf_8_path (a_path)
+			l_filename_prefix := ""
+
+			if l_filename.count > {TAR_HEADER_CONST}.name_length then
+				l_split_index := l_filename.index_of ('/', l_filename.count - {TAR_HEADER_CONST}.name_length)
+				if l_split_index = 1 then
+					l_split_index := l_filename.index_of ('/', 2)
+				end
+				if l_split_index = 0 then
+					l_filename_prefix := l_filename;
+					l_filename := ""
+				else
+					l_filename_prefix := l_filename.substring (1, l_split_index - 1)
+					l_filename := l_filename.substring (l_split_index +1 , l_filename.count)
+				end
+			end
+
+			Result := [l_filename_prefix, l_filename]
+		ensure
+			correct_length: Result.filename.count <= {TAR_HEADER_CONST}.name_length
+			correct_result_without_prefix: Result.filename_prefix.is_empty implies (Result.filename ~ unify_utf_8_path (a_path))
+			correct_result_with_prefix: (not Result.filename_prefix.is_empty and not Result.filename.is_empty) implies (Result.filename_prefix + "/" + Result.filename ~ unify_utf_8_path (a_path))
+			correct_result_with_prefix_without_filename: (not Result.filename_prefix.is_empty and Result.filename.is_empty) implies (Result.filename_prefix ~ unify_utf_8_path (a_path))
+		end
+
 feature {NONE} -- Utilities stolen from file_info
 
 	file_owner (uid: INTEGER): STRING

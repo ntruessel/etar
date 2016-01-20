@@ -83,8 +83,29 @@ feature -- Status setting
 			-- Close archive
 		do
 			storage_backend.close
+			mode := mode_closed
 		ensure
 			closed: storage_backend.is_closed
+		end
+
+	enable_absolute_filenames
+			-- Set `absolute_filenames'
+		require
+			closed: is_closed
+		do
+			absolute_filenames := True
+		ensure
+			absolute_filenames_allowed: absolute_filenames
+		end
+
+	disable_absolute_filenames
+			-- Reset `absolute_filenames'
+		require
+			closed: is_closed
+		do
+			absolute_filenames := False
+		ensure
+			absolute_filenames_disallowed: not absolute_filenames
 		end
 
 feature -- Status
@@ -100,6 +121,15 @@ feature -- Status
 		do
 			Result := mode = mode_archive
 		end
+
+	is_closed: BOOLEAN
+			-- Is this archive closed?
+		do
+			Result := mode = mode_closed
+		end
+
+	absolute_filenames: BOOLEAN
+			-- Allow absolute paths / paths containing ".." ?
 
 feature {NONE} -- Status (internal)
 
@@ -180,7 +210,7 @@ feature -- Unarchiving
 						if l_unarchiver /= Void then
 								-- Parse payload
 							from
-								l_unarchiver.initialize (l_header)
+								l_unarchiver.initialize (sanitized_header (l_header))
 							until
 								has_error or l_unarchiver.unarchiving_finished
 							loop
@@ -212,13 +242,14 @@ feature -- Archiving
 			l_block: MANAGED_POINTER
 		do
 			create l_block.make ({TAR_CONST}.tar_block_size)
+
 			from
-				header_writer.set_active_header (a_entry.header)
+				header_writer.set_active_header (sanitized_header (a_entry.header))
 			until
 				header_writer.finished_writing
 			loop
 				header_writer.write_block_to_managed_pointer (l_block, 0)
-				storage_backend.write_block (l_block)
+				storage_backend.write_block (l_block, 0)
 			end
 
 			from
@@ -227,7 +258,7 @@ feature -- Archiving
 				a_entry.finished_writing
 			loop
 				a_entry.write_block_to_managed_pointer (l_block, 0)
-				storage_backend.write_block (l_block)
+				storage_backend.write_block (l_block, 0)
 			end
 		end
 
@@ -235,6 +266,7 @@ feature -- Archiving
 			-- Write archive delimiter
 		do
 			storage_backend.finalize
+			mode := mode_closed
 		end
 
 
@@ -270,4 +302,36 @@ feature {NONE} -- Implementation
 
 	header_writer: TAR_HEADER_WRITER
 			-- Writer to use for header writing
+
+	sanitized_header (a_header: TAR_HEADER): TAR_HEADER
+			-- Remove dangerous values from `a_header'
+			-- Currently only removes absolute filenames and parent directories
+		local
+			l_safe_path: PATH
+		do
+			Result := a_header
+			if not absolute_filenames then
+				create l_safe_path.make_empty
+				across
+					Result.filename.components as l_path_cursor
+				loop
+					if l_path_cursor.item.has_root or l_path_cursor.item.is_current_symbol or l_path_cursor.item.is_parent_symbol then
+						create l_safe_path.make_empty
+					else
+						l_safe_path := l_safe_path + l_path_cursor.item
+					end
+				end
+				Result.set_filename (l_safe_path)
+			end
+
+		ensure
+			relative_filename: not absolute_filenames implies Result.filename.is_relative
+			no_parent_or_current_symbols: not absolute_filenames implies across Result.filename.components as l_path_cursor all not l_path_cursor.item.is_current_symbol and not l_path_cursor.item.is_parent_symbol end
+		end
+
+invariant
+	only_one_mode: (is_archiving_mode and not is_unarchiving_mode and not is_closed) or
+					(not is_archiving_mode and is_unarchiving_mode and not is_closed) or
+					(not is_archiving_mode and not is_unarchiving_mode and is_closed)
+	closed_iff_backend_closed: is_closed = storage_backend.is_closed
 end

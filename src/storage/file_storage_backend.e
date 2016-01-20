@@ -85,6 +85,7 @@ feature -- Status setting
 			-- Close backend
 		do
 			if not has_error then
+				backend.flush
 				backend.close
 			end
 		end
@@ -163,10 +164,10 @@ feature -- Reading
 
 feature -- Writing
 
-	write_block (a_block: MANAGED_POINTER)
-			-- Write `a_block'
+	write_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write `a_block', starting from `a_pos'
 		do
-			backend.put_managed_pointer (a_block, 0, a_block.count)
+			backend.put_managed_pointer (a_block, a_pos, a_block.count)
 		end
 
 	finalize
@@ -178,8 +179,8 @@ feature -- Writing
 			l_template := "%U"
 			l_template.multiply ({TAR_CONST}.tar_block_size)
 			create l_block.make_from_pointer (l_template.area.base_address, {TAR_CONST}.tar_block_size)
-			write_block (l_block)
-			write_block (l_block)
+			write_block (l_block, 0)
+			write_block (l_block, 0)
 			backend.flush
 			close
 		end

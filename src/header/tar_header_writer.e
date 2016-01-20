@@ -9,6 +9,9 @@ note
 deferred class
 	TAR_HEADER_WRITER
 
+inherit
+	TAR_UTILS
+
 feature -- Status
 
 	required_blocks: INTEGER
@@ -86,20 +89,6 @@ feature {NONE} -- Utilities
 		require
 			has_active_header: attached active_header
 		deferred
-		end
-
-	unify_utf_8_path (a_path: PATH): STRING_8
-			-- Turns `a_path' into a UTF-8 string using unix directory separators
-		do
-			create Result.make (a_path.utf_8_name.count)
-			across
-				a_path.components as ic
-			loop
-				if not Result.is_empty then
-					Result.append_character ('/')
-				end
-				Result.append (ic.item.utf_8_name)
-			end
 		end
 
 invariant

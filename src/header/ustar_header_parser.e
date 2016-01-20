@@ -207,6 +207,7 @@ feature {NONE} -- Implementation
 			-- Next block octal string in `a_block' at position `a_pos' with at most `a_length' characters.
 		do
 			Result := next_block_string (a_block, a_pos, a_length)
+			Result.adjust
 			if not is_octal_natural_16_string (Result) then
 				Result := Void
 			end
@@ -218,6 +219,7 @@ feature {NONE} -- Implementation
 			-- Next block octal string in `a_block' at position `a_pos' with at most `a_length' characters.
 		do
 			Result := next_block_string (a_block, a_pos, a_length)
+			Result.adjust
 			if not is_octal_natural_32_string (Result) then
 				Result := Void
 			end
@@ -229,6 +231,7 @@ feature {NONE} -- Implementation
 			-- Next block octal string in `a_block' at position `a_pos' with at most `a_length' characters.
 		do
 			Result := next_block_string (a_block, a_pos, a_length)
+			Result.adjust
 			if not is_octal_natural_64_string (Result) then
 				Result := Void
 			end

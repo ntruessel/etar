@@ -1,6 +1,6 @@
 note
 	description: "[
-		Simple file unarchiver that creates a new file on disk
+		Simple file unarchiver that creates a new file on disk or overwrites an existing file
 	]"
 	author: ""
 	date: "$Date$"
@@ -50,22 +50,30 @@ feature -- Output
 		local
 			remaining_bytes: NATURAL_64
 		do
-			if attached active_file as l_file and attached active_header as l_header then
-				-- Check whether this is the last block
-				remaining_bytes := l_header.size - (unarchived_blocks * {TAR_CONST}.tar_block_size).as_natural_64
-				if remaining_bytes <= {TAR_CONST}.tar_block_size.as_natural_64 then
-					-- Last block
-					l_file.put_managed_pointer (p, a_pos, remaining_bytes.as_integer_32)
-					finalize_file
+			if not skip then
+				if attached active_file as l_file and attached active_header as l_header then
+					-- Check whether this is the last block
+					remaining_bytes := l_header.size - (unarchived_blocks * {TAR_CONST}.tar_block_size).as_natural_64
+					if remaining_bytes <= {TAR_CONST}.tar_block_size.as_natural_64 then
+							-- Last block
+						l_file.put_managed_pointer (p, a_pos, remaining_bytes.as_integer_32)
+
+							-- finalize
+						l_file.flush
+						l_file.close
+
+						file_set_metadata (l_file, l_header)
+					else
+							-- Standard block
+						l_file.put_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
+					end
 				else
-					-- Standard block
-					l_file.put_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
+					check False end -- Unreachable (invariant)
 				end
-				unarchived_blocks := unarchived_blocks + 1
 			else
-				check false end -- Unreachable
-				-- FIXME: Better error handling
+					-- silently ignore
 			end
+			unarchived_blocks := unarchived_blocks + 1
 		end
 
 feature {NONE} -- Implementation
@@ -75,31 +83,44 @@ feature {NONE} -- Implementation
 		local
 			l_file: FILE
 		do
+			skip := False
 			if attached active_header as l_header then
 				create {RAW_FILE} l_file.make_with_path (l_header.filename)
-				l_file.open_write
-				active_file := l_file
+				if l_file.exists then
+					file_safe_delete (l_file)
+				end
+
+				if l_file.exists then
+					skip := True
+				else
+					l_file.open_write
+					active_file := l_file
+				end
 			else
 				check false end -- Unreachable, when do_internal_initialization is called, active_header references an attached TAR_HEADER object
-				-- FIXME: Better error handling
-			end
-		end
-
-	finalize_file
-			-- Do final changes to the active file (called after the last block was written)
-		do
-			if attached active_file as l_file and attached active_header as l_header then
-				l_file.flush
-				l_file.close
-
-				file_set_metadata (l_file, l_header)
-			else
-				check false end -- Unreachable
-				-- FIXME: Better error handling
 			end
 		end
 
 	active_file: detachable FILE
 			-- File that is currently unarchived
+
+	skip: BOOLEAN
+			-- skip payload?
+
+	file_safe_delete (a_file: FILE)
+			-- Safe delete file (or ignore)
+		local
+			l_failed: BOOLEAN
+		do
+			if a_file.path_exists and not l_failed then
+				a_file.delete
+			end
+		rescue
+			l_failed := True
+			retry
+		end
+
+invariant
+	header_and_file: (attached active_header = attached active_file) or skip
 
 end

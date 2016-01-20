@@ -15,7 +15,7 @@ inherit
 			default_create
 		end
 
-feature -- Initialization
+feature {NONE} -- Initialization
 
 	default_create
 			-- Initialize unarchiver
@@ -30,16 +30,6 @@ feature -- Initialization
 			name := "pax payload unarchiver"
 
 			Precursor
-		end
-
-	required_blocks: INTEGER
-			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
-		do
-			if attached active_header as l_header then
-				Result := needed_blocks (l_header.size).as_integer_32
-			else
-				-- Unreachable (precondition)
-			end
 		end
 
 feature -- Status
@@ -60,6 +50,22 @@ feature -- Status
 			-- Returns void if there is none
 		do
 			Result := entries.item (a_key)
+		end
+
+	required_blocks: INTEGER
+			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+		do
+			if attached active_header as l_header then
+				Result := needed_blocks (l_header.size).as_integer_32
+			else
+				-- Unreachable (precondition)
+			end
+		end
+
+	reset_entries
+			-- Reset all entries
+		do
+			entries.wipe_out
 		end
 
 feature -- Unarchiving
@@ -112,7 +118,6 @@ feature {NONE} -- Implementation
 	do_internal_initialization
 			-- Initialize subclass specific internals after initialize has done its job
 		do
-			entries.wipe_out
 			reset_error
 			reset_parser
 		end
@@ -130,6 +135,9 @@ feature {NONE} -- parsing finite state machine
 
 	active_value: STRING_8
 			-- Value field entry for which parsing is in progress
+
+	parsed_characters: INTEGER
+			-- Indiates how many characters have been parsed so far
 
 	parsing_state: INTEGER
 			-- In what parsing state are we currently? One of the following constants
@@ -149,24 +157,22 @@ feature {NONE} -- parsing finite state machine
 			no_errors: not has_error
 			correct_state: parsing_state = ps_length
 		do
-			inspect c
-			when ' ' then
+			parsed_characters := parsed_characters + 1
+
+			if c = ' ' then
 				if not active_length.is_empty then
 					parsing_state := ps_key
 				else
 					report_error ("No length parsed, first character was space")
 				end
-			when '=' then
-				report_error ("No key found - instead found equals sign, currently parsed length: " + active_length)
-			when '%N' then
-				report_error ("No key found - instead found newline character, currently parsed length: " + active_length)
+			elseif c.is_digit then
+				active_length.append_character (c)
 			else
-				if c.is_digit then
-					active_length.append_character (c)
-				else
-					report_error ("Detected non-digit character in payload entry")
-				end
+				report_error ("Detected non-digit character in length entry, currently parsed length: " + active_length)
 			end
+		ensure
+			more_parsed_characters: not has_error implies parsed_characters = old parsed_characters + 1
+			correct_successor_state: not has_error implies if c = ' ' then parsing_state = ps_key else parsing_state = ps_length end
 		end
 
 	handle_key_character (c: CHARACTER_8)
@@ -175,6 +181,8 @@ feature {NONE} -- parsing finite state machine
 			no_errors: not has_error
 			correct_state: parsing_state = ps_key
 		do
+			parsed_characters := parsed_characters + 1
+
 			inspect c
 			when '=' then
 				if not active_key.is_empty then
@@ -185,11 +193,12 @@ feature {NONE} -- parsing finite state machine
 				else
 					report_error ("No key found, currently parsed length: " + active_length)
 				end
-			when '%N' then
-				report_error ("No value found - instead found newline character, currently parsed key: " + active_key)
 			else
 				active_key.append_character (c)
 			end
+		ensure
+			more_parsed_characters: not has_error implies parsed_characters = old parsed_characters + 1
+			correct_successor_state: not has_error implies if c = '=' then parsing_state = ps_value else parsing_state = ps_key end
 		end
 
 	handle_value_character (c: CHARACTER_8)
@@ -198,17 +207,23 @@ feature {NONE} -- parsing finite state machine
 			no_errors: not has_error
 			correct_state: parsing_state = ps_value
 		do
-			inspect c
-			when '%N' then
-				if active_length.count + active_key.count + active_value.count + 3 = active_length.to_integer then
+			parsed_characters := parsed_characters + 1
+
+			if parsed_characters < active_length.to_integer then
+				active_value.append_character (c)
+			elseif parsed_characters = active_length.to_integer then
+				if c = '%N' then
 					entries.force (active_value.twin, active_key.twin)
 					reset_parser
 				else
-					report_error ("Entry was finished before/after indicated length. Key: " + active_key)
+					report_error ("Entry not delimited by newline. Key: " + active_key)
 				end
 			else
-				active_value.append_character (c)
+				report_error ("Incorrect entry length. Key: " + active_key)
 			end
+		ensure
+			more_parsed_characters_in_same_state: not has_error implies if old parsed_characters < active_length.to_integer then parsed_characters = old parsed_characters + 1 else parsed_characters = 0 end
+			correct_successor_state: not has_error implies if old parsed_characters < active_length.to_integer then parsing_state = ps_value else parsing_state = ps_length end
 		end
 
 	reset_parser
@@ -220,6 +235,7 @@ feature {NONE} -- parsing finite state machine
 			active_length.wipe_out
 			active_key.wipe_out
 			active_value.wipe_out
+			parsed_characters := 0
 		end
 
 invariant

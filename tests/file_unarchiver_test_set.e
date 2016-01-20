@@ -12,9 +12,9 @@ class
 
 inherit
 	TAR_TEST_SET_BASE
-	redefine
-		on_prepare
-	end
+		redefine
+			on_prepare
+		end
 
 feature -- Test routines
 
