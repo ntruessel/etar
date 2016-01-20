@@ -101,7 +101,7 @@ feature {NONE} -- Implementation
 								l_to_archive.force (l_to_archive.item + l_cur.item)
 							end
 						end
-					elseif l_file.is_plain then
+					elseif l_file.is_plain and not l_file.path.same_as (create {PATH}.make_from_string (options.archive_name)) then
 						l_archive.add_entry (create {FILE_ARCHIVABLE}.make (l_file))
 					else
 						-- Warn about unsupported filetype
