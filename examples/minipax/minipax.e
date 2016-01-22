@@ -10,8 +10,16 @@ class
 
 inherit
 	SHARED_EXECUTION_ENVIRONMENT
+		undefine
+			default_create
+		end
 
 	LOCALIZED_PRINTER
+		undefine
+			default_create
+		end
+
+	ERROR_UTILS
 
 create
 	make
@@ -21,6 +29,9 @@ feature {NONE} -- Initialization
 	make
 			-- Run minitar
 		do
+			default_create
+			report_error := agent print_error (?)
+
 			create options
 			options.parse (execution_environment.arguments)
 
@@ -39,6 +50,13 @@ feature {NONE} -- Initialization
 		end
 
 feature {NONE} -- Implementation
+
+	print_error (a_message: READABLE_STRING_GENERAL)
+			-- Print error to output
+		do
+			localized_print (a_message)
+			localized_print ("%N")
+		end
 
 	options: OPTIONS
 			-- Program options
@@ -135,6 +153,9 @@ feature {NONE} -- Implementation
 			if options.absolute_paths then
 				Result.enable_absolute_filenames
 			end
+
+			Result.register_redirector (Current, "Archive")
+
 		end
 
 	print_usage
