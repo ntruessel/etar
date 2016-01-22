@@ -333,5 +333,5 @@ invariant
 	only_one_mode: (is_archiving_mode and not is_unarchiving_mode and not is_closed) or
 					(not is_archiving_mode and is_unarchiving_mode and not is_closed) or
 					(not is_archiving_mode and not is_unarchiving_mode and is_closed)
-	closed_iff_backend_closed: is_closed = storage_backend.is_closed
+	closed_iff_backend_closed_or_error: is_closed = storage_backend.is_closed or has_error
 end
