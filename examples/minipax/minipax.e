@@ -54,8 +54,8 @@ feature {NONE} -- Implementation
 	print_error (a_message: READABLE_STRING_GENERAL)
 			-- Print error to output
 		do
-			localized_print (a_message)
-			localized_print ("%N")
+			localized_print_error (a_message)
+			localized_print_error ("%N")
 		end
 
 	options: OPTIONS
