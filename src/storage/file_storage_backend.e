@@ -58,11 +58,11 @@ feature -- Status setting
 				if backend.exists and then backend.is_readable then
 					backend.open_read
 				elseif not backend.exists then
-					report_error ("File does not exist")
+					report_new_error ("File does not exist")
 				elseif not backend.is_readable then
-					report_error ("File is not readable")
+					report_new_error ("File is not readable")
 				else
-					report_error ("Unknown error")
+					report_new_error ("Unknown error")
 				end
 			end
 		end
@@ -74,9 +74,9 @@ feature -- Status setting
 				if backend.exists implies backend.is_writable then
 					backend.open_write
 				elseif backend.exists then
-					report_error ("File is not writable")
+					report_new_error ("File is not writable")
 				else
-					report_error ("Unknown error")
+					report_new_error ("Unknown error")
 				end
 			end
 		end
@@ -157,7 +157,7 @@ feature -- Reading
 
 				if not has_valid_block then
 					close
-					report_error ("Not enough bytes to read full block")
+					report_new_error ("Not enough bytes to read full block")
 				end
 			end
 		end
@@ -211,7 +211,7 @@ feature {NONE} -- Implementation
 				buffer.force (l_buffer)
 			else
 				close
-				report_error ("Not enough bytes to read full block")
+				report_new_error ("Not enough bytes to read full block")
 			end
 		ensure
 			error_or_one_more_entry: has_error or else buffer.count = old buffer.count + 1

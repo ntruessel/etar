@@ -9,7 +9,7 @@ note
 	revision: "$Revision$"
 
 class
-	ERROR_UTILS
+	ERROR_HANDLER
 
 inherit
 	ANY
@@ -22,8 +22,8 @@ feature {NONE} -- Initialization
 	default_create
 			-- Initialize error handling structures
 		do
-			create {ARRAYED_LIST [STRING_8]} error_messages.make (1)
-			create {ARRAYED_LIST [PROCEDURE [ANY, TUPLE [STRING_8]]]} error_listeners.make (1)
+			create {ARRAYED_LIST [ERROR]} error_messages.make (1)
+			create error_listeners
 			register_error_callaback (agent error_messages.force (?))
 		end
 
@@ -35,7 +35,7 @@ feature -- Access
 			Result := not error_messages.is_empty
 		end
 
-	error_messages: LIST [STRING_8]
+	error_messages: LIST [ERROR]
 			-- Error messages.
 
 	reset_error
@@ -46,7 +46,7 @@ feature -- Access
 			has_no_error: not has_error
 		end
 
-	register_error_callaback (a_callback: PROCEDURE [ANY, TUPLE [a_message: STRING_8]])
+	register_error_callaback (a_callback: PROCEDURE [ANY, TUPLE [ERROR]])
 			-- Register `a_callback' as new target to send error messages to
 		do
 			error_listeners.force (a_callback)
@@ -54,23 +54,29 @@ feature -- Access
 
 feature {NONE} -- Error reporting
 
-	report_error (a_message: STRING_8)
-			-- Report error message `a_message'
+	report_error (a_error: ERROR)
+			-- Report error `a_error'
 		do
 			across
 				error_listeners as l_listener_cursor
 			loop
-				l_listener_cursor.item (a_message)
+				l_listener_cursor.item (a_error)
 			end
 		end
 
-	report_prefixed_error (a_prefix: STRING_8; a_message: STRING_8)
-			-- Report error message `a_prefix': `a_message'
+	report_new_error (a_message: READABLE_STRING_GENERAL)
+			-- Report error message `a_message'
 		do
-			report_error (a_prefix + ": " + a_message)
+			report_error (create {ERROR}.make (a_message))
 		end
 
-	error_listeners: LIST [PROCEDURE [ANY, TUPLE [a_message: STRING_8]]]
+	report_error_with_parent (a_message: READABLE_STRING_GENERAL; a_parent: ERROR)
+			-- Report error message `a_prefix': `a_message'
+		do
+			report_error (create {ERROR}.make_with_parent (a_message, a_parent))
+		end
+
+	error_listeners: ACTION_SEQUENCE [TUPLE [ERROR]]
 			-- All procedures that are notified on error
 
 end

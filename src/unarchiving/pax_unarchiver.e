@@ -108,7 +108,7 @@ feature -- Unarchiving
 
 			if unarchiving_finished then
 				if parsing_state /= ps_length then
-					report_error ("Parsing not finished, current key: " + active_key)
+					report_new_error ("Parsing not finished, current key: " + active_key)
 				end
 			end
 		end
@@ -163,12 +163,12 @@ feature {NONE} -- parsing finite state machine
 				if not active_length.is_empty then
 					parsing_state := ps_key
 				else
-					report_error ("No length parsed, first character was space")
+					report_new_error ("No length parsed, first character was space")
 				end
 			elseif c.is_digit then
 				active_length.append_character (c)
 			else
-				report_error ("Detected non-digit character in length entry, currently parsed length: " + active_length)
+				report_new_error ("Detected non-digit character in length entry, currently parsed length: " + active_length)
 			end
 		ensure
 			more_parsed_characters: not has_error implies parsed_characters = old parsed_characters + 1
@@ -191,7 +191,7 @@ feature {NONE} -- parsing finite state machine
 
 					parsing_state := ps_value
 				else
-					report_error ("No key found, currently parsed length: " + active_length)
+					report_new_error ("No key found, currently parsed length: " + active_length)
 				end
 			else
 				active_key.append_character (c)
@@ -216,10 +216,10 @@ feature {NONE} -- parsing finite state machine
 					entries.force (active_value.twin, active_key.twin)
 					reset_parser
 				else
-					report_error ("Entry not delimited by newline. Key: " + active_key)
+					report_new_error ("Entry not delimited by newline. Key: " + active_key)
 				end
 			else
-				report_error ("Incorrect entry length. Key: " + active_key)
+				report_new_error ("Incorrect entry length. Key: " + active_key)
 			end
 		ensure
 			more_parsed_characters_in_same_state: not has_error implies if old parsed_characters < active_length.to_integer then parsed_characters = old parsed_characters + 1 else parsed_characters = 0 end

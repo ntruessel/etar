@@ -93,7 +93,7 @@ feature {NONE} -- Pretty printing
 			-- Print all errors that occured
 		do
 			across a_archive.error_messages as l_error_cursor loop
-				print_error (l_error_cursor.item)
+				print_error (l_error_cursor.item.pretty_print)
 			end
 		end
 

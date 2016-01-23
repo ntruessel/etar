@@ -26,9 +26,9 @@ feature {NONE} -- Initialization
 			Precursor
 
 				-- Redirect error messages
-			ustar_parser.register_error_callaback (agent report_prefixed_error ("ustar parser", ?))
-			extended_payload_unarchiver.register_error_callaback (agent report_prefixed_error ("extended payload unarchiver", ?))
-			global_payload_unarchiver.register_error_callaback (agent report_prefixed_error ("global payload unarchiver", ?))
+			ustar_parser.register_error_callaback (agent report_error_with_parent ("ustar parser", ?))
+			extended_payload_unarchiver.register_error_callaback (agent report_error_with_parent ("extended payload unarchiver", ?))
+			global_payload_unarchiver.register_error_callaback (agent report_error_with_parent ("global payload unarchiver", ?))
 		end
 
 feature -- Parsing
@@ -52,7 +52,7 @@ feature -- Parsing
 				when ps_second_header then
 					handle_second_header_block (a_block, a_pos)
 				else
-					report_error ("Unknown parsing state")
+					report_new_error ("Unknown parsing state")
 				end
 			end
 		end
@@ -115,11 +115,11 @@ feature {NONE} -- Implementation
 						end
 					else
 							-- Unreachable (TAR_HEADER_PARSER invariant)
-						report_error ("Parsing first header failed")
+						report_new_error ("Parsing first header failed")
 					end
 				end
 			else
-				report_error ("Parsing first header failed")
+				report_new_error ("Parsing first header failed")
 			end
 
 		end
@@ -140,10 +140,10 @@ feature {NONE} -- Implementation
 						parsing_state := ps_first_header
 					end
 				else
-					report_error ("Parsing global pax payload failed")
+					report_new_error ("Parsing global pax payload failed")
 				end
 			else
-				report_error ("Remaining in global pax payload parsing stage, even though all payload is unarchived")
+				report_new_error ("Remaining in global pax payload parsing stage, even though all payload is unarchived")
 			end
 		end
 
@@ -163,11 +163,11 @@ feature {NONE} -- Implementation
 						parsing_state := ps_second_header
 					end
 				else
-					report_error ("Parsing extended pax payload failed")
+					report_new_error ("Parsing extended pax payload failed")
 				end
 
 			else
-				report_error ("Remaining in extended pax payload parsing stage, even though all payload is unarchived")
+				report_new_error ("Remaining in extended pax payload parsing stage, even though all payload is unarchived")
 			end
 		end
 
@@ -193,11 +193,11 @@ feature {NONE} -- Implementation
 						parsing_finished := True
 					else
 							-- Unreachable (TAR_HEADER_PARSER invariant)
-						report_error ("Parsing second header failed")
+						report_new_error ("Parsing second header failed")
 					end
 				end
 			else
-				report_error ("Parsing second header failed")
+				report_new_error ("Parsing second header failed")
 			end
 		end
 
@@ -224,7 +224,7 @@ feature {NONE} -- Implementation
 					if l_update_value.is_natural_32 then
 						l_header.set_user_id (l_update_value.to_natural_32)
 					else
-						report_error ("Parsed uid is not a valid 32bit number: " + l_update_value)
+						report_new_error ("Parsed uid is not a valid 32bit number: " + l_update_value)
 					end
 				end
 
@@ -234,7 +234,7 @@ feature {NONE} -- Implementation
 					if l_update_value.is_natural_32 then
 						l_header.set_group_id (l_update_value.to_natural_32)
 					else
-						report_error ("Parsed gid is not a valid 32bit number: " + l_update_value)
+						report_new_error ("Parsed gid is not a valid 32bit number: " + l_update_value)
 					end
 				end
 
@@ -244,7 +244,7 @@ feature {NONE} -- Implementation
 					if l_update_value.is_natural_64 then
 						l_header.set_size (l_update_value.to_natural_64)
 					else
-						report_error ("Parsed size is not a valid 64bit number: " + l_update_value)
+						report_new_error ("Parsed size is not a valid 64bit number: " + l_update_value)
 					end
 				end
 
@@ -260,7 +260,7 @@ feature {NONE} -- Implementation
 					if l_update_value.is_natural_64 then
 						l_header.set_mtime (l_update_value.to_natural_64)
 					else
-						report_error ("Parsed mtime is not a valid 64bit number: " + l_update_value)
+						report_new_error ("Parsed mtime is not a valid 64bit number: " + l_update_value)
 					end
 				end
 

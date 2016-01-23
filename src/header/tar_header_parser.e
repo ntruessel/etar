@@ -12,7 +12,7 @@ deferred class
 	TAR_HEADER_PARSER
 
 inherit
-	ERROR_UTILS
+	ERROR_HANDLER
 
 feature -- Status
 
