@@ -21,6 +21,8 @@ feature {NONE} -- Initialization
 	make
 			-- Run minitar
 		do
+			default_create
+
 			create options
 			options.parse (execution_environment.arguments)
 
@@ -39,6 +41,12 @@ feature {NONE} -- Initialization
 		end
 
 feature {NONE} -- Implementation
+
+	print_error (a_error: ERROR)
+			-- Print error to output
+		do
+			localized_print_error (a_error.pretty_print)
+		end
 
 	options: OPTIONS
 			-- Program options
@@ -135,6 +143,9 @@ feature {NONE} -- Implementation
 			if options.absolute_paths then
 				Result.enable_absolute_filenames
 			end
+
+			Result.register_error_callaback (agent print_error (?))
+
 		end
 
 	print_usage
