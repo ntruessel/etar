@@ -83,4 +83,5 @@ feature {NONE} -- Utilities
 
 invariant
 	valid_header_if_no_errors: not has_error and parsing_finished implies attached last_parsed_header
+	parsing_finished_on_error: has_error implies parsing_finished
 end

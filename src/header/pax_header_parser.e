@@ -55,6 +55,7 @@ feature -- Parsing
 					report_new_error ("Unknown parsing state")
 				end
 			end
+			parsing_finished := parsing_finished or has_error
 		end
 
 feature {NONE} -- Implementation
