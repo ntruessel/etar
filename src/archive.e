@@ -44,8 +44,8 @@ feature {NONE} -- Initialization
 
 
 				-- Error redirections
-			header_parser.register_error_callaback (agent report_error_with_parent ("Header parser", ?))
-			storage_backend.register_error_callaback (agent report_error_with_parent ("Storage backend", ?))
+			header_parser.register_error_callaback (agent report_error_with_parent ("Header parser failed", ?))
+			storage_backend.register_error_callaback (agent report_error_with_parent ("Storage backend failed", ?))
 		end
 
 	make (a_storage_backend: STORAGE_BACKEND)
@@ -151,7 +151,7 @@ feature -- Unarchiving
 			-- Add unarchiver `a_unarchiver' to `unarchivers'
 		do
 			unarchivers.force (a_unarchiver)
-			a_unarchiver.register_error_callaback (agent report_error_with_parent (a_unarchiver.name, ?))
+			a_unarchiver.register_error_callaback (agent report_error_with_parent (a_unarchiver.name + " failed", ?))
 		end
 
 	unarchiving_finished: BOOLEAN
