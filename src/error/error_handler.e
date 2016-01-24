@@ -35,9 +35,6 @@ feature -- Access
 			Result := not error_messages.is_empty
 		end
 
-	error_messages: LIST [ERROR]
-			-- Error messages.
-
 	reset_error
 			-- Reset errors.
 		do
@@ -52,7 +49,7 @@ feature -- Access
 			error_listeners.force (a_callback)
 		end
 
-feature {NONE} -- Error reporting
+feature -- Error reporting
 
 	report_error (a_error: ERROR)
 			-- Report error `a_error'
@@ -76,7 +73,12 @@ feature {NONE} -- Error reporting
 			report_error (create {ERROR}.make_with_parent (a_message, a_parent))
 		end
 
+feature {NONE} -- Implementation
+
 	error_listeners: ACTION_SEQUENCE [TUPLE [ERROR]]
 			-- All procedures that are notified on error
+
+	error_messages: LIST [ERROR]
+			-- Error messages.
 
 end
