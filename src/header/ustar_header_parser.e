@@ -50,17 +50,15 @@ feature -- Parsing
 				-- FIXME: Implement filename splitting
 			if not has_error then
 				l_filename := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.name_offset, {TAR_HEADER_CONST}.name_length)
-				if not l_filename.is_whitespace then
---					l_header.set_filename (create {PATH}.make_from_string (l_field))
-						-- prefix
-					l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.prefix_offset, {TAR_HEADER_CONST}.prefix_length)
-					if not l_field.is_whitespace then
-						l_filename := l_field + "/" + l_filename
-					end
-					l_header.set_filename (create {PATH}.make_from_string (l_filename))
-				else
-					report_error ("Missing filename")
+				if l_filename.is_whitespace then
+					l_filename := "."
 				end
+					-- prefix
+				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.prefix_offset, {TAR_HEADER_CONST}.prefix_length)
+				if not l_field.is_whitespace then
+					l_filename := l_field + "/" + l_filename
+				end
+				l_header.set_filename (create {PATH}.make_from_string (l_filename))
 			end
 
 				-- parse mode
