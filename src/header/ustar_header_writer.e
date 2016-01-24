@@ -145,7 +145,7 @@ feature -- Fitting
 		do
 				-- No need for terminating '%U'
 			l_split_filename := unify_and_split_filename (a_header.filename)
-			Result := l_split_filename.filename_prefix.count <= {TAR_HEADER_CONST}.prefix_length
+			Result := l_split_filename.filename_prefix.count <= {TAR_HEADER_CONST}.prefix_length and not l_split_filename.filename.is_empty
 		end
 
 	user_id_fits (a_header: TAR_HEADER): BOOLEAN
