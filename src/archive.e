@@ -190,8 +190,6 @@ feature -- Unarchiving
 					storage_backend.read_block
 					if storage_backend.block_ready then
 						header_parser.parse_block (storage_backend.last_block, 0)
-					else
-						report_new_error ("Not enough blocks to parse header")
 					end
 				until
 					header_parser.parsing_finished or has_error
@@ -199,8 +197,6 @@ feature -- Unarchiving
 					storage_backend.read_block
 					if storage_backend.block_ready then
 						header_parser.parse_block (storage_backend.last_block, 0)
-					else
-						report_new_error ("Not enough blocks to parse header")
 					end
 				end
 
@@ -217,8 +213,6 @@ feature -- Unarchiving
 								storage_backend.read_block
 								if storage_backend.block_ready then
 									l_unarchiver.unarchive_block (storage_backend.last_block, 0)
-								else
-									report_new_error ("Not enough blocks for payload")
 								end
 							end
 						else
