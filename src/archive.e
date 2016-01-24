@@ -183,6 +183,7 @@ feature -- Unarchiving
 			correct_mode: is_unarchiving_mode
 		local
 			l_unarchiver: detachable UNARCHIVER
+			l_sane_header: TAR_HEADER
 		do
 			if not unarchiving_finished and not has_error then
 					-- parse header
@@ -202,11 +203,12 @@ feature -- Unarchiving
 
 				if not has_error then
 					if attached header_parser.parsed_header as l_header then
-						l_unarchiver := matching_unarchiver (l_header)
+						l_sane_header := sanitized_header (l_header)
+						l_unarchiver := matching_unarchiver (l_sane_header)
 						if l_unarchiver /= Void then
 								-- Parse payload
 							from
-								l_unarchiver.initialize (sanitized_header (l_header))
+								l_unarchiver.initialize (sanitized_header (l_sane_header))
 							until
 								has_error or l_unarchiver.unarchiving_finished
 							loop
