@@ -26,9 +26,9 @@ feature {NONE} -- Initialization
 			Precursor
 
 				-- Redirect error messages
-			ustar_parser.register_error_callaback (agent report_error_with_parent ("ustar parser failed", ?))
-			extended_payload_unarchiver.register_error_callaback (agent report_error_with_parent ("extended payload unarchiver failed", ?))
-			global_payload_unarchiver.register_error_callaback (agent report_error_with_parent ("global payload unarchiver failed", ?))
+			ustar_parser.register_error_callback (agent report_error_with_parent ("ustar parser failed", ?))
+			extended_payload_unarchiver.register_error_callback (agent report_error_with_parent ("extended payload unarchiver failed", ?))
+			global_payload_unarchiver.register_error_callback (agent report_error_with_parent ("global payload unarchiver failed", ?))
 		end
 
 feature -- Parsing

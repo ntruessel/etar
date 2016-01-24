@@ -144,7 +144,7 @@ feature {NONE} -- Implementation
 				Result.enable_absolute_filenames
 			end
 
-			Result.register_error_callaback (agent print_error (?))
+			Result.register_error_callback (agent print_error (?))
 
 		end
 

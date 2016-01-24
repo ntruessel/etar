@@ -24,7 +24,7 @@ feature {NONE} -- Initialization
 		do
 			create {ARRAYED_LIST [ERROR]} error_messages.make (1)
 			create error_listeners
-			register_error_callaback (agent error_messages.force (?))
+			register_error_callback (agent error_messages.force (?))
 		end
 
 feature -- Access
@@ -46,7 +46,7 @@ feature -- Access
 			has_no_error: not has_error
 		end
 
-	register_error_callaback (a_callback: PROCEDURE [ANY, TUPLE [ERROR]])
+	register_error_callback (a_callback: PROCEDURE [ANY, TUPLE [ERROR]])
 			-- Register `a_callback' as new target to send error messages to
 		do
 			error_listeners.force (a_callback)
