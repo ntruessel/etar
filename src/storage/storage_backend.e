@@ -10,7 +10,7 @@ deferred class
 	STORAGE_BACKEND
 
 inherit
-	ERROR_UTILS
+	ERROR_HANDLER
 
 feature -- Status setting
 

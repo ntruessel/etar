@@ -15,7 +15,7 @@ class
 	ARCHIVE
 
 inherit
-	ERROR_UTILS
+	ERROR_HANDLER
 		redefine
 			default_create
 		end
@@ -44,8 +44,8 @@ feature {NONE} -- Initialization
 
 
 				-- Error redirections
-			header_parser.register_redirector (Current, "Header parser")
-			storage_backend.register_redirector (Current, "Storage backend")
+			header_parser.register_error_callaback (agent report_error_with_parent ("Header parser failed", ?))
+			storage_backend.register_error_callaback (agent report_error_with_parent ("Storage backend failed", ?))
 		end
 
 	make (a_storage_backend: STORAGE_BACKEND)
@@ -151,7 +151,7 @@ feature -- Unarchiving
 			-- Add unarchiver `a_unarchiver' to `unarchivers'
 		do
 			unarchivers.force (a_unarchiver)
-			a_unarchiver.register_redirector (Current, a_unarchiver.name)
+			a_unarchiver.register_error_callaback (agent report_error_with_parent (a_unarchiver.name + " failed", ?))
 		end
 
 	unarchiving_finished: BOOLEAN
@@ -190,8 +190,6 @@ feature -- Unarchiving
 					storage_backend.read_block
 					if storage_backend.block_ready then
 						header_parser.parse_block (storage_backend.last_block, 0)
-					else
-						report_error ("Not enough blocks to parse header")
 					end
 				until
 					header_parser.parsing_finished or has_error
@@ -199,8 +197,6 @@ feature -- Unarchiving
 					storage_backend.read_block
 					if storage_backend.block_ready then
 						header_parser.parse_block (storage_backend.last_block, 0)
-					else
-						report_error ("Not enough blocks to parse header")
 					end
 				end
 
@@ -217,16 +213,14 @@ feature -- Unarchiving
 								storage_backend.read_block
 								if storage_backend.block_ready then
 									l_unarchiver.unarchive_block (storage_backend.last_block, 0)
-								else
-									report_error ("Not enough blocks for payload")
 								end
 							end
 						else
-							report_error ("No unarchiver found")
+							report_new_error ("No unarchiver found")
 						end
 					else
 							-- unreachable (TAR_HEADER_PARSER invariant)
-						report_error ("Failed to parse header")
+						report_new_error ("Failed to parse header")
 					end
 				end
 			end

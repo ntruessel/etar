@@ -67,7 +67,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_mode (octal_string_to_natural_16 (l_field))
 				else
-					report_error ("Missing mode")
+					report_new_error ("Missing mode")
 				end
 			end
 
@@ -77,7 +77,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_user_id (octal_string_to_natural_32 (l_field))
 				else
-					report_error ("Missing uid")
+					report_new_error ("Missing uid")
 				end
 			end
 
@@ -87,7 +87,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_group_id (octal_string_to_natural_32 (l_field))
 				else
-					report_error ("Missing gid")
+					report_new_error ("Missing gid")
 				end
 			end
 
@@ -97,7 +97,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_size (octal_string_to_natural_64 (l_field))
 				else
-					report_error ("Missing size")
+					report_new_error ("Missing size")
 				end
 			end
 
@@ -107,7 +107,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_mtime (octal_string_to_natural_64 (l_field))
 				else
-					report_error ("Missing mtime")
+					report_new_error ("Missing mtime")
 				end
 			end
 
@@ -115,7 +115,7 @@ feature -- Parsing
 				-- verify checksum
 			if not has_error then
 				if not is_checksum_verified (a_block, a_pos) then
-					report_error ("Cheksum not verified")
+					report_new_error ("Cheksum not verified")
 				end
 			end
 
@@ -130,7 +130,7 @@ feature -- Parsing
 				if not l_field.is_whitespace then
 					l_header.set_linkname (create {PATH}.make_from_string (l_field))
 				else
---					report_error ("Missing linkname")
+--					report_new_error ("Missing linkname")
 				end
 			end
 
@@ -138,7 +138,7 @@ feature -- Parsing
 			if not has_error then
 				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.magic_offset, {TAR_HEADER_CONST}.magic_length)
 				if l_field /~ {TAR_CONST}.ustar_magic then
-					report_error ("Missing magic")
+					report_new_error ("Missing magic")
 				end
 			end
 
@@ -147,7 +147,7 @@ feature -- Parsing
 			if not has_error then
 				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.version_offset, {TAR_HEADER_CONST}.version_length)
 				if l_field /~ {TAR_CONST}.ustar_version then
-					report_error ("Missing version")
+					report_new_error ("Missing version")
 				end
 			end
 
@@ -157,7 +157,7 @@ feature -- Parsing
 				if not l_field.is_whitespace then
 					l_header.set_user_name (l_field)
 				else
---					report_error ("Missing uname")
+--					report_new_error ("Missing uname")
 				end
 			end
 
@@ -167,7 +167,7 @@ feature -- Parsing
 				if not l_field.is_whitespace then
 					l_header.set_group_name (l_field)
 				else
---					report_error ("Missing gname")
+--					report_new_error ("Missing gname")
 				end
 			end
 
@@ -177,7 +177,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_device_major (octal_string_to_natural_32 (l_field))
 				else
---					report_error ("Missing devmajor")
+--					report_new_error ("Missing devmajor")
 				end
 			end
 
@@ -187,7 +187,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_device_minor (octal_string_to_natural_32 (l_field))
 				else
---					report_error ("Missing devminor")
+--					report_new_error ("Missing devminor")
 				end
 			end
 
