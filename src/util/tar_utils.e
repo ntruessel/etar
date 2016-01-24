@@ -198,7 +198,6 @@ feature -- Filename normalization
 			correct_result_without_prefix: Result.filename_prefix.is_empty implies (Result.filename ~ unify_utf_8_path (a_path))
 			correct_result_with_prefix: (not Result.filename_prefix.is_empty and not Result.filename.is_empty) implies (Result.filename_prefix + "/" + Result.filename ~ unify_utf_8_path (a_path))
 			correct_result_with_prefix_without_filename: (not Result.filename_prefix.is_empty and Result.filename.is_empty) implies (Result.filename_prefix ~ unify_utf_8_path (a_path))
-			no_prefix_without_filename: not (Result.filename.is_empty and not Result.filename_prefix.is_empty)
 		end
 
 feature {NONE} -- Utilities stolen from file_info
