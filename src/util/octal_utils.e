@@ -162,16 +162,6 @@ feature -- Utilities
 			not_more_zeros: a_string.is_empty or else a_string[Result + 1] /= '0' or else Result + 1 = a_string.count
 		end
 
-	truncate_leading_zeros (a_string: STRING_8)
-			-- Truncates leading zeros of `a_string' until it has no more leading zeros or only one character left
-		do
-			a_string.keep_tail (a_string.count - leading_zeros_count(a_string))
-		ensure
-			no_leading_zero: a_string.count <= 1 or else a_string[1] /= '0'
-			correct_length: a_string.count + old leading_zeros_count(a_string) = old a_string.count
-			is_end: old a_string.ends_with (a_string)
-		end
-
 	pad (a_string: STRING_8; n: INTEGER)
 			-- Pad `a_string' with `n' zeros
 		require
