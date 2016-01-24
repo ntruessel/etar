@@ -85,16 +85,20 @@ feature {NONE} -- Implementation
 		do
 			skip := False
 			if attached active_header as l_header then
-				create {RAW_FILE} l_file.make_with_path (l_header.filename)
-				if l_file.exists then
-					file_safe_delete (l_file)
-				end
-
-				if l_file.exists then
-					skip := True
+				if l_header.filename.is_empty then
+					report_new_error ("Can't unarchive file to current working directory")
 				else
-					l_file.open_write
-					active_file := l_file
+					create {RAW_FILE} l_file.make_with_path (l_header.filename)
+					if l_file.exists then
+						file_safe_delete (l_file)
+					end
+
+					if l_file.exists then
+						skip := True
+					else
+						l_file.open_write
+						active_file := l_file
+					end
 				end
 			else
 				check false end -- Unreachable, when do_internal_initialization is called, active_header references an attached TAR_HEADER object

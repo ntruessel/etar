@@ -84,7 +84,7 @@ feature -- Status setting
 	close
 			-- Close backend
 		do
-			if not has_error then
+			if not backend.is_closed then
 				backend.flush
 				backend.close
 			end
@@ -152,13 +152,8 @@ feature -- Reading
 
 				has_valid_block := True
 			else
-				backend.read_to_managed_pointer (block_buffer, 0, block_buffer.count)
-				has_valid_block := backend.bytes_read = block_buffer.count
-
-				if not has_valid_block then
-					close
-					report_new_error ("Not enough bytes to read full block")
-				end
+				read_block_to_managed_pointer (block_buffer, 0)
+				has_valid_block := not has_error
 			end
 		end
 
@@ -205,13 +200,9 @@ feature {NONE} -- Implementation
 			l_buffer: MANAGED_POINTER
 		do
 			create l_buffer.make (block_buffer.count)
-			backend.read_to_managed_pointer (l_buffer, 0, l_buffer.count)
-
-			if backend.bytes_read = l_buffer.count then
+			read_block_to_managed_pointer (l_buffer, 0)
+			if not has_error then
 				buffer.force (l_buffer)
-			else
-				close
-				report_new_error ("Not enough bytes to read full block")
 			end
 		ensure
 			error_or_one_more_entry: has_error or else buffer.count = old buffer.count + 1
@@ -225,6 +216,24 @@ feature {NONE} -- Implementation
 					do
 						Result := c = '%U'
 					end, 0, a_block.count - 1)
+		end
+
+	read_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Read block from backend to `p' (starting at `a_pos')
+		require
+			non_negative_pos: a_pos >= 0
+			enough_space: p.count >= a_pos + {TAR_CONST}.tar_block_size
+		do
+			if backend.file_readable then
+				backend.read_to_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
+				if backend.bytes_read /= {TAR_CONST}.tar_block_size then
+					report_new_error ("Not enough bytes to read full block")
+					close
+				end
+			else
+				report_new_error ("No more bytes available to read")
+				close
+			end
 		end
 
 invariant

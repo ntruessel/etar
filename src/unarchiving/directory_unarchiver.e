@@ -57,7 +57,11 @@ feature {NONE} -- Implementation
 			l_file: FILE
 		do
 			if attached active_header as l_header then
-				create l_directory.make_with_path (l_header.filename)
+				if l_header.filename.is_empty then
+					create l_directory.make_with_path (create {PATH}.make_current)
+				else
+					create l_directory.make_with_path (l_header.filename)
+				end
 				if not l_directory.exists then
 					l_directory.recursive_create_dir
 				end
