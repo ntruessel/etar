@@ -46,7 +46,7 @@ feature -- Access
 
 feature -- Output
 
-	pretty_print: STRING_32
+	string_representation: STRING_32
 			-- Output error message including all parents
 		local
 			l_error: detachable like Current
@@ -60,6 +60,7 @@ feature -- Output
 			loop
 				Result.append_character ('%T')
 				Result.append_string_general (l_error.message)
+				Result.append_character ('%N')
 				l_error := l_error.parent
 			end
 		end

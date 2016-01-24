@@ -45,7 +45,7 @@ feature {NONE} -- Implementation
 	print_error (a_error: ERROR)
 			-- Print error to output
 		do
-			localized_print_error (a_error.pretty_print)
+			localized_print_error (a_error.string_representation)
 		end
 
 	options: OPTIONS
