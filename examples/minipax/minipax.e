@@ -43,9 +43,21 @@ feature {NONE} -- Initialization
 feature {NONE} -- Implementation
 
 	print_error (a_error: ERROR)
-			-- Print error to output
+			-- Print error to stderr
 		do
-			localized_print_error (a_error.string_representation)
+			localized_print_error ("ERROR: " + a_error.string_representation)
+		end
+
+	print_warning (a_message: READABLE_STRING_GENERAL)
+			-- Print warning to stderr
+		do
+			localized_print_error ("WARNING: " + a_message + "%N")
+		end
+
+	print_info (a_message: READABLE_STRING_GENERAL)
+			-- Print info to stderr
+		do
+			localized_print_error ("INFO: " + a_message + "%N")
 		end
 
 	options: OPTIONS
@@ -109,13 +121,17 @@ feature {NONE} -- Implementation
 								l_to_archive.force (l_to_archive.item + l_cur.item)
 							end
 						end
-					elseif l_file.is_plain and not l_file.path.same_as (create {PATH}.make_from_string (options.archive_name)) then
-						l_archive.add_entry (create {FILE_ARCHIVABLE}.make (l_file))
+					elseif l_file.is_plain then
+						if not l_file.path.canonical_path.same_as ((create {PATH}.make_from_string (options.archive_name)).canonical_path) then
+							l_archive.add_entry (create {FILE_ARCHIVABLE}.make (l_file))
+						else
+							print_info ("Skipping file %"" + l_file.path.name + "%", is same file as output file")
+						end
 					else
-						-- Warn about unsupported filetype
+						print_warning ("Skipping file %"" + l_file.path.name + "%", unsupported filetype")
 					end
 				else
-					-- Warn about non-existing file
+					print_warning ("File %"" + l_file.path.name + "%" does not exist");
 				end
 				l_to_archive.remove
 			end
