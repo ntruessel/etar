@@ -20,6 +20,13 @@ inherit
 			default_create
 		end
 
+	OCTAL_UTILS
+		export
+			{NONE} all
+		undefine
+			default_create
+		end
+
 feature -- Parsing
 
 	parse_block (a_block: MANAGED_POINTER; a_pos: INTEGER)

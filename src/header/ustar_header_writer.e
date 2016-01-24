@@ -20,6 +20,11 @@ inherit
 			{NONE} all
 		end
 
+	OCTAL_UTILS
+		export
+			{NONE} all
+		end
+
 feature -- Status
 
 	required_blocks: INTEGER

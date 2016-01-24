@@ -9,9 +9,6 @@ note
 class
 	TAR_UTILS
 
-inherit
-	OCTAL_UTILS
-
 feature -- Bytes to Blocks
 
 	needed_blocks (n: NATURAL_64): NATURAL_64
