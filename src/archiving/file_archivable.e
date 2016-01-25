@@ -9,7 +9,7 @@ note
 
 class
 	FILE_ARCHIVABLE
-	
+
 inherit
 	ARCHIVABLE
 
@@ -21,7 +21,7 @@ feature {NONE} -- Initialization
 	make (a_file: FILE)
 			-- Create a new FILE_ARCHIVABLE for `a_file'
 		require
-			file_existis: a_file.exists
+			file_exists: a_file.exists
 			file_is_readable: a_file.is_readable
 			file_is_plain: a_file.is_plain
 		do

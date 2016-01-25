@@ -61,30 +61,38 @@ feature -- Status setting
 			-- Open for reading
 		do
 			if not has_error then
-				if backend.exists and then backend.is_readable then
-					backend.open_read
-				elseif not backend.exists then
-					report_new_error ("File does not exist")
-				elseif not backend.is_readable then
-					report_new_error ("File is not readable")
+				if backend.exists then
+					if backend.is_access_readable then
+						backend.open_read
+					else
+						report_new_error ("File is not readable!")
+					end
 				else
-					report_new_error ("Unknown error")
+					report_new_error ("File does not exist!")
 				end
 			end
 		end
 
 	open_write
 			-- Open for writing
+		local
+			retried: BOOLEAN
 		do
 			if not has_error then
-				if backend.exists implies backend.is_writable then
-					backend.open_write
-				elseif backend.exists then
-					report_new_error ("File is not writable")
+				if backend.exists then
+					if backend.is_writable then
+						backend.open_write
+					else
+						report_new_error ("File is not writable!")
+					end
 				else
-					report_new_error ("Unknown error")
+					backend.open_write
 				end
 			end
+		rescue
+			report_new_error ("Error occurred!")
+			retried := True
+			retry
 		end
 
 	close
@@ -121,13 +129,13 @@ feature -- Status
 		end
 
 	is_readable: BOOLEAN
-			-- Indicates whether this instance can be read from
+			-- Is Current open and readable?
 		do
 			Result := not has_error and then backend.is_open_read
 		end
 
 	is_writable: BOOLEAN
-			-- Indicates whether this instance can be written to
+			-- Is Current created and writable?
 		do
 			Result := not has_error and then backend.is_open_write
 		end

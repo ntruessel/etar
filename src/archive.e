@@ -36,7 +36,7 @@ feature {NONE} -- Initialization
 
 --			unarchiving_finished := False
 
-			Precursor
+			Precursor {ERROR_HANDLER}
 
 				-- Add default unarchivers
 			add_unarchiver (create {SKIP_UNARCHIVER}) -- Fallback
@@ -61,7 +61,7 @@ feature {NONE} -- Initialization
 feature -- Status setting
 
 	open_archive
-			-- Open for archiving
+			-- Open for archiving.
 		do
 			storage_backend.open_write
 			mode := mode_archive
@@ -257,7 +257,32 @@ feature -- Archiving
 			end
 		end
 
-	add_node_entry (a_location: PATH)
+	finalize
+			-- Write archive delimiter
+		do
+			storage_backend.finalize
+			mode := mode_closed
+		end
+
+feature -- Archiving helpers		
+
+	add_directory (a_dir: FILE)
+		require
+			exists: a_dir.exists
+			readable: a_dir.is_access_readable
+		do
+			add_entry (create {DIRECTORY_ARCHIVABLE}.make (a_dir))
+		end
+
+	add_file (a_file: FILE)
+		require
+			exists: a_file.exists and then a_file.is_plain
+			readable: a_file.is_access_readable
+		do
+			add_entry (create {FILE_ARCHIVABLE}.make (a_file))
+		end
+
+	add_location (a_location: PATH)
 			-- Add a node entry at location `a_location'.
 			-- note: it can be file or directory, ..
 		local
@@ -266,9 +291,9 @@ feature -- Archiving
 			create f.make_with_path (a_location)
 			if f.exists and then f.is_access_readable then
 				if f.is_directory then
-					add_entry (create {DIRECTORY_ARCHIVABLE}.make (f))
+					add_directory (f)
 				elseif f.is_plain then
-					add_entry (create {FILE_ARCHIVABLE}.make (f))
+					add_file (f)
 				else
 					report_new_error ({STRING_32} "Unsupported type of node at %"" + a_location.name + {STRING_32} "%".")
 				end
@@ -277,7 +302,7 @@ feature -- Archiving
 			end
 		end
 
-	add_directory_entry (a_location: PATH)
+	add_directory_location (a_location: PATH)
 			-- Add a directory entry at location `a_location'.
 		require
 			correct_mode: is_archiving_mode
@@ -290,13 +315,13 @@ feature -- Archiving
 				d.is_access_readable and then
 				d.is_directory
 			then
-				add_entry (create {DIRECTORY_ARCHIVABLE}.make (d))
+				add_directory (d)
 			else
 				report_new_error ({STRING_32} "Can not add directory at %"" + a_location.name + {STRING_32} "%".")
 			end
 		end
 
-	add_plain_file_entry (a_location: PATH)
+	add_plain_file_location (a_location: PATH)
 			-- Add a plain file entry at location `a_location'.
 		require
 			correct_mode: is_archiving_mode
@@ -305,17 +330,10 @@ feature -- Archiving
 		do
 			create f.make_with_path (a_location)
 			if f.exists and then f.is_access_readable and then f.is_plain then
-				add_entry (create {FILE_ARCHIVABLE}.make (f))
+				add_file (f)
 			else
 				report_new_error ({STRING_32} "Can not add file at %"" + a_location.name + {STRING_32} "%".")
 			end
-		end
-
-	finalize
-			-- Write archive delimiter
-		do
-			storage_backend.finalize
-			mode := mode_closed
 		end
 
 feature {NONE} -- Implementation
@@ -328,8 +346,6 @@ feature {NONE} -- Implementation
 
 	matching_unarchiver (a_header: TAR_HEADER): detachable UNARCHIVER
 			-- Unarchiver being able to unarchive `a_header', Void if none.
-		local
-			l_cursor: like unarchivers.new_cursor
 		do
 			across
 				unarchivers.new_cursor.reversed as ic
