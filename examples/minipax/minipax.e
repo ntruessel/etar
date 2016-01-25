@@ -117,7 +117,7 @@ feature {NONE} -- Implementation
 						across
 							l_dir.entries as l_cur
 						loop
-							if not l_cur.item.is_current_symbol /~ "." and not l_cur.item.is_parent_symbol then
+							if not l_cur.item.is_current_symbol and not l_cur.item.is_parent_symbol then
 								l_to_archive.force (l_to_archive.item + l_cur.item)
 							end
 						end

@@ -1,8 +1,7 @@
 note
 	description: "[
-		Simple directory unarchiver that creates a new directory on disk (if it does not exist)
-	]"
-	author: ""
+			Simple directory unarchiver that creates a new directory on disk (if it does not exist)
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -34,24 +33,24 @@ feature -- Status
 		end
 
 	required_blocks: INTEGER
-			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+			-- Number of blocks required to unarchive payload belonging `active_header'.
 		do
---			Result := 0
+			--| Result := 0
 		end
 
 feature -- Output
 
 	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Unarchive block `p' starting at `a_pos'
-			-- Since directories are header only entries, there is nothing to do
+			-- Unarchive block `p' starting at `a_pos'.
+			-- Since directories are header only entries, there is nothing to do.
 		do
-			-- do_nothing
+			--| do_nothing
 		end
 
 feature {NONE} -- Implementation
 
 	do_internal_initialization
-			-- Setup internal structures after initialize has run
+			-- Setup internal structures after initialize has run.
 		local
 			l_directory: DIRECTORY
 			l_file: FILE

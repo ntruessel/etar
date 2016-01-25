@@ -1,10 +1,9 @@
 note
 	description: "[
-		ARCHIVABLE for pax headers, mainly used by PAX_HEADER_WRITER
-		
-		A pax archivable models the pax extended header payload
-	]"
-	author: ""
+			ARCHIVABLE for pax headers, mainly used by PAX_HEADER_WRITER
+			
+			A pax archivable models the pax extended header payload
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 

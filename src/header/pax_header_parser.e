@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {PAX_HEADER_PARSER}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 

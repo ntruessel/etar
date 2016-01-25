@@ -1,8 +1,7 @@
 note
 	description: "[
-		Simple file unarchiver that creates a new file on disk or overwrites an existing file
-	]"
-	author: ""
+			Simple file unarchiver that creates a new file on disk or overwrites an existing file.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -28,13 +27,14 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
-			-- Instances of this class can unarchive every header that belongs to a basic file
+			-- Current can unarchive every header belonging to a basic file.
 		do
-			Result := a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file or a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file_old
+			Result :=  a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file
+					or a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file_old
 		end
 
 	required_blocks: INTEGER
-			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+			-- Number of blocks required to unarchive the payload that belongs to `active_header'.
 		do
 			if attached active_header as l_header then
 				Result := needed_blocks (l_header.size).as_integer_32

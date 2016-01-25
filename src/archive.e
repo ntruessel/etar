@@ -327,21 +327,19 @@ feature {NONE} -- Implementation
 			-- List of all registered unarchivers.
 
 	matching_unarchiver (a_header: TAR_HEADER): detachable UNARCHIVER
-			-- Return the last added unarchiver that can unarchive `a_header', Void if none
+			-- Unarchiver being able to unarchive `a_header', Void if none.
 		local
 			l_cursor: like unarchivers.new_cursor
 		do
-			from
-				l_cursor := unarchivers.new_cursor
-				l_cursor.reverse
-				l_cursor.start
+			across
+				unarchivers.new_cursor.reversed as ic
 			until
-				l_cursor.after or Result /= Void
+				Result /= Void
 			loop
-				if l_cursor.item.can_unarchive (a_header) then
-					Result := l_cursor.item
+				Result := ic.item
+				if not Result.can_unarchive (a_header) then
+					Result := Void
 				end
-				l_cursor.forth
 			end
 		end
 
@@ -356,31 +354,31 @@ feature {NONE} -- Implementation
 			-- Currently only removes absolute filenames and parent directories
 		local
 			l_safe_path: PATH
+			p: PATH
 		do
 			Result := a_header
 			if not absolute_filenames then
 				create l_safe_path.make_empty
 				across
-					Result.filename.components as l_path_cursor
+					Result.filename.components as ic
 				loop
-					if l_path_cursor.item.has_root or l_path_cursor.item.is_current_symbol or l_path_cursor.item.is_parent_symbol then
+					p := ic.item
+					if p.has_root or p.is_current_symbol or p.is_parent_symbol then
 						create l_safe_path.make_empty
 					else
-						l_safe_path := l_safe_path + l_path_cursor.item
+						l_safe_path := l_safe_path + p
 					end
 				end
 				Result.set_filename (l_safe_path)
 			end
-
 		ensure
 			relative_filename: not absolute_filenames implies Result.filename.is_relative
-			no_parent_or_current_symbols: not absolute_filenames implies across Result.filename.components as l_path_cursor all not l_path_cursor.item.is_current_symbol and not l_path_cursor.item.is_parent_symbol end
+			no_parent_or_current_symbols: not absolute_filenames implies
+					across Result.filename.components as ic all not ic.item.is_current_symbol and not ic.item.is_parent_symbol end
 		end
 
 invariant
-	only_one_mode: (is_archiving_mode and not is_unarchiving_mode and not is_closed) or
-					(not is_archiving_mode and is_unarchiving_mode and not is_closed) or
-					(not is_archiving_mode and not is_unarchiving_mode and is_closed)
+	only_one_mode: is_archiving_mode xor is_unarchiving_mode xor is_closed
 	closed_iff_backend_closed_or_error: is_closed = storage_backend.is_closed or has_error
 
 note
