@@ -4,7 +4,6 @@ note
 		check for errors and register a different error handler,
 		where errors should be redirected to.
 	]"
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -60,9 +59,9 @@ feature -- Error reporting
 			-- Report error `a_error'
 		do
 			across
-				error_listeners as l_listener_cursor
+				error_listeners as ic
 			loop
-				l_listener_cursor.item (a_error)
+				ic.item (a_error)
 			end
 		end
 

@@ -1,8 +1,7 @@
 note
 	description: "[
-		ARCHIVABLE wrapper for DIRECTORY
-	]"
-	author: ""
+			ARCHIVABLE wrapper for DIRECTORY
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -36,16 +35,20 @@ feature -- Status
 
 	header: TAR_HEADER
 			-- Header that belongs to the payload
+		local
+			f: like directory
 		do
+			f := directory
+
 			create Result
-			Result.set_filename (directory.path)
-			Result.set_mode (directory.protection.to_natural_16)
-			Result.set_user_id (directory.user_id.to_natural_32)
-			Result.set_group_id (directory.group_id.to_natural_32)
-			Result.set_mtime (directory.date.to_natural_64)
-			Result.set_user_name (directory.owner_name)
-			Result.set_group_name (directory.file_info.group_name)
+			Result.set_filename (f.path)
 			Result.set_typeflag ({TAR_CONST}.tar_typeflag_directory)
+			Result.set_mode (f.protection.to_natural_16)
+			Result.set_user_id (f.user_id.to_natural_32)
+			Result.set_group_id (f.group_id.to_natural_32)
+			Result.set_mtime (f.date.to_natural_64)
+			Result.set_user_name (f.owner_name)
+			Result.set_group_name (f.file_info.group_name)
 		end
 
 feature -- Output
@@ -60,7 +63,7 @@ feature {NONE} -- Implementation
 
 	directory: FILE
 			-- the directory this instance represents/wraps
-			-- unfortunately, DIRECTORY does not provide enough metadata to use it
+			-- to get directory metadata, use the FILE interface (the interface {DIRECTORY} is mostly used to get child information).
 
 invariant
 	no_payload: required_blocks = 0

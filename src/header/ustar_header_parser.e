@@ -35,7 +35,14 @@ feature -- Parsing
 			l_field: detachable STRING_8
 			l_filename: STRING_8
 			l_header: like last_parsed_header
+			utf: UTF_CONVERTER
 		do
+				-- Reset parsing
+			parsing_finished := False
+			last_parsed_header := Void
+			reset_error
+
+				-- Read field from `a_block'.
 			if attached a_block.read_array (a_pos, a_block.count - a_pos) as arr then
 				create l_field.make (arr.count)
 				across
@@ -44,11 +51,6 @@ feature -- Parsing
 					l_field.extend (ic.item.to_character_8)
 				end
 			end
-
-				-- Reset parsing
-			parsing_finished := False
-			last_parsed_header := Void
-			reset_error
 
 				-- Parse `a_block'.
 			create l_header
@@ -65,7 +67,7 @@ feature -- Parsing
 				if not l_field.is_whitespace then
 					l_filename := l_field + "/" + l_filename
 				end
-				l_header.set_filename (create {PATH}.make_from_string (l_filename))
+				l_header.set_filename (create {PATH}.make_from_string (utf.utf_8_string_8_to_escaped_string_32 (l_filename)))
 			end
 
 				-- parse mode
@@ -120,10 +122,11 @@ feature -- Parsing
 
 
 				-- verify checksum
-			if not has_error then
-				if not is_checksum_verified (a_block, a_pos) then
-					report_new_error ("Cheksum not verified")
-				end
+			if
+				not has_error and then
+				not is_checksum_verified (a_block, a_pos)
+			then
+				report_new_error ("Checksum not verified")
 			end
 
 				-- parse typeflag
@@ -135,7 +138,7 @@ feature -- Parsing
 			if not has_error then
 				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.linkname_offset, {TAR_HEADER_CONST}.linkname_length)
 				if not l_field.is_whitespace then
-					l_header.set_linkname (create {PATH}.make_from_string (l_field))
+					l_header.set_linkname (create {PATH}.make_from_string (utf.utf_8_string_8_to_escaped_string_32 (l_field)))
 				else
 --					report_new_error ("Missing linkname")
 				end
@@ -197,6 +200,9 @@ feature -- Parsing
 --					report_new_error ("Missing devminor")
 				end
 			end
+
+			--| FIXME: maybe group previous multiple "if not has_error then ..." into a unique "if not has_error ..."
+			--|			since no error reporting is done (all are commented..)
 
 			if not has_error then
 				last_parsed_header := l_header

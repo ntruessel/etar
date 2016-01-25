@@ -1,8 +1,7 @@
 note
 	description: "[
-		Abstract parent class for all classes that write tar headers
-	]"
-	author: ""
+			Abstract parent class for all classes that write tar headers
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 

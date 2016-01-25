@@ -1,8 +1,7 @@
 note
 	description: "[
-		Storage backends for files
-	]"
-	author: ""
+			Storage backends for files
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -17,6 +16,7 @@ inherit
 
 create
 	make_from_file,
+	make_from_path,
 	make_from_filename
 
 feature {NONE} -- Initialization
@@ -31,19 +31,25 @@ feature {NONE} -- Initialization
 		end
 
 	make_from_file (a_file: FILE)
-			-- Create new instance for `a_file'
-			-- Will create a clone of `a_file' to prevent interference with client-side changes
+			-- Create new instance for `a_file'.
+			-- note: a clone of `a_file' is created to prevent interference with client-side changes.
 		do
-			create {RAW_FILE} backend.make_with_path (a_file.path)
+			make_from_path (a_file.path)
+		end
+
+	make_from_filename (a_filename: READABLE_STRING_GENERAL)
+			-- Create new instance for `a_filename'.
+		do
+			create {RAW_FILE} backend.make_with_name (a_filename)
 			default_create
 		ensure
 			backend_closed: backend.is_closed
 		end
 
-	make_from_filename (a_filename: READABLE_STRING_GENERAL)
-			-- Create new instance for `a_filename'
+	make_from_path (a_path: PATH)
+			-- Create new instance for `a_path'.
 		do
-			create {RAW_FILE} backend.make_with_name (a_filename)
+			create {RAW_FILE} backend.make_with_path (a_path)
 			default_create
 		ensure
 			backend_closed: backend.is_closed
@@ -93,12 +99,11 @@ feature -- Status setting
 feature -- Status
 
 	archive_finished: BOOLEAN
-			-- Indicates whether the next two blocks only contain NUL bytes or the file has not enough characters to read
+			-- Do the next two blocks contain only NUL bytes or file has not enough characters to read?
 		do
 			Result := backend.is_closed
 			if not Result then
 				from
-
 				until
 					buffer.count >= 2 or has_error
 				loop
@@ -107,7 +112,6 @@ feature -- Status
 			end
 
 			Result := has_error or else (only_nul_bytes (buffer.at (1)) and only_nul_bytes (buffer.at (2)))
-
 		end
 
 	block_ready: BOOLEAN
@@ -195,7 +199,7 @@ feature {NONE} -- Implementation
 			-- Boolean flag for `block_ready'
 
 	read_block_to_buffer
-			-- Read block and add it to the buffer
+			-- Read block and add it to the buffer.
 		local
 			l_buffer: MANAGED_POINTER
 		do
@@ -209,7 +213,7 @@ feature {NONE} -- Implementation
 		end
 
 	only_nul_bytes (a_block: MANAGED_POINTER): BOOLEAN
-			-- Check whether `a_block' only consists of NUL bytes
+			-- Does `a_block' contain only NUL bytes?
 		do
 			Result := a_block.read_special_character_8 (0, a_block.count).for_all_in_bounds (
 				agent (c: CHARACTER_8): BOOLEAN
@@ -219,7 +223,7 @@ feature {NONE} -- Implementation
 		end
 
 	read_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Read block from backend to `p' (starting at `a_pos')
+			-- Read block from backend to `p' (starting at `a_pos').
 		require
 			non_negative_pos: a_pos >= 0
 			enough_space: p.count >= a_pos + {TAR_CONST}.tar_block_size

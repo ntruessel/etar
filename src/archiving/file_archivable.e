@@ -2,14 +2,14 @@ note
 	description: "[
 		ARCHIVABLE wrapper for files
 		
-		This version only accepts plain files
+		This version only accepts plain files.
 	]"
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
 	FILE_ARCHIVABLE
+	
 inherit
 	ARCHIVABLE
 
@@ -32,13 +32,13 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	required_blocks: INTEGER
-			-- Indicate how much space is needed to represent this ARCHIVABLE
+			-- Indicate how much space is needed to represent this ARCHIVABLE resource.
 		do
 			Result := needed_blocks (file.file_info.size.as_natural_64).as_integer_32
 		end
 
 	header: TAR_HEADER
-			-- Header that belongs to the payload
+			-- Header belonging to the payload.
 		do
 			create Result
 
@@ -58,13 +58,13 @@ feature -- Output
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write the next block to `p' starting at `a_pos'
 		do
-			-- Write next block
+				-- Write next block
 			file.read_to_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
 			if (file.end_of_file) then
-				-- Fill with '%U'
+					-- Fill with '%U'
 				pad_block (p, a_pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
 
-				-- Close file
+					-- Close file
 				file.close
 			end
 			written_blocks := written_blocks + 1

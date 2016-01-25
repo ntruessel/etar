@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {SKIP_UNARCHIVER}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -44,7 +43,6 @@ feature -- Status
 				-- Unreachable (precondition)
 			end
 		end
-
 
 feature -- Unarchiving
 

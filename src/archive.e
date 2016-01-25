@@ -1,13 +1,12 @@
 note
 	description: "[
-		This class models an archive and allows to
-		create new archives and unarchive existing archives
+			This class models an archive and allows to
+			create new archives and unarchive existing archives
 
-		It supports the following modes:
-			- unarchiving (reading)
-			- archiving (writing)
-	]"
-	author: ""
+			It supports the following modes:
+				- unarchiving (reading)
+				- archiving (writing)
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -258,13 +257,66 @@ feature -- Archiving
 			end
 		end
 
+	add_node_entry (a_location: PATH)
+			-- Add a node entry at location `a_location'.
+			-- note: it can be file or directory, ..
+		local
+			f: RAW_FILE
+		do
+			create f.make_with_path (a_location)
+			if f.exists and then f.is_access_readable then
+				if f.is_directory then
+					add_entry (create {DIRECTORY_ARCHIVABLE}.make (f))
+				elseif f.is_plain then
+					add_entry (create {FILE_ARCHIVABLE}.make (f))
+				else
+					report_new_error ({STRING_32} "Unsupported type of node at %"" + a_location.name + {STRING_32} "%".")
+				end
+			else
+				report_new_error ({STRING_32} "Can not read file or directory at %"" + a_location.name + {STRING_32} "%".")
+			end
+		end
+
+	add_directory_entry (a_location: PATH)
+			-- Add a directory entry at location `a_location'.
+		require
+			correct_mode: is_archiving_mode
+		local
+			d: RAW_FILE
+		do
+			create d.make_with_path (a_location)
+			if
+				d.exists and then
+				d.is_access_readable and then
+				d.is_directory
+			then
+				add_entry (create {DIRECTORY_ARCHIVABLE}.make (d))
+			else
+				report_new_error ({STRING_32} "Can not add directory at %"" + a_location.name + {STRING_32} "%".")
+			end
+		end
+
+	add_plain_file_entry (a_location: PATH)
+			-- Add a plain file entry at location `a_location'.
+		require
+			correct_mode: is_archiving_mode
+		local
+			f: RAW_FILE
+		do
+			create f.make_with_path (a_location)
+			if f.exists and then f.is_access_readable and then f.is_plain then
+				add_entry (create {FILE_ARCHIVABLE}.make (f))
+			else
+				report_new_error ({STRING_32} "Can not add file at %"" + a_location.name + {STRING_32} "%".")
+			end
+		end
+
 	finalize
 			-- Write archive delimiter
 		do
 			storage_backend.finalize
 			mode := mode_closed
 		end
-
 
 feature {NONE} -- Implementation
 
@@ -330,6 +382,7 @@ invariant
 					(not is_archiving_mode and is_unarchiving_mode and not is_closed) or
 					(not is_archiving_mode and not is_unarchiving_mode and is_closed)
 	closed_iff_backend_closed_or_error: is_closed = storage_backend.is_closed or has_error
+
 note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"

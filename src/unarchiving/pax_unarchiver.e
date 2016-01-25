@@ -1,8 +1,7 @@
 note
 	description: "[
-		UNARCHIVER for pax payload
-	]"
-	author: ""
+			UNARCHIVER for pax payload
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -45,7 +44,7 @@ feature -- Status
 											a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global)
 		end
 
-	get_value (a_key: STRING_8): detachable READABLE_STRING_8
+	value (a_key: STRING_8): detachable READABLE_STRING_8
 			-- Get value corresponding to `a_key'
 			-- Returns void if there is none
 		do
