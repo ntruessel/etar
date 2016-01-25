@@ -70,4 +70,7 @@ feature {NONE} -- Implementation
 				file_set_metadata (l_file, l_header)
 			end
 		end
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -172,4 +172,7 @@ feature {NONE} -- Implementation
 invariant
 	active_header_writable: attached active_header as l_header implies ustar_writer.can_write (l_header)
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -78,4 +78,7 @@ feature -- PAX
 
 	pax_header_mode: NATURAL_16 = 0c644 -- Permissions o use for pax header
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

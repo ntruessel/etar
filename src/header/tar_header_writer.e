@@ -95,4 +95,7 @@ invariant
 	can_always_write_header: attached active_header as header implies can_write(header)
 	non_negative_blocks_written: written_blocks >= 0
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

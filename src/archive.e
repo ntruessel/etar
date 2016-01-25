@@ -330,4 +330,7 @@ invariant
 					(not is_archiving_mode and is_unarchiving_mode and not is_closed) or
 					(not is_archiving_mode and not is_unarchiving_mode and is_closed)
 	closed_iff_backend_closed_or_error: is_closed = storage_backend.is_closed or has_error
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

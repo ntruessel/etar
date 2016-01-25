@@ -248,4 +248,7 @@ invariant
 	value_state_active_fields: parsing_state = ps_value implies (not active_length.is_empty and not active_key.is_empty)
 	correct_state: parsing_state = ps_length or parsing_state = ps_key or parsing_state = ps_value
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

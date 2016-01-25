@@ -108,4 +108,7 @@ invariant
 	unarchived_blocks_needs_header: unarchived_blocks > 0 implies attached active_header
 	non_negative_number_of_blocks: unarchived_blocks >= 0
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

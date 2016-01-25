@@ -35,6 +35,11 @@ feature -- Access
 			Result := not error_messages.is_empty
 		end
 
+	error_messages: LIST [ERROR]
+			-- Error messages.
+
+feature -- Element change			
+
 	reset_error
 			-- Reset errors.
 		do
@@ -78,7 +83,7 @@ feature {NONE} -- Implementation
 	error_listeners: ACTION_SEQUENCE [TUPLE [ERROR]]
 			-- All procedures that are notified on error
 
-	error_messages: LIST [ERROR]
-			-- Error messages.
-
+;note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

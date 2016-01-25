@@ -251,4 +251,7 @@ feature {NONE} -- Implementation
 			Result := attached next_block_octal_natural_64_string (a_block, a_pos + {TAR_HEADER_CONST}.chksum_offset, {TAR_HEADER_CONST}.chksum_length) as checksum_string and then
 					octal_string_to_natural_64 (checksum_string) = checksum (a_block, a_pos)
 		end
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

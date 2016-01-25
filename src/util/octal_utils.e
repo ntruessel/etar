@@ -187,4 +187,7 @@ feature -- Constants
 	octal_64_max_digits: INTEGER = 22
 			-- Maximal digits of a 64 bit natural octal string representation
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

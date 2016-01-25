@@ -75,4 +75,7 @@ feature {NONE} -- Implementation
 	file: FILE
 			-- The file this ARCHIVABLE represents
 
+;note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

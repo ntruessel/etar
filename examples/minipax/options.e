@@ -99,4 +99,7 @@ invariant
 	correct_mode: mode = mode_usage or mode = mode_list or mode = mode_unarchive or mode = mode_archive
 	empty_name_implies_usage: archive_name.is_empty implies mode = mode_usage
 	non_empty_file_list_implies_archive: not file_list.is_empty implies mode = mode_archive
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
