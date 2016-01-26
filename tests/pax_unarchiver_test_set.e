@@ -31,10 +31,10 @@ feature -- Test routines
 
 			assert ("Finished after single block", unit_under_test.unarchiving_finished)
 			assert ("No errors", not unit_under_test.has_error)
-			assert ("path parsed", unit_under_test.get_value ("path") /= Void)
-			assert ("correct path", unit_under_test.get_value ("path") ~ "/dev/sda1")
-			assert ("mtime parsed", unit_under_test.get_value ("mtime") /= Void)
-			assert ("correct mtime", unit_under_test.get_value ("mtime") ~ "1451293316.085474313")
+			assert ("path parsed", unit_under_test.value ("path") /= Void)
+			assert ("correct path", unit_under_test.value ("path") ~ "/dev/sda1")
+			assert ("mtime parsed", unit_under_test.value ("mtime") /= Void)
+			assert ("correct mtime", unit_under_test.value ("mtime") ~ "1451293316.085474313")
 		end
 
 	test_pax_unarchiver_error
