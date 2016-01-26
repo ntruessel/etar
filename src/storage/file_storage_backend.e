@@ -250,7 +250,7 @@ feature {NONE} -- Implementation
 
 invariant
 	buffer_size: block_buffer.count = {TAR_CONST}.tar_block_size
-	buffer_entries_size: across buffer as l_cursor all l_cursor.item.count = {TAR_CONST}.tar_block_size end
+	buffer_entries_size: across buffer as ic all ic.item.count = {TAR_CONST}.tar_block_size end
 note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
