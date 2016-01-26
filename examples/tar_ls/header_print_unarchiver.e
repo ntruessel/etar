@@ -1,7 +1,7 @@
 note
 	description: "[
-		UNARCHIVER that generates a ls styled string for the current header
-	]"
+			UNARCHIVER that generates a ls styled string for the current header
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -19,7 +19,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Create new instance
+			-- Create new instance.
 		do
 			last_header_string := ""
 
@@ -29,12 +29,12 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	last_header_string: READABLE_STRING_GENERAL
-			-- ls style string to last header
+			-- ls style string to last header.
 
 feature {NONE} -- Implementation
 
 	do_internal_initialization
-			-- Internal initialization after initialize was called
+			-- Internal initialization after initialize was called.
 		do
 			if attached active_header as l_header then
 				last_header_string := typeflag_string (l_header) +
@@ -48,7 +48,7 @@ feature {NONE} -- Implementation
 		end
 
 	typeflag_string (header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `header's typeflag
+			-- Prettyprint `header's typeflag.
 		do
 			inspect header.typeflag
 			when {TAR_CONST}.tar_typeflag_directory then
@@ -67,7 +67,7 @@ feature {NONE} -- Implementation
 		end
 
 	permissions_string (header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `header's permissions/mode
+			-- Prettyprint `header's permissions/mode.
 		do
 			-- User
 			if header.is_user_readable then
@@ -130,10 +130,10 @@ feature {NONE} -- Implementation
 		end
 
 	user_width_memo: INTEGER
-			-- Stores the length of the longest username printed so far
+			-- Stores the length of the longest username printed so far.
 
 	user_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's username if set, uid otherwise
+			-- Prettyprint `a_header's username if set, uid otherwise.
 		local
 			l_username: STRING
 			l_padding: STRING
@@ -155,10 +155,10 @@ feature {NONE} -- Implementation
 		end
 
 	group_width_memo: INTEGER
-			-- Stores the length of the longest groupname printed so far
+			-- Stores the length of the longest groupname printed so far.
 
 	group_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's groupname if set, gid otherwise
+			-- Prettyprint `a_header's groupname if set, gid otherwise.
 		local
 			l_groupname: STRING
 			l_padding: STRING
@@ -180,7 +180,7 @@ feature {NONE} -- Implementation
 		end
 
 	size_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's size
+			-- Prettyprint `a_header's size.
 		local
 			l_size: NATURAL_64
 			i: INTEGER
@@ -223,7 +223,7 @@ feature {NONE} -- Implementation
 		end
 
 	mtime_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's timestamp
+			-- Prettyprint `a_header's timestamp.
 		local
 			l_mtime: DATE_TIME
 		do
