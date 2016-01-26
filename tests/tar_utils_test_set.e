@@ -94,6 +94,19 @@ feature -- Test routines
 			assert ("all zeros", unit_under_test.checksum (p, 0).as_integer_32 = (' ').code * {TAR_CONST}.chksum_length + ('0').code * ({TAR_CONST}.tar_block_size - {TAR_CONST}.chksum_length))
 
 		end
+
+	test_needed_blocks
+			-- test needed blocks calculation
+		local
+			unit_under_test: TAR_UTILS
+		do
+			create unit_under_test
+
+			assert ("empty block", unit_under_test.needed_blocks (0) = 0)
+			assert ("single byte", unit_under_test.needed_blocks (1) = 1)
+			assert ("full block", unit_under_test.needed_blocks ({TAR_CONST}.tar_block_size.as_natural_64) = 1)
+			assert ("overfull block", unit_under_test.needed_blocks ({TAR_CONST}.tar_block_size.as_natural_64 + 1) = 2)
+		end
 end
 
 

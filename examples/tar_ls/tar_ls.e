@@ -1,10 +1,10 @@
 note
 	description : "[
-		ls for tar files
-		
-		This demo program lists the contents of a tar
-		compressed file.
-	]"
+			ls for tar files
+			
+			This demo program lists the contents of a tar
+			compressed file.
+		]"
 	date        : "$Date$"
 	revision    : "$Revision$"
 
@@ -22,7 +22,7 @@ create
 feature {NONE} -- Initialization
 
 	make
-			-- List contents of all files given as arguments
+			-- List contents of all files given as arguments.
 		local
 			f: FILE
 			i,n: INTEGER
@@ -45,7 +45,7 @@ feature {NONE} -- Initialization
 feature {NONE} -- Implementation
 
 	list_contents (tar_file: FILE)
-			-- List the contents of `file'
+			-- List the contents of `file'.
 		require
 			readable_file: tar_file.is_readable
 		local
@@ -81,7 +81,7 @@ feature {NONE} -- Implementation
 feature {NONE} -- Pretty printing
 
 	print_error (msg: READABLE_STRING_GENERAL)
-			-- Put `msg' to stderr
+			-- Put `msg' to stderr.
 		do
 			localized_print_error ("ERROR: ")
 			localized_print_error (msg)
@@ -90,10 +90,10 @@ feature {NONE} -- Pretty printing
 
 
 	print_errors (a_archive: ARCHIVE)
-			-- Print all errors that occured
+			-- Print all errors that occured.
 		do
 			across a_archive.error_messages as l_error_cursor loop
-				print_error (l_error_cursor.item)
+				print_error (l_error_cursor.item.string_representation)
 			end
 		end
 
@@ -101,7 +101,7 @@ feature {NONE} -- Pretty printing
 feature {NONE} -- Utilites
 
 	needed_blocks (n: NATURAL_64): NATURAL_64
-			-- Indicate how many blocks are needed to represent `n' bytes
+			-- How many blocks are needed to represent `n' bytes?
 		do
 			Result := (n + {TAR_CONST}.tar_block_size.as_natural_64 - 1) // {TAR_CONST}.tar_block_size.as_natural_64
 		ensure
@@ -109,4 +109,7 @@ feature {NONE} -- Utilites
 			smallest_fit: Result * {TAR_CONST}.tar_block_size.as_natural_64 < n + {TAR_CONST}.tar_block_size.as_natural_64
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

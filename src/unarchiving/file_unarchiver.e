@@ -1,8 +1,7 @@
 note
 	description: "[
-		Simple file unarchiver that creates a new file on disk or overwrites an existing file
-	]"
-	author: ""
+			Simple file unarchiver that creates a new file on disk or overwrites an existing file.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -18,7 +17,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Create new instance
+			-- Create new instance.
 		do
 			name := "file to disk unarchiver"
 
@@ -27,14 +26,16 @@ feature {NONE} -- Initialization
 
 feature -- Status
 
-	can_unarchive (a_header: TAR_HEADER): BOOLEAN
-			-- Instances of this class can unarchive every header that belongs to a basic file
+	unarchivable (a_header: TAR_HEADER): BOOLEAN
+			-- Can the payload that belongs to `a_header' be unarchived using this FILE_UNARCHIVER?
+			-- note: Instances of this class can unarchive every header belonging to a basic file.
 		do
-			Result := a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file or a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file_old
+			Result :=  a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file
+					or a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file_old
 		end
 
 	required_blocks: INTEGER
-			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+			-- Number of blocks required to unarchive the payload that belongs to `active_header'.
 		do
 			if attached active_header as l_header then
 				Result := needed_blocks (l_header.size).as_integer_32
@@ -46,7 +47,7 @@ feature -- Status
 feature -- Output
 
 	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Unarchive block `p' starting at `a_pos'
+			-- Unarchive block `p' starting at `a_pos'.
 		local
 			remaining_bytes: NATURAL_64
 		do
@@ -79,22 +80,26 @@ feature -- Output
 feature {NONE} -- Implementation
 
 	do_internal_initialization
-			-- Setup internal structures after initialize has run
+			-- Setup internal structures after initialize has run.
 		local
 			l_file: FILE
 		do
 			skip := False
 			if attached active_header as l_header then
-				create {RAW_FILE} l_file.make_with_path (l_header.filename)
-				if l_file.exists then
-					file_safe_delete (l_file)
-				end
-
-				if l_file.exists then
-					skip := True
+				if l_header.filename.is_empty then
+					report_new_error ("Can't unarchive file to current working directory")
 				else
-					l_file.open_write
-					active_file := l_file
+					create {RAW_FILE} l_file.make_with_path (l_header.filename)
+					if l_file.exists then
+						file_safe_delete (l_file)
+					end
+
+					if l_file.exists then
+						skip := True
+					else
+						l_file.open_write
+						active_file := l_file
+					end
 				end
 			else
 				check false end -- Unreachable, when do_internal_initialization is called, active_header references an attached TAR_HEADER object
@@ -102,13 +107,13 @@ feature {NONE} -- Implementation
 		end
 
 	active_file: detachable FILE
-			-- File that is currently unarchived
+			-- File that is currently unarchived.
 
 	skip: BOOLEAN
 			-- skip payload?
 
 	file_safe_delete (a_file: FILE)
-			-- Safe delete file (or ignore)
+			-- Safe delete file (or ignore).
 		local
 			l_failed: BOOLEAN
 		do
@@ -123,4 +128,7 @@ feature {NONE} -- Implementation
 invariant
 	header_and_file: (attached active_header = attached active_file) or skip
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

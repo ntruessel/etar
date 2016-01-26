@@ -1,7 +1,7 @@
 note
 	description: "[
-		Prettyprint a list of headers using an ls-like format
-	]"
+			Prettyprint a list of headers using an ls-like format
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -12,7 +12,7 @@ class
 feature -- PP
 
 	pretty_print (a_header_list: LIST [TAR_HEADER]): LIST [READABLE_STRING_GENERAL]
-			-- Prettyprint `a_header_list'
+			-- Prettyprint `a_header_list'.
 		do
 			create {ARRAYED_LIST [READABLE_STRING_GENERAL]} Result.make (a_header_list.count)
 			initialize_paddings (a_header_list)
@@ -26,7 +26,7 @@ feature -- PP
 feature {NONE} -- Implementation
 
 	initialize_paddings (a_header_list: LIST [TAR_HEADER])
-			-- Initialize all paddings such that `a_header_list' can be pretty-printed
+			-- Initialize all paddings such that `a_header_list' can be pretty-printed.
 		do
 			user_width := 0
 			group_width := 0
@@ -39,7 +39,7 @@ feature {NONE} -- Implementation
 		end
 
 	pretty_print_entry (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint a single header using the current padding settings
+			-- Prettyprint a single header using the current padding settings.
 		do
 			Result := typeflag_string (a_header) + permissions_string (a_header) + " "
 						+ user_string (a_header) + " " + group_string (a_header) + " "
@@ -48,7 +48,7 @@ feature {NONE} -- Implementation
 		end
 
 	typeflag_string (header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `header's typeflag
+			-- Prettyprint `header's typeflag.
 		do
 			inspect header.typeflag
 			when {TAR_CONST}.tar_typeflag_directory then
@@ -67,9 +67,9 @@ feature {NONE} -- Implementation
 		end
 
 	permissions_string (header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `header's permissions/mode
+			-- Prettyprint `header's permissions/mode.
 		do
-			-- User
+				-- User
 			if header.is_user_readable then
 				Result := ("r")
 			else
@@ -90,7 +90,7 @@ feature {NONE} -- Implementation
 				Result := Result + ("-")
 			end
 
-			-- Group
+				-- Group
 			if header.is_group_readable then
 				Result := Result + ("r")
 			else
@@ -111,7 +111,7 @@ feature {NONE} -- Implementation
 				Result := Result + ("-")
 			end
 
-			-- Other
+				-- Other
 			if header.is_other_readable then
 				Result := Result + ("r")
 			else
@@ -130,10 +130,10 @@ feature {NONE} -- Implementation
 		end
 
 	user_width: INTEGER
-			-- Usernames are padded to this length
+			-- Usernames are padded to this length.
 
 	user_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's username if set, uid otherwise
+			-- Prettyprint `a_header's username if set, uid otherwise.
 		local
 			l_username: STRING
 			l_padding: STRING
@@ -144,7 +144,7 @@ feature {NONE} -- Implementation
 				l_username := a_header.user_id.out
 			end
 
-			-- Pad
+				-- Pad
 			if l_username.count < user_width then
 				l_padding := " "
 				l_padding.multiply (user_width - l_username.count)
@@ -154,10 +154,10 @@ feature {NONE} -- Implementation
 		end
 
 	group_width: INTEGER
-			-- Groupnames are padded to this length
+			-- Groupnames are padded to this length.
 
 	group_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's groupname if set, gid otherwise
+			-- Prettyprint `a_header's groupname if set, gid otherwise.
 		local
 			l_groupname: STRING
 			l_padding: STRING
@@ -168,7 +168,7 @@ feature {NONE} -- Implementation
 				l_groupname := a_header.group_id.out
 			end
 
-			-- Pad
+				-- Pad
 			if l_groupname.count < group_width then
 				l_padding := " "
 				l_padding.multiply (group_width - l_groupname.count)
@@ -179,7 +179,7 @@ feature {NONE} -- Implementation
 
 
 	size_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's size
+			-- Prettyprint `a_header's size.
 		local
 			l_size: NATURAL_64
 			i: INTEGER
@@ -198,13 +198,13 @@ feature {NONE} -- Implementation
 				l_size := 1
 			end
 
-			-- Fix width to 3 characters
+				-- Fix width to 3 characters
 			l_output := " "
 			l_output.multiply (4 - l_size.out.count)
 			l_output.remove (1)
 			l_output.append (l_size.out)
 
-			-- Unit
+				-- Unit
 			inspect i
 			when 0 then
 				l_output.prepend (" ")
@@ -222,7 +222,7 @@ feature {NONE} -- Implementation
 		end
 
 	mtime_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's timestamp
+			-- Prettyprint `a_header's timestamp.
 		local
 			l_mtime: DATE_TIME
 		do
@@ -231,7 +231,7 @@ feature {NONE} -- Implementation
 		end
 
 	filename_string (a_header: TAR_HEADER): READABLE_STRING_GENERAL
-			-- Prettyprint `a_header's filename (including link target)
+			-- Prettyprint `a_header's filename (including link target).
 		do
 			Result := a_header.filename.name
 			if a_header.typeflag = {TAR_CONST}.tar_typeflag_symlink or a_header.typeflag = {TAR_CONST}.tar_typeflag_hardlink then
@@ -239,4 +239,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

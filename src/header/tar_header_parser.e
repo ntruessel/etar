@@ -1,9 +1,9 @@
 note
 	description: "[
-		Common ancestor for tar header parsers
-		
-		Additionally provides a string parsing utility
-	]"
+			Common ancestor for tar header parsers
+			
+			Additionally provides a string parsing utility
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -12,18 +12,18 @@ deferred class
 	TAR_HEADER_PARSER
 
 inherit
-	ERROR_UTILS
+	ERROR_HANDLER
 
 feature -- Status
 
 	parsing_finished: BOOLEAN
-			-- Indicates whether the current parsing step has finished
+			-- Has parsing step finished yet?
 			-- On parse failure this is True as well.
 
 feature -- Parsing
 
 	parse_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- parse `a_block' (starting from `a_pos')
+			-- parse `a_block' (starting from `a_pos').
 		require
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
 			non_negative_length: a_pos >= 0
@@ -33,7 +33,7 @@ feature -- Parsing
 feature -- Result query
 
 	parsed_header: detachable TAR_HEADER
-			-- Return the last parsed header if no error occured
+			-- Return the last parsed header if no error occured.
 		require
 			completely_parsed: parsing_finished
 		do
@@ -47,8 +47,8 @@ feature -- Result query
 feature {NONE} -- Implementation
 
 	last_parsed_header: detachable TAR_HEADER
-			-- The current header (based on the parsed blocks)
-			-- Void in case of parse failures
+			-- The current header (based on the parsed blocks).
+			-- Void in case of parse failures.
 
 feature {NONE} -- Utilities
 
@@ -56,8 +56,8 @@ feature {NONE} -- Utilities
 			-- Parse a string in `a_block' from `a_pos' with length at most `a_length'
 			-- A string is a sequence of characters, stopping at the first '%U'
 			-- that occurs. In case no '%U' occurs, it ends after at `a_length'
-			-- characters
-			-- FIXME: Slow implementation
+			-- characters.
+			-- FIXME: Slow implementation.
 		require
 			enough_characters: a_pos + a_length <= a_block.count
 			non_negative_pos: a_pos >= 0
@@ -66,7 +66,7 @@ feature {NONE} -- Utilities
 			c: CHARACTER_8
 			i: INTEGER
 		do
-			create Result.make (a_length) -- Might be inefficient due to many resizes
+			create Result.make (a_length)
 			from
 				i := 0
 				c := ' ' -- dummy character different from %U
@@ -83,4 +83,8 @@ feature {NONE} -- Utilities
 
 invariant
 	valid_header_if_no_errors: not has_error and parsing_finished implies attached last_parsed_header
+	parsing_finished_on_error: has_error implies parsing_finished
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

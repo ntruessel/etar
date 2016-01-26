@@ -1,12 +1,12 @@
 note
 	description: "[
-		Utilities to print numbers in octal representation 
-		and parse octal formatted strings
-		
-		Inherit from this class to use its facilities
-		
-		Parsing allows natural numbers only
-	]"
+			Utilities to print numbers in octal representation 
+			and parse octal formatted strings
+			
+			Inherit from this class to use its facilities
+			
+			Parsing allows natural numbers only
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -16,49 +16,83 @@ class
 
 feature -- Format check
 
-	is_octal_natural_16_string (a_string: READABLE_STRING_8): BOOLEAN
-			-- Indicates whether `a_string' represents an octal encoded NATURAL_16
+	is_octal_formatted (a_string: READABLE_STRING_8): BOOLEAN
+			-- Is `a_string' composed of characters allowed by octal formatting?
+			-- i.e: composed by number from 0 to 7, without any sign or whitespace.
+		local
+			i,n: INTEGER
 		do
-			-- Format check
-			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9') and not a_string.has ('+') and not a_string.has ('-') and not a_string.has (' ')
+			Result := True
+			from
+				i := 1
+				n := a_string.count
+			until
+				i > n or not Result
+			loop
+				inspect
+					a_string [i]
+				when '0'..'7' then
+					Result := True
+				else
+					Result := False
+				end
+				i := i + 1
+			end
+		ensure
+			result_coherent: Result implies (
+						(a_string.is_number_sequence and
+							not a_string.has ('8') and not a_string.has ('9') and
+							not a_string.has ('+') and not a_string.has ('-') and
+							not a_string.has (' ')
+						) or (
+							a_string.is_empty
+						)
+					)
+		end
 
-			-- Length check
-			Result := Result and (
-							(a_string.count - leading_zeros_count (a_string) < octal_16_max_digits) or
-							((a_string.count - leading_zeros_count (a_string) = octal_16_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('1').code))
+	is_octal_natural_16_string (a_string: READABLE_STRING_8): BOOLEAN
+			-- Does `a_string' represent an octal encoded NATURAL_16?
+		do
+			Result := is_octal_formatted (a_string) and (
+								-- Length check
+							(a_string.count - leading_zeros_count (a_string) < octal_16_max_digits)
+							or (
+								(a_string.count - leading_zeros_count (a_string) = octal_16_max_digits) and
+								(a_string [leading_zeros_count (a_string) + 1].code <= ('1').code)
+							)
 						)
 		end
 
 	is_octal_natural_32_string (a_string: READABLE_STRING_8): BOOLEAN
-			-- Indicates whether `a_string' represents an octal encoded NATURAL_32
+			-- Does `a_string' represent an octal encoded NATURAL_32?
 		do
-			-- Format check
-			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9') and not a_string.has ('+') and not a_string.has ('-') and not a_string.has (' ')
-
-			-- Length check
-			Result := Result and (
-							(a_string.count - leading_zeros_count (a_string) < octal_32_max_digits) or
-							((a_string.count - leading_zeros_count (a_string) = octal_32_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('3').code))
+			Result := is_octal_formatted (a_string) and (
+								-- Length check
+							(a_string.count - leading_zeros_count (a_string) < octal_32_max_digits)
+							or (
+								(a_string.count - leading_zeros_count (a_string) = octal_32_max_digits) and
+								(a_string [leading_zeros_count (a_string) + 1].code <= ('3').code)
+							)
 						)
 		end
 
 	is_octal_natural_64_string (a_string: READABLE_STRING_8): BOOLEAN
-			-- Indicates whether `a_string' represents an octal encoded NATURAL_64
+			-- Does `a_string' represent an octal encoded NATURAL_64?
 		do
-			-- Format check
-			Result := a_string.is_number_sequence and not a_string.has ('8') and not a_string.has ('9') and not a_string.has ('+') and not a_string.has ('-') and not a_string.has (' ')
-
-			-- Length check
-			Result := Result and (
-							(a_string.count - leading_zeros_count (a_string) < octal_64_max_digits) or
-							((a_string.count - leading_zeros_count (a_string) = octal_64_max_digits) and (a_string[leading_zeros_count (a_string) + 1].code <= ('1').code))
+			Result := is_octal_formatted (a_string) and (
+								-- Length check
+							(a_string.count - leading_zeros_count (a_string) < octal_64_max_digits)
+							or (
+								(a_string.count - leading_zeros_count (a_string) = octal_64_max_digits) and
+								(a_string [leading_zeros_count (a_string) + 1].code <= ('1').code)
+							)
 						)
 		end
 
 feature -- Parsing
 
 	octal_string_to_natural_16 (a_string: READABLE_STRING_8): NATURAL_16
-			-- Converts `a_string' (interpreted as octal) to a NATURAL_16
+			-- Converts `a_string' (interpreted as octal) to a NATURAL_16.
 		require
 			valid_input: is_octal_natural_16_string (a_string)
 		do
@@ -66,7 +100,7 @@ feature -- Parsing
 		end
 
 	octal_string_to_natural_32 (a_string: READABLE_STRING_8): NATURAL_32
-			-- Converts `a_string' (interpreted as octal) to a NATURAL_32
+			-- Converts `a_string' (interpreted as octal) to a NATURAL_32.
 		require
 			valid_input: is_octal_natural_32_string (a_string)
 		do
@@ -74,7 +108,7 @@ feature -- Parsing
 		end
 
 	octal_string_to_natural_64 (a_string: READABLE_STRING_8): NATURAL_64
-			-- Converts `a_string' (interpreted as octal) to a NATURAL_64
+			-- Converts `a_string' (interpreted as octal) to a NATURAL_64.
 		require
 			valid_input: is_octal_natural_64_string (a_string)
 		local
@@ -83,14 +117,14 @@ feature -- Parsing
 			leading_zeros: INTEGER
 		do
 			digit_weight := 1
---			Result := 0
+				-- Result is set by default to 0
 			from
 				i := a_string.count
 				leading_zeros := leading_zeros_count (a_string)
 			until
 				i < leading_zeros + 1 -- last non-zero digit
 			loop
-				Result := Result + digit_weight * (a_string[i].code - ('0').code).to_natural_64
+				Result := Result + digit_weight * (a_string [i].code - ('0').code).to_natural_64
 				digit_weight := digit_weight * 8
 				i := i - 1
 			end
@@ -99,19 +133,19 @@ feature -- Parsing
 feature -- Output
 
 	natural_16_to_octal_string (n: NATURAL_16): STRING_8
-			-- Converts `n' to an octal string
+			-- Converts `n' to an octal string.
 		do
 			Result := natural_64_to_octal_string (n.to_natural_64)
 		end
 
 	natural_32_to_octal_string (n: NATURAL_32): STRING_8
-			-- Converts `n' to an octal string
+			-- Converts `n' to an octal string.
 		do
 			Result := natural_64_to_octal_string (n.to_natural_64)
 		end
 
 	natural_64_to_octal_string (n: NATURAL_64): STRING_8
-			-- Converts `n' to an octal string
+			-- Converts `n' to an octal string.
 		local
 			tmp: NATURAL_64
 		do
@@ -134,7 +168,7 @@ feature -- Output
 feature -- Utilities
 
 	natural_8_to_octal_character (n: NATURAL_8): CHARACTER_8
-			-- Convert `n' to its corresponding character representation
+			-- Convert `n' to its corresponding character representation.
 		require
 			in_range: 0 <= n and n <= 7
 		do
@@ -144,36 +178,26 @@ feature -- Utilities
 		end
 
 	leading_zeros_count (a_string: STRING_8): INTEGER
-			-- The number of leading zeros of `a_string'
+			-- The number of leading zeros of `a_string'.
 		do
 			from
 				Result := 1
 			until
-				Result > a_string.count or else a_string[Result] /= '0'
+				Result > a_string.count or else a_string [Result] /= '0'
 			loop
 				Result := Result + 1
 			end
-			-- Loop stops at first non-zero digit, hence subtract one
+				-- Loop stops at first non-zero digit, hence subtract one
 			Result := Result - 1
-			-- "0" has no leading zeros
+				-- "0" has no leading zeros
 			Result := if not a_string.is_empty and Result = a_string.count then Result - 1 else Result end
 		ensure
 			leading_zeros: a_string.head (Result).to_natural = 0
-			not_more_zeros: a_string.is_empty or else a_string[Result + 1] /= '0' or else Result + 1 = a_string.count
-		end
-
-	truncate_leading_zeros (a_string: STRING_8)
-			-- Truncates leading zeros of `a_string' until it has no more leading zeros or only one character left
-		do
-			a_string.keep_tail (a_string.count - leading_zeros_count(a_string))
-		ensure
-			no_leading_zero: a_string.count <= 1 or else a_string[1] /= '0'
-			correct_length: a_string.count + old leading_zeros_count(a_string) = old a_string.count
-			is_end: old a_string.ends_with (a_string)
+			not_more_zeros: a_string.is_empty or else a_string [Result + 1] /= '0' or else Result + 1 = a_string.count
 		end
 
 	pad (a_string: STRING_8; n: INTEGER)
-			-- Pad `a_string' with `n' zeros
+			-- Pad `a_string' with `n' zeros.
 		require
 			positive: n >= 0
 		local
@@ -189,12 +213,15 @@ feature -- Utilities
 feature -- Constants
 
 	octal_16_max_digits: INTEGER = 6
-			-- Maximal digits of a 16 bit natural octal string representation
+			-- Maximal digits of a 16 bit natural octal string representation.
 
 	octal_32_max_digits: INTEGER = 11
-			-- Maximal digits of a 32 bit natural octal string representation
+			-- Maximal digits of a 32 bit natural octal string representation.
 
 	octal_64_max_digits: INTEGER = 22
-			-- Maximal digits of a 64 bit natural octal string representation
+			-- Maximal digits of a 64 bit natural octal string representation.
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

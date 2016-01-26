@@ -26,7 +26,7 @@ feature -- Test routines
 		do
 			create unit_under_test
 
-			assert ("Can unarchive directory", unit_under_test.can_unarchive (easy_header))
+			assert ("Can unarchive directory", unit_under_test.unarchivable (easy_header))
 
 			unit_under_test.initialize (easy_header)
 			assert ("No blocks processed", unit_under_test.unarchived_blocks = 0)

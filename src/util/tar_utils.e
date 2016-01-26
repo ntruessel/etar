@@ -1,7 +1,7 @@
 note
 	description: "[
-		Utility functions for tar archives
-	]"
+			Utility functions for tar archives
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -9,13 +9,10 @@ note
 class
 	TAR_UTILS
 
-inherit
-	OCTAL_UTILS
-
 feature -- Bytes to Blocks
 
 	needed_blocks (n: NATURAL_64): NATURAL_64
-			-- How many blocks are needed to store `n' bytes
+			-- Number of blocks needed to store `n' bytes.
 		do
 			Result := (n + {TAR_CONST}.tar_block_size.as_natural_64 - 1) // {TAR_CONST}.tar_block_size.as_natural_64
 		ensure
@@ -26,13 +23,13 @@ feature -- Bytes to Blocks
 feature -- Block Padding
 
 	pad_block (p: MANAGED_POINTER; a_pos, n: INTEGER)
-			-- pad `p' with `n' NUL-bytes starting at `a_pos'
+			-- pad `p' with `n' NUL-bytes starting at `a_pos'.
 		require
 			non_negative_position: a_pos >= 0
 			non_negative_length: n >= 0
 			enough_space: p.count >= a_pos + n
 		local
-			l_padding: SPECIAL[CHARACTER_8]
+			l_padding: SPECIAL [CHARACTER_8]
 		do
 			if n > 0 then
 				create l_padding.make_filled ('%U', n)
@@ -40,11 +37,10 @@ feature -- Block Padding
 			end
 		end
 
-
 feature -- Header Checksum
 
 	checksum (block: MANAGED_POINTER; a_pos: INTEGER): NATURAL_64
-			-- Calcualte checksum of `block' (starting at `a_pos')
+			-- Calcualte checksum of `block' (starting at `a_pos').
 		require
 			non_negative_pos: a_pos >= 0
 			enough_space: block.count >= a_pos + {TAR_CONST}.tar_block_size
@@ -91,25 +87,33 @@ feature -- Metadata
 feature -- Metadata manipulation
 
 	file_set_metadata (a_file: FILE; a_header: TAR_HEADER)
-			-- Set all of `a_file's metadata according to `a_header'
+			-- Set all of `a_file's metadata according to `a_header'.
 		require
 			file_exists: a_file.exists
+		local
+			l_uid, l_gid: INTEGER
 		do
 			file_set_mode (a_file, a_header.mode.as_integer_32)
 			file_set_mtime (a_file, a_header.mtime.as_integer_32)
 
-			if file_owner (a_header.user_id.as_integer_32) ~ a_header.user_name then
+			l_uid := get_uid_from_username (a_header.user_name)
+			if l_uid /= -1 then
+				file_set_uid (a_file, l_uid)
+			elseif file_owner (a_header.user_id.as_integer_32) ~ a_header.user_name then
 				file_set_uid (a_file, a_header.user_id.as_integer_32)
 			end
 
-			if file_group (a_header.group_id.as_integer_32) ~ a_header.group_name then
+			l_gid := get_gid_from_groupname (a_header.group_name)
+			if l_gid /= -1 then
+				file_set_gid (a_file, l_gid)
+			elseif file_group (a_header.group_id.as_integer_32) ~ a_header.group_name then
 				file_set_gid (a_file, a_header.group_id.as_integer_32)
 			end
 
 		end
 
 	file_set_mode (a_file: FILE; a_mode: INTEGER)
-			-- Set `a_file's permissions ot `a_mode' or silently exit on error
+			-- Set `a_file's permissions ot `a_mode' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -124,7 +128,7 @@ feature -- Metadata manipulation
 		end
 
 	file_set_mtime (a_file: FILE; a_mtime: INTEGER)
-			-- Set `a_file's mtime to `a_mtime' or silently exit on error
+			-- Set `a_file's mtime to `a_mtime' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -139,7 +143,7 @@ feature -- Metadata manipulation
 		end
 
 	file_set_uid (a_file: FILE; a_uid: INTEGER)
-			-- Set `a_file's uid to `a_uid' or silently exit on error
+			-- Set `a_file's uid to `a_uid' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -154,7 +158,7 @@ feature -- Metadata manipulation
 		end
 
 	file_set_gid (a_file: FILE; a_gid: INTEGER)
-			-- Set `a_file's gid to `a_gid' or silently exit on error
+			-- Set `a_file's gid to `a_gid' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -171,7 +175,7 @@ feature -- Metadata manipulation
 feature -- Filename normalization
 
 	unify_utf_8_path (a_path: PATH): STRING_8
-			-- Turns `a_path' into a UTF-8 string using unix directory separators
+			-- Turns `a_path' into a UTF-8 string using unix directory separators.
 		do
 			create Result.make (a_path.utf_8_name.count)
 			across
@@ -186,7 +190,7 @@ feature -- Filename normalization
 
 	unify_and_split_filename (a_path: PATH): TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 			-- Split `a_path' into filename and prefix, such that prefix + '/' + filename equals the UTF-8
-			-- representation of `a_path' using unix directory separator
+			-- representation of `a_path' using unix directory separator.
 		local
 			l_filename: STRING_8
 			l_filename_prefix: STRING_8
@@ -220,7 +224,7 @@ feature -- Filename normalization
 feature {NONE} -- Utilities stolen from file_info
 
 	file_owner (uid: INTEGER): STRING
-			-- Convert UID to login name if possible
+			-- Convert UID to login name if possible.
 		external
 			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
 		alias
@@ -228,7 +232,7 @@ feature {NONE} -- Utilities stolen from file_info
 		end
 
 	file_group (gid: INTEGER): STRING
-			-- Convert GID to group name if possible
+			-- Convert GID to group name if possible.
 		external
 			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
 		alias
@@ -267,4 +271,7 @@ feature {NONE} -- external
 			}"
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

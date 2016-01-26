@@ -231,32 +231,6 @@ feature -- Utilities
 			assert ("Empty string", unit_under_test.leading_zeros_count ("") = 0)
 		end
 
-	test_truncate_leading_zeros
-			-- Test leading zero truncation
-		note
-			testing:	"covers/{OCTAL_UTILS}.truncate_leading_zeros"
-		local
-			unit_under_test: OCTAL_UTILS
-			s: STRING
-		do
-			create unit_under_test
-			s := "123456789"
-			unit_under_test.truncate_leading_zeros (s)
-			assert ("No leading zeros", s ~ "123456789")
-
-			s := "000012345"
-			unit_under_test.truncate_leading_zeros (s)
-			assert ("Some leading zeros", s ~ "12345")
-
-			s := "000000000000"
-			unit_under_test.truncate_leading_zeros (s)
-			assert ("No leading zeros", s ~ "0")
-
-			s := ""
-			unit_under_test.truncate_leading_zeros (s)
-			assert ("Empty string", s ~ "")
-		end
-
 	test_pad
 			-- Test padding
 		note
@@ -287,24 +261,17 @@ feature -- Utilities
 			i: INTEGER
 		do
 			create unit_under_test
-			s := "123456789"
 			from
 				i := 1
 			until
 				i > 16
 			loop
+				s := "123456789"
 				unit_under_test.pad (s, i)
 				assert ("Zeros added", unit_under_test.leading_zeros_count (s) = i)
 
-				unit_under_test.truncate_leading_zeros (s)
-				assert ("Zeros removed", s ~ "123456789")
 				i := i + 1
 			end
-
-			s := ""
-			unit_under_test.pad (s, 10)
-			unit_under_test.truncate_leading_zeros (s)
-			assert ("Do not remove last 0", s ~ "0")
 		end
 
 feature {NONE} -- Constants

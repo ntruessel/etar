@@ -1,15 +1,15 @@
 note
 	description: "[
-		ARCHIVABLE wrapper for files
-		
-		This version only accepts plain files
-	]"
-	author: ""
+			ARCHIVABLE wrapper for files
+			
+			This version only accepts plain files.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
 	FILE_ARCHIVABLE
+
 inherit
 	ARCHIVABLE
 
@@ -19,9 +19,9 @@ create
 feature {NONE} -- Initialization
 
 	make (a_file: FILE)
-			-- Create a new FILE_ARCHIVABLE for `a_file'
+			-- Create a new FILE_ARCHIVABLE for `a_file'.
 		require
-			file_existis: a_file.exists
+			file_exists: a_file.exists
 			file_is_readable: a_file.is_readable
 			file_is_plain: a_file.is_plain
 		do
@@ -32,13 +32,13 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	required_blocks: INTEGER
-			-- Indicate how much space is needed to represent this ARCHIVABLE
+			-- How many blocks are required to store this FILE_ARCHIVABLE?
 		do
 			Result := needed_blocks (file.file_info.size.as_natural_64).as_integer_32
 		end
 
 	header: TAR_HEADER
-			-- Header that belongs to the payload
+			-- Header belonging to the payload.
 		do
 			create Result
 
@@ -56,15 +56,15 @@ feature -- Status
 feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the next block to `p' starting at `a_pos'
+			-- Write the next block to `p' starting at `a_pos'.
 		do
-			-- Write next block
+				-- Write next block
 			file.read_to_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
 			if (file.end_of_file) then
-				-- Fill with '%U'
+					-- Fill with '%U'
 				pad_block (p, a_pos + file.bytes_read, {TAR_CONST}.tar_block_size - file.bytes_read)
 
-				-- Close file
+					-- Close file
 				file.close
 			end
 			written_blocks := written_blocks + 1
@@ -73,6 +73,9 @@ feature -- Output
 feature {NONE} -- Implementation
 
 	file: FILE
-			-- The file this ARCHIVABLE represents
+			-- The file this ARCHIVABLE represents.
 
+;note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
