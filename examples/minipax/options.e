@@ -28,35 +28,35 @@ feature {NONE} -- Initialization
 feature -- Mode
 
 	mode: INTEGER
-			-- Program mode
+			-- Program mode.
 
 	absolute_paths_enabled: BOOLEAN
 			-- Keep absolute paths?
 
 	archive_name: IMMUTABLE_STRING_32
-			-- archive name
+			-- archive name.
 
 	file_list: ARRAY [IMMUTABLE_STRING_32]
-			-- given files
+			-- given files.
 
 feature -- Mode: constants
 
 	mode_usage: INTEGER = 0
-			-- Usage printing
+			-- Usage printing.
 
 	mode_list: INTEGER = 1
-			-- List archive contents
+			-- List archive contents.
 
 	mode_unarchive: INTEGER = 2
-			-- Unarchive given archive
+			-- Unarchive given archive.
 
 	mode_archive: INTEGER = 3
-			-- Archive given files			
+			-- Archive given files.		
 
 feature -- Parsing
 
 	parse (args: ARGUMENTS_32)
-			-- Parse `args'
+			-- Parse `args'.
 		local
 			i, n: INTEGER
 			arg,arg_next: READABLE_STRING_32

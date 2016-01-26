@@ -1,7 +1,7 @@
 note
 	description : "[
-		minimal pax implementation (lacking many features, different usage, different behavior)
-	]"
+			minimal pax implementation (lacking many features, different usage, different behavior)
+		]"
 	date        : "$Date$"
 	revision    : "$Revision$"
 
@@ -19,7 +19,7 @@ create
 feature {NONE} -- Initialization
 
 	make
-			-- Run minitar
+			-- Run minitar.
 		do
 			default_create
 
@@ -43,28 +43,28 @@ feature {NONE} -- Initialization
 feature {NONE} -- Implementation
 
 	print_error (a_error: ERROR)
-			-- Print error to stderr
+			-- Print error to stderr.
 		do
 			localized_print_error ("ERROR: " + a_error.string_representation)
 		end
 
 	print_warning (a_message: READABLE_STRING_GENERAL)
-			-- Print warning to stderr
+			-- Print warning to stderr.
 		do
 			localized_print_error ("WARNING: " + a_message + "%N")
 		end
 
 	print_info (a_message: READABLE_STRING_GENERAL)
-			-- Print info to stderr
+			-- Print info to stderr.
 		do
 			localized_print_error ("INFO: " + a_message + "%N")
 		end
 
 	options: OPTIONS
-			-- Program options
+			-- Program options.
 
 	list
-			-- List contents of the archive stored at `a_archive_filename'
+			-- List contents of the archive stored at `a_archive_filename'.
 		local
 			l_archive: ARCHIVE
 			l_header_save_unarchiver: HEADER_SAVE_UNARCHIVER
@@ -152,7 +152,7 @@ feature {NONE} -- Implementation
 		end
 
 	new_archive: ARCHIVE
-			-- Build archive according to `options'
+			-- Build archive according to `options'.
 		do
 			create Result.make (create {FILE_STORAGE_BACKEND}.make_from_filename (options.archive_name))
 
@@ -166,7 +166,7 @@ feature {NONE} -- Implementation
 		end
 
 	print_usage
-			-- Print usage of this utility
+			-- Print usage of this utility.
 		do
 			localized_print (
 			"[
