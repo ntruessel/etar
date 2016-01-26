@@ -108,11 +108,11 @@ feature -- Output
 				put_string ({TAR_CONST}.ustar_version, p, a_pos + {TAR_HEADER_CONST}.version_offset)
 
 					-- Put username
-				put_string (header.user_name.as_string_8,
+				put_string (header.user_name.as_string_8,				-- No conversion problem, since user_name is IMMUTABLE_STRING_8.
 						p, a_pos + {TAR_HEADER_CONST}.uname_offset)
 
 					-- Put groupname
-				put_string (header.group_name.as_string_8,
+				put_string (header.group_name.as_string_8,				-- No conversion problem, since group_name is IMMUTABLE_STRING_8.
 						p, a_pos + {TAR_HEADER_CONST}.gname_offset)
 
 					-- Put devmajor
