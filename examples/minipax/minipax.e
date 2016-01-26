@@ -162,7 +162,7 @@ feature {NONE} -- Implementation
 
 			Result.register_error_callback (agent print_error (?))
 		ensure
-			no_error: Result.has_error
+			no_error: not Result.has_error
 		end
 
 	print_usage
