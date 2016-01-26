@@ -27,7 +27,7 @@ feature -- Format check
 				i := 1
 				n := a_string.count
 			until
-				i <= n or not Result
+				i > n or not Result
 			loop
 				inspect
 					a_string [i]
