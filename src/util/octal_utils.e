@@ -39,10 +39,14 @@ feature -- Format check
 				i := i + 1
 			end
 		ensure
-			result_coherent: Result implies (a_string.is_number_sequence and
-						not a_string.has ('8') and not a_string.has ('9') and
-						not a_string.has ('+') and not a_string.has ('-') and
-						not a_string.has (' ')
+			result_coherent: Result implies (
+						(a_string.is_number_sequence and
+							not a_string.has ('8') and not a_string.has ('9') and
+							not a_string.has ('+') and not a_string.has ('-') and
+							not a_string.has (' ')
+						) or (
+							a_string.is_empty
+						)
 					)
 		end
 
