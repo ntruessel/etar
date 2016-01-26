@@ -59,7 +59,7 @@ feature -- Status
 			Result := has_error or attached active_header implies unarchived_blocks = required_blocks
 		end
 
-	can_unarchive (a_header: TAR_HEADER): BOOLEAN
+	unarchivable (a_header: TAR_HEADER): BOOLEAN
 			-- Can this unarchiver unarchive payload that belongs to `a_header'?
 		deferred
 		end
@@ -69,7 +69,7 @@ feature -- Basic unarchiving operations.
 	frozen initialize (a_header: TAR_HEADER)
 			-- Initialize for unarchiving payload for `a_header'.
 		require
-			can_handle: can_unarchive (a_header)
+			can_handle: unarchivable (a_header)
 			no_unarchiving_in_progress: unarchiving_finished
 		do
 			active_header := a_header

@@ -26,7 +26,7 @@ feature {NONE} -- Initialization
 
 feature -- Status
 
-	can_unarchive (a_header: TAR_HEADER): BOOLEAN
+	unarchivable (a_header: TAR_HEADER): BOOLEAN
 			-- Is Current able to handle payload that belongs to `a_header'?
 			-- Note: SKIP_UNARCHIVER takes all headers and skips the payload
 		once

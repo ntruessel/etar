@@ -84,7 +84,7 @@ feature -- Status setting
 			storage_backend.close
 			mode := mode_closed
 		ensure
-			closed: storage_backend.is_closed
+			closed: storage_backend.closed
 		end
 
 	enable_absolute_filenames
@@ -355,7 +355,7 @@ feature {NONE} -- Implementation
 				Result /= Void
 			loop
 				Result := ic.item
-				if not Result.can_unarchive (a_header) then
+				if not Result.unarchivable (a_header) then
 					Result := Void
 				end
 			end
@@ -397,7 +397,7 @@ feature {NONE} -- Implementation
 
 invariant
 	only_one_mode: is_archiving_mode xor is_unarchiving_mode xor is_closed
-	closed_iff_backend_closed_or_error: is_closed = storage_backend.is_closed or has_error
+	closed_iff_backend_closed_or_error: is_closed = storage_backend.closed or has_error
 
 note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"

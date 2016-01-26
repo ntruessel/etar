@@ -128,19 +128,19 @@ feature -- Status
 			Result := not has_error and then has_valid_block
 		end
 
-	is_readable: BOOLEAN
+	readable: BOOLEAN
 			-- Is Current open and readable?
 		do
 			Result := not has_error and then backend.is_open_read
 		end
 
-	is_writable: BOOLEAN
+	writable: BOOLEAN
 			-- Is Current created and writable?
 		do
 			Result := not has_error and then backend.is_open_write
 		end
 
-	is_closed: BOOLEAN
+	closed: BOOLEAN
 			-- Is Current closed?
 		do
 			Result := backend.is_closed

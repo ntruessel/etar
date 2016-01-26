@@ -35,7 +35,7 @@ feature -- Status
 			end
 		end
 
-	can_write (a_header: TAR_HEADER): BOOLEAN
+	writable (a_header: TAR_HEADER): BOOLEAN
 			-- Can `a_header' be written?
 		once
 			Result := True
@@ -80,7 +80,7 @@ feature {NONE} -- Implementation
 			l_pax_archivable: PAX_ARCHIVABLE
 		do
 			if attached active_header as l_ustar_header then
-				if not ustar_writer.can_write (l_ustar_header) then
+				if not ustar_writer.writable (l_ustar_header) then
 					create l_pax_archivable.make_empty
 
 						-- Identify problem fields, write them to payload and simplify ustar header
@@ -168,7 +168,7 @@ feature {NONE} -- Implementation
 			-- pax payload, attached if the current header does not fit into at ustar header.
 
 invariant
-	active_header_writable: attached active_header as l_header implies ustar_writer.can_write (l_header)
+	active_header_writable: attached active_header as l_header implies ustar_writer.writable (l_header)
 
 note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"

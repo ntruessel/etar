@@ -33,15 +33,15 @@ feature {NONE} -- Initialization
 
 feature -- Status
 
-	can_unarchive (a_header: TAR_HEADER): BOOLEAN
+	unarchivable (a_header: TAR_HEADER): BOOLEAN
 			-- Current can unarchive payload with header `a_header'?
 			-- note: PAX_UNARCHIVER can unarchive every header belonging to pax payload (global or extended)
 		do
 			Result :=  a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended
 					or a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global
 		ensure then
-			correct_result: Result =   a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended
-									or a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global
+			correct_result: Result =   (a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended
+									or a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global)
 		end
 
 	value (a_key: STRING_8): detachable READABLE_STRING_8

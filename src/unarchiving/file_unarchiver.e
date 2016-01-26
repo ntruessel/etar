@@ -26,7 +26,7 @@ feature {NONE} -- Initialization
 
 feature -- Status
 
-	can_unarchive (a_header: TAR_HEADER): BOOLEAN
+	unarchivable (a_header: TAR_HEADER): BOOLEAN
 			-- Can the payload that belongs to `a_header' be unarchived using this FILE_UNARCHIVER?
 			-- note: Instances of this class can unarchive every header belonging to a basic file.
 		do

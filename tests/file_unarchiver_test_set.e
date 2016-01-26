@@ -31,7 +31,7 @@ feature -- Test routines
 
 			assert ("Correct payload size", p.count = {TAR_CONST}.tar_block_size)
 
-			assert ("Can unarchive regular file", unit_under_test.can_unarchive (easy_header))
+			assert ("Can unarchive regular file", unit_under_test.unarchivable (easy_header))
 
 			unit_under_test.initialize (easy_header)
 
@@ -67,7 +67,7 @@ feature -- Test routines
 
 			assert ("Correct payload size", p.count = {TAR_CONST}.tar_block_size)
 
-			assert ("Can unarchive regular file", unit_under_test.can_unarchive (root_header))
+			assert ("Can unarchive regular file", unit_under_test.unarchivable (root_header))
 
 			unit_under_test.initialize (root_header)
 

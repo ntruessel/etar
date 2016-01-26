@@ -17,21 +17,21 @@ feature -- Status setting
 			-- Open storage backend for reading.
 		deferred
 		ensure
-			error_or_readable: has_error or else is_readable
+			error_or_readable: has_error or else readable
 		end
 
 	open_write
 			-- Open storage backend for writing.
 		deferred
 		ensure
-			error_or_writable: has_error or else is_writable
+			error_or_writable: has_error or else writable
 		end
 
 	close
 			-- Close storage backend.
 		deferred
 		ensure
-			closed: is_closed
+			closed: closed
 		end
 
 feature -- Status
@@ -40,34 +40,34 @@ feature -- Status
 			-- Do the next two blocks only contain NUL bytes?
 			-- This denotes the end of an archive, if not occuring in some payload.
 		require
-			readable: is_readable
+			readable: readable
 		deferred
 		end
 
 	block_ready: BOOLEAN
 			-- Is there a block ready?
 		require
-			readable: is_readable
+			readable: readable
 		deferred
 		ensure
 			no_blocks_on_error: Result implies not has_error
 		end
 
-	is_readable: BOOLEAN
+	readable: BOOLEAN
 			-- Is Current backend readable?
 		deferred
 		ensure
 			no_error_if_readable: Result implies not has_error
 		end
 
-	is_writable: BOOLEAN
+	writable: BOOLEAN
 			-- Is Current backend writable and accepts blocks to be written to Current?
 		deferred
 		ensure
 			no_error_if_writable: Result implies not has_error
 		end
 
-	is_closed: BOOLEAN
+	closed: BOOLEAN
 			-- Is Current backend closed?
 		deferred
 		end
@@ -86,7 +86,7 @@ feature -- Reading
 	read_block
 			-- Try to read next block.
 		require
-			readable: is_readable
+			readable: readable
 		deferred
 		ensure
 			error_or_ready: has_error or block_ready
@@ -97,7 +97,7 @@ feature -- Writing
 	write_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
 			-- Write `a_block' starting at position `a_pos'.
 		require
-			writable: is_writable
+			writable: writable
 			non_negative_pos: a_pos >= 0
 			enough_space: a_block.count >= a_pos + {TAR_CONST}.tar_block_size
 		deferred
@@ -107,10 +107,10 @@ feature -- Writing
 			-- Finalize archive.
 			-- i.e: write two 0 blocks and close.
 		require
-			writable: is_writable
+			writable: writable
 		deferred
 		ensure
-			closed: is_closed
+			closed: closed
 		end
 note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"

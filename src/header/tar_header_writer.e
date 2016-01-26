@@ -22,7 +22,7 @@ feature -- Status
 			valid_size: Result > 0
 		end
 
-	can_write (a_header: TAR_HEADER): BOOLEAN
+	writable (a_header: TAR_HEADER): BOOLEAN
 			-- Can `a_header' be written?
 		deferred
 		end
@@ -44,7 +44,7 @@ feature -- Setup
 	set_active_header (a_header: TAR_HEADER)
 			-- Set `active_header' to `a_header'.
 		require
-			writable: can_write (a_header)
+			writable: writable (a_header)
 		do
 			active_header := a_header.twin
 			written_blocks := 0
@@ -68,7 +68,7 @@ feature -- Output
 			another_block_written: written_blocks = old written_blocks + 1
 		end
 
-	write_block_to_new_managed_pointer: MANAGED_POINTER
+	next_block: MANAGED_POINTER
 			-- Write next block of `active_header' to a new managed pointer with block size.
 		require
 			has_active_header: attached active_header
@@ -91,7 +91,7 @@ feature {NONE} -- Utilities
 		end
 
 invariant
-	can_always_write_header: attached active_header as header implies can_write(header)
+	can_always_write_header: attached active_header as header implies writable(header)
 	non_negative_blocks_written: written_blocks >= 0
 
 note

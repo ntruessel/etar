@@ -32,7 +32,7 @@ feature -- Status
 			Result := 1
 		end
 
-	can_write (a_header: TAR_HEADER): BOOLEAN
+	writable (a_header: TAR_HEADER): BOOLEAN
 			-- Can `a_header' be written?
 		do
 			Result := filename_fits (a_header) and
