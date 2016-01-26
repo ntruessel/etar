@@ -119,7 +119,6 @@ feature -- Parsing
 				end
 			end
 
-
 				-- verify checksum
 			if
 				not has_error and then
@@ -133,16 +132,6 @@ feature -- Parsing
 				l_header.set_typeflag (a_block.read_character (a_pos + {TAR_HEADER_CONST}.typeflag_offset))
 			end
 
-				-- parse linkname
-			if not has_error then
-				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.linkname_offset, {TAR_HEADER_CONST}.linkname_length)
-				if not l_field.is_whitespace then
-					l_header.set_linkname (create {PATH}.make_from_string (utf.utf_8_string_8_to_escaped_string_32 (l_field)))
-				else
---					report_new_error ("Missing linkname")		-- linkname only needed if typeflag is {TAR_CONST}.tar_typeflag_symlink, {TAR_CONST}.tar_typeflag_hardling, or custom
-				end
-			end
-
 				-- parse and check magic
 			if not has_error then
 				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.magic_offset, {TAR_HEADER_CONST}.magic_length)
@@ -150,7 +139,6 @@ feature -- Parsing
 					report_new_error ("Missing magic")
 				end
 			end
-
 
 				-- parse and check version
 			if not has_error then
@@ -160,38 +148,40 @@ feature -- Parsing
 				end
 			end
 
-				-- parse uname
 			if not has_error then
+					-- parse uname
 				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.uname_offset, {TAR_HEADER_CONST}.uname_length)
 				if not l_field.is_whitespace then
 					l_header.set_user_name (l_field)
 				else
 --					report_new_error ("Missing uname")		-- optional
 				end
-			end
 
-				-- parse gname
-			if not has_error then
+					-- parse gname
 				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.gname_offset, {TAR_HEADER_CONST}.gname_length)
 				if not l_field.is_whitespace then
 					l_header.set_group_name (l_field)
 				else
 --					report_new_error ("Missing gname")		-- optional
 				end
-			end
 
-				-- parse devmajor
-			if not has_error then
+					-- parse linkname
+				l_field := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.linkname_offset, {TAR_HEADER_CONST}.linkname_length)
+				if not l_field.is_whitespace then
+					l_header.set_linkname (create {PATH}.make_from_string (utf.utf_8_string_8_to_escaped_string_32 (l_field)))
+				else
+--					report_new_error ("Missing linkname")		-- linkname only needed if typeflag is {TAR_CONST}.tar_typeflag_symlink, {TAR_CONST}.tar_typeflag_hardling, or custom
+				end
+
+					-- parse devmajor
 				l_field := next_block_octal_natural_32_string (a_block, a_pos + {TAR_HEADER_CONST}.devmajor_offset, {TAR_HEADER_CONST}.devmajor_length)
 				if l_field /= Void then
 					l_header.set_device_major (octal_string_to_natural_32 (l_field))
 				else
 --					report_new_error ("Missing devmajor")		-- only for typeflags of special files (character/block device)
 				end
-			end
 
-				-- parse devminor
-			if not has_error then
+					-- parse devminor
 				l_field := next_block_octal_natural_32_string (a_block, a_pos + {TAR_HEADER_CONST}.devminor_offset, {TAR_HEADER_CONST}.devminor_length)
 				if l_field /= Void then
 					l_header.set_device_minor (octal_string_to_natural_32 (l_field))
@@ -199,9 +189,6 @@ feature -- Parsing
 --					report_new_error ("Missing devminor")		-- only for typeflags of special files (character/block device)
 				end
 			end
-
-			--| FIXME: maybe group previous multiple "if not has_error then ..." into a unique "if not has_error ..."
-			--|			since no error reporting is done (all are commented..)
 
 			if not has_error then
 				last_parsed_header := l_header
