@@ -1,7 +1,7 @@
 note
 	description: "[
-		Utility functions for tar archives
-	]"
+			Utility functions for tar archives
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -23,7 +23,7 @@ feature -- Bytes to Blocks
 feature -- Block Padding
 
 	pad_block (p: MANAGED_POINTER; a_pos, n: INTEGER)
-			-- pad `p' with `n' NUL-bytes starting at `a_pos'
+			-- pad `p' with `n' NUL-bytes starting at `a_pos'.
 		require
 			non_negative_position: a_pos >= 0
 			non_negative_length: n >= 0
@@ -40,7 +40,7 @@ feature -- Block Padding
 feature -- Header Checksum
 
 	checksum (block: MANAGED_POINTER; a_pos: INTEGER): NATURAL_64
-			-- Calcualte checksum of `block' (starting at `a_pos')
+			-- Calcualte checksum of `block' (starting at `a_pos').
 		require
 			non_negative_pos: a_pos >= 0
 			enough_space: block.count >= a_pos + {TAR_CONST}.tar_block_size
@@ -168,7 +168,7 @@ feature -- Filename normalization
 
 	unify_and_split_filename (a_path: PATH): TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 			-- Split `a_path' into filename and prefix, such that prefix + '/' + filename equals the UTF-8
-			-- representation of `a_path' using unix directory separator
+			-- representation of `a_path' using unix directory separator.
 		local
 			l_filename: STRING_8
 			l_filename_prefix: STRING_8

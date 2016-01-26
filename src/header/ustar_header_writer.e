@@ -1,9 +1,9 @@
 note
 	description: "[
-		Header writer for the ustar format
+			Header writer for the ustar format
 
-		Everything that is too large will be truncated
-	]"
+			Everything that is too large will be truncated
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 	EIS: "name=Further information about the USTAR format", "src=http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06", "tag=ustar"
@@ -27,7 +27,7 @@ inherit
 feature -- Status
 
 	required_blocks: INTEGER
-			-- Space required to write `active_header' in blocks
+			-- How many blocks are required to store `active_header'?
 		once
 			Result := 1
 		end
@@ -47,7 +47,7 @@ feature -- Status
 feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write next block to `p' starting at `a_pos'
+			-- Write next block to `p' starting at `a_pos'.
 		local
 			l_split_filename: TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 		do
@@ -138,7 +138,7 @@ feature -- Output
 feature -- Fitting
 
 	filename_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `filename' of `a_header' fits in a ustar header
+			-- Does `a_header.filename' fit in a ustar header?
 		local
 			l_split_filename: TUPLE [filename_prefix: STRING_8; filename: STRING_8]
 		do
@@ -148,49 +148,49 @@ feature -- Fitting
 		end
 
 	user_id_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `user_id' of `a_header' fits in ustar header
+			-- Does `a_header.user_id' fit in a ustar header?
 		do
 				-- Strictly less: terminating '%U'
 			Result := natural_32_to_octal_string (a_header.user_id).count < {TAR_HEADER_CONST}.uid_length
 		end
 
 	group_id_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `group_id' of `a_header' fits in ustar header
+			-- Does `a_header.group_id' fit in a ustar header?
 		do
 				-- Strictly less: terminating '%U'
 			Result := natural_32_to_octal_string (a_header.group_id).count < {TAR_HEADER_CONST}.gid_length
 		end
 
 	size_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `size' of `a_header' fits in a ustar header
+			-- Does `a_header.size' fit in a ustar header?
 		do
 				-- Strictly less: terminating '%U'
 			Result := natural_64_to_octal_string (a_header.size).count < {TAR_HEADER_CONST}.size_length
 		end
 
 	mtime_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `mtime' of `a_header' fits in a ustar header
+			-- Does `a_header.mtime' fit in a ustar header?
 		do
 				-- Strictly less: terminating '%U'
 			Result := natural_64_to_octal_string (a_header.mtime).count < {TAR_HEADER_CONST}.mtime_length
 		end
 
 	linkname_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `linkname' of `a_header' fits in a ustar header
+			-- Does `a_header.linkname' fit in a ustar header?
 		do
 				-- No need for terminating '%U'
 			Result := unify_utf_8_path (a_header.linkname).count <= {TAR_HEADER_CONST}.linkname_length
 		end
 
 	user_name_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `user_name' of `a_header' fits in a ustar header
+			-- Does `a_header.user_name' fit in a ustar header?
 		do
 				-- No need for terminating '%U'
 			Result := a_header.user_name.count <= {TAR_HEADER_CONST}.uname_length
 		end
 
 	group_name_fits (a_header: TAR_HEADER): BOOLEAN
-			-- Indicates whether `group_name' of `a_header' fits in a ustar header
+			-- Does `a_header.group_name' fit in a ustar header?
 		do
 				-- No need for terminating '%U'
 			Result := a_header.group_name.count <= {TAR_HEADER_CONST}.gname_length
@@ -199,25 +199,25 @@ feature -- Fitting
 feature {NONE} -- Utilities
 
 	prepare_header
-			-- prepare `active_header' after it was set
+			-- Prepare `active_header' after it was set.
 		do
 			-- do_nothing
 		end
 
 	put_string (s: STRING_8; p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write `s' to `p' at `a_pos'
+			-- Write `s' to `p' at `a_pos'.
 		do
 			p.put_special_character_8 (s.area, 0, a_pos, s.count)
 		end
 
-	put_natural (n: NATURAL_64; length: INTEGER; p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the octal representation of `n' padded to `lenght' - 1 to `p' at `a_pos'
-			-- `length' - 1 because tar requires a terminating '%U' for numeric values
+	put_natural (n: NATURAL_64; a_length: INTEGER; p: MANAGED_POINTER; a_pos: INTEGER)
+			-- Write the octal representation of `n' padded to `a_length' - 1 to `p' at `a_pos'
+			-- `a_length' - 1 because tar requires a terminating '%U' for numeric values.
 		local
 			s: STRING_8
 		do
 			s := natural_64_to_octal_string (n)
-			pad (s, length - s.count - 1)
+			pad (s, a_length - s.count - 1)
 			p.put_special_character_8 (s.area, 0, a_pos, s.count)
 		end
 

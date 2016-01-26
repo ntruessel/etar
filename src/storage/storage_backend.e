@@ -14,21 +14,21 @@ inherit
 feature -- Status setting
 
 	open_read
-			-- Open storage backend for reading
+			-- Open storage backend for reading.
 		deferred
 		ensure
 			error_or_readable: has_error or else is_readable
 		end
 
 	open_write
-			-- Open storage backend for writing
+			-- Open storage backend for writing.
 		deferred
 		ensure
 			error_or_writable: has_error or else is_writable
 		end
 
 	close
-			-- Close storage backend
+			-- Close storage backend.
 		deferred
 		ensure
 			closed: is_closed
@@ -37,8 +37,8 @@ feature -- Status setting
 feature -- Status
 
 	archive_finished: BOOLEAN
-			-- Indicates whether the next two blocks only contain NUL bytes
-			-- This denotes the end of an archive, if not occuring in some payload
+			-- Do the next two blocks only contain NUL bytes?
+			-- This denotes the end of an archive, if not occuring in some payload.
 		require
 			readable: is_readable
 		deferred
@@ -61,7 +61,7 @@ feature -- Status
 		end
 
 	is_writable: BOOLEAN
-			-- Is Current backend writable and accept blocks to be written to Current?
+			-- Is Current backend writable and accepts blocks to be written to Current?
 		deferred
 		ensure
 			no_error_if_writable: Result implies not has_error

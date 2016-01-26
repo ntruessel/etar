@@ -25,7 +25,7 @@ create
 feature {NONE} -- Initialization
 
 	default_create
-			-- (Ab)used for internal initialization
+			-- (Ab)used for internal initialization.
 		do
 				-- Header utilities
 			create {PAX_HEADER_WRITER} header_writer
@@ -48,7 +48,7 @@ feature {NONE} -- Initialization
 		end
 
 	make (a_storage_backend: STORAGE_BACKEND)
-			-- Creat new archive with backend `a_storage_backend'
+			-- Creat new archive with backend `a_storage_backend'.
 		do
 			storage_backend := a_storage_backend
 			mode := mode_closed
@@ -70,7 +70,7 @@ feature -- Status setting
 		end
 
 	open_unarchive
-			-- Open for unarchiving
+			-- Open for unarchiving.
 		do
 			storage_backend.open_read
 			mode := mode_unarchive
@@ -79,7 +79,7 @@ feature -- Status setting
 		end
 
 	close
-			-- Close archive
+			-- Close archive.
 		do
 			storage_backend.close
 			mode := mode_closed
@@ -88,7 +88,7 @@ feature -- Status setting
 		end
 
 	enable_absolute_filenames
-			-- Set `absolute_filenames'
+			-- Set `absolute_filenames'.
 		require
 			closed: is_closed
 		do
@@ -98,7 +98,7 @@ feature -- Status setting
 		end
 
 	disable_absolute_filenames
-			-- Reset `absolute_filenames'
+			-- Reset `absolute_filenames'.
 		require
 			closed: is_closed
 		do
@@ -133,28 +133,28 @@ feature -- Status
 feature {NONE} -- Status (internal)
 
 	mode: INTEGER
-			-- In what mode has this instance been created
+			-- In what mode has this instance been created?
 
 	mode_closed: INTEGER = 0
-			-- closed mode
+			-- closed mode.
 
 	mode_unarchive: INTEGER = 1
-			-- unarchive (read) mode
+			-- unarchive (read) mode.
 
 	mode_archive: INTEGER = 2
-			-- archive (write) mode
+			-- archive (write) mode.
 
 feature -- Unarchiving
 
 	add_unarchiver (a_unarchiver: UNARCHIVER)
-			-- Add unarchiver `a_unarchiver' to `unarchivers'
+			-- Add unarchiver `a_unarchiver' to `unarchivers'.
 		do
 			unarchivers.force (a_unarchiver)
 			a_unarchiver.register_error_callback (agent report_error_with_parent (a_unarchiver.name + " failed", ?))
 		end
 
 	unarchiving_finished: BOOLEAN
-			-- Indicate whether unarchiving finished
+			-- Unarchiving finished yet?
 		require
 			correct_mode: is_unarchiving_mode
 		do
@@ -162,7 +162,7 @@ feature -- Unarchiving
 		end
 
 	unarchive
-			-- Unarchive the whole archive
+			-- Unarchive the whole archive.
 		require
 			correct_mode: is_unarchiving_mode
 		do
@@ -177,7 +177,7 @@ feature -- Unarchiving
 		end
 
 	unarchive_next_entry
-			-- Unarchives the next entry
+			-- Unarchives the next entry.
 		require
 			correct_mode: is_unarchiving_mode
 		local
@@ -230,7 +230,7 @@ feature -- Unarchiving
 feature -- Archiving
 
 	add_entry (a_entry: ARCHIVABLE)
-			-- Add `a_entry' to the archive
+			-- Add `a_entry' to the archive.
 		require
 			correct_mode: is_archiving_mode
 		local
@@ -258,7 +258,7 @@ feature -- Archiving
 		end
 
 	finalize
-			-- Write archive delimiter
+			-- Write archive delimiter.
 		do
 			storage_backend.finalize
 			mode := mode_closed
@@ -267,6 +267,7 @@ feature -- Archiving
 feature -- Archiving helpers		
 
 	add_directory (a_dir: FILE)
+			-- Add directory file to archive.
 		require
 			exists: a_dir.exists
 			readable: a_dir.is_access_readable
@@ -275,6 +276,7 @@ feature -- Archiving helpers
 		end
 
 	add_file (a_file: FILE)
+			-- Add regular file to archive.
 		require
 			exists: a_file.exists and then a_file.is_plain
 			readable: a_file.is_access_readable
@@ -339,7 +341,7 @@ feature -- Archiving helpers
 feature {NONE} -- Implementation
 
 	storage_backend: STORAGE_BACKEND
-			-- Storage backend to use, set on initialization
+			-- Storage backend to use, set on initialization.
 
 	unarchivers: LIST [UNARCHIVER]
 			-- List of all registered unarchivers.
@@ -360,14 +362,14 @@ feature {NONE} -- Implementation
 		end
 
 	header_parser: TAR_HEADER_PARSER
-			-- Parser to use for header parsing
+			-- Parser to use for header parsing.
 
 	header_writer: TAR_HEADER_WRITER
-			-- Writer to use for header writing
+			-- Writer to use for header writing.
 
 	sanitized_header (a_header: TAR_HEADER): TAR_HEADER
-			-- Remove dangerous values from `a_header'
-			-- Currently only removes absolute filenames and parent directories
+			-- Remove dangerous values from `a_header'.
+			-- Currently only removes absolute filenames and parent directories.
 		local
 			l_safe_path: PATH
 			p: PATH

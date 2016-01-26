@@ -17,7 +17,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Create new instance
+			-- Create new instance.
 		do
 			name := "directory to disk unarchiver"
 
@@ -27,7 +27,8 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
-			-- Instances of this class can unarchive every header that belongs to a directory
+			-- Can the payload that belongs to `a_header' be unarchived using this DIRECTORY_UNARCHIVER?
+			-- note: Instances of this class can unarchive every header that belongs to a directory.
 		do
 			Result := a_header.typeflag = {TAR_CONST}.tar_typeflag_directory
 		end

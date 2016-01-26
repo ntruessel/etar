@@ -24,7 +24,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-				-- Default initialization for UNARCHIVER
+				-- Default initialization for UNARCHIVER.
 		do
 --			active_header := Void
 --			unarchived_blocks := 0
@@ -51,17 +51,16 @@ feature -- Access
 feature -- Status			
 
 	unarchived_blocks: INTEGER
-			-- How many blocks have been unarchived so far.
+			-- How many blocks have been unarchived so far?
 
 	unarchiving_finished: BOOLEAN
-			-- Flag that indicates whether unarchiving finished
+			-- Unarchiving finished?
 		do
 			Result := has_error or attached active_header implies unarchived_blocks = required_blocks
 		end
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
-			-- Indicate whether this type of unarchiver can unarchive payload with
-			-- header `a_header'
+			-- Can this unarchiver unarchive payload that belongs to `a_header'?
 		deferred
 		end
 
@@ -98,7 +97,7 @@ feature -- Basic unarchiving operations.
 feature {NONE} -- Implementation
 
 	do_internal_initialization
-			-- Initialize subclass specific internals after initialize has done its job
+			-- Initialize subclass specific internals after initialize has done its job.
 		require
 			header_attached: attached active_header
 		deferred

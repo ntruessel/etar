@@ -17,7 +17,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Initialize unarchiver
+			-- Initialize unarchiver.
 		do
 				-- Initialize internals. Capacities chosen from gnutar's default pax entries
 			create entries.make_equal (3)	-- pax provides atime, mtime and ctime
@@ -35,6 +35,7 @@ feature -- Status
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
 			-- Current can unarchive payload with header `a_header'?
+			-- note: PAX_UNARCHIVER can unarchive every header belonging to pax payload (global or extended)
 		do
 			Result :=  a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended
 					or a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global
@@ -44,14 +45,14 @@ feature -- Status
 		end
 
 	value (a_key: STRING_8): detachable READABLE_STRING_8
-			-- Get value corresponding to `a_key'
-			-- Returns void if there is none
+			-- Get value corresponding to `a_key'.
+			-- Returns void if there is none.
 		do
 			Result := entries.item (a_key)
 		end
 
 	required_blocks: INTEGER
-			-- Indicate how many blocks are required to unarchive the payload that belongs to `active_header'
+			-- How many blocks are required to unarchive the payload that belongs to `active_header'?
 		do
 			if attached active_header as l_header then
 				Result := needed_blocks (l_header.size).as_integer_32
@@ -61,7 +62,7 @@ feature -- Status
 		end
 
 	reset_entries
-			-- Reset all entries
+			-- Reset all entries.
 		do
 			entries.wipe_out
 		end
@@ -69,9 +70,10 @@ feature -- Status
 feature -- Unarchiving
 
 	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Unarchive next block, stored in `p' starting at `a_pos'
+			-- Unarchive next block, stored in `p' starting at `a_pos'.
 			-- the payload has the form
 			-- length key=value%N
+			-- .
 		local
 			i: INTEGER
 			c: CHARACTER_8
@@ -115,43 +117,43 @@ feature -- Unarchiving
 feature {NONE} -- Implementation
 
 	do_internal_initialization
-			-- Initialize subclass specific internals after initialize has done its job
+			-- Initialize subclass specific internals after initialize has done its job.
 		do
 			reset_error
 			reset_parser
 		end
 
 	entries: HASH_TABLE [STRING_8, STRING_8]
-			-- The entries in the current payload
+			-- The entries in the current payload.
 
 feature {NONE} -- parsing finite state machine
 
 	active_length: STRING_8
-			-- Length field entry for which parsing is in progress
+			-- Length field entry for which parsing is in progress.
 
 	active_key: STRING_8
-			-- Key field entry for which parsing is in progress
+			-- Key field entry for which parsing is in progress.
 
 	active_value: STRING_8
-			-- Value field entry for which parsing is in progress
+			-- Value field entry for which parsing is in progress.
 
 	parsed_characters: INTEGER
-			-- Indiates how many characters have been parsed so far
+			-- Indiates how many characters have been parsed so far.
 
 	parsing_state: INTEGER
-			-- In what parsing state are we currently? One of the following constants
+			-- In what parsing state are we currently? One of the following constants.
 
 	ps_length: INTEGER = 0
-			-- parsing state: next block to be parsed belongs to pax header
+			-- parsing state: next block to be parsed belongs to pax header.
 
 	ps_key: INTEGER = 1
-			-- parsing state: next block to be parsed belongs to pax payload
+			-- parsing state: next block to be parsed belongs to pax payload.
 
 	ps_value: INTEGER = 2
-			-- parsing state: next block to be parsed belongs to ustar header
+			-- parsing state: next block to be parsed belongs to ustar header.
 
 	handle_length_character (c: CHARACTER_8)
-			-- Handle `c', treating it as a length character
+			-- Handle `c', treating it as a length character.
 		require
 			no_errors: not has_error
 			correct_state: parsing_state = ps_length
@@ -175,7 +177,7 @@ feature {NONE} -- parsing finite state machine
 		end
 
 	handle_key_character (c: CHARACTER_8)
-			-- Handle `c', treating it as a key character
+			-- Handle `c', treating it as a key character.
 		require
 			no_errors: not has_error
 			correct_state: parsing_state = ps_key
@@ -201,7 +203,7 @@ feature {NONE} -- parsing finite state machine
 		end
 
 	handle_value_character (c: CHARACTER_8)
-			-- Handle `c', treating it as a value character
+			-- Handle `c', treating it as a value character.
 		require
 			no_errors: not has_error
 			correct_state: parsing_state = ps_value
@@ -226,7 +228,7 @@ feature {NONE} -- parsing finite state machine
 		end
 
 	reset_parser
-			-- Reset parser state to process a new entry
+			-- Reset parser state to process a new entry.
 		require
 			no_errors: not has_error
 		do

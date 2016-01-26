@@ -22,7 +22,7 @@ create
 feature {NONE} -- Initialization
 
 	default_create
-			-- Used to initialize internal status
+			-- Used to initialize internal status.
 		do
 			create block_buffer.make ({TAR_CONST}.tar_block_size)
 			create {ARRAYED_CIRCULAR [MANAGED_POINTER]} buffer.make (2)
@@ -58,7 +58,7 @@ feature {NONE} -- Initialization
 feature -- Status setting
 
 	open_read
-			-- Open for reading
+			-- Open for reading.
 		do
 			if not has_error then
 				if backend.exists then
@@ -74,7 +74,7 @@ feature -- Status setting
 		end
 
 	open_write
-			-- Open for writing
+			-- Open for writing.
 		local
 			retried: BOOLEAN
 		do
@@ -96,7 +96,7 @@ feature -- Status setting
 		end
 
 	close
-			-- Close backend
+			-- Close backend.
 		do
 			if not backend.is_closed then
 				backend.flush
@@ -123,7 +123,7 @@ feature -- Status
 		end
 
 	block_ready: BOOLEAN
-			-- Indicate whether there is a block ready
+			-- Is there a block ready to read with last_block?
 		do
 			Result := not has_error and then has_valid_block
 		end
@@ -141,7 +141,7 @@ feature -- Status
 		end
 
 	is_closed: BOOLEAN
-			-- Indicates whether backend is closed
+			-- Is Current closed?
 		do
 			Result := backend.is_closed
 		end
@@ -149,13 +149,13 @@ feature -- Status
 feature -- Reading
 
 	last_block: MANAGED_POINTER
-			-- Return last block that was read
+			-- Return last block that was read.
 		do
 			Result := block_buffer
 		end
 
 	read_block
-			-- Read next block
+			-- Read next block.
 		do
 			if not buffer.is_empty then
 					-- There are buffered items, use them
@@ -172,13 +172,13 @@ feature -- Reading
 feature -- Writing
 
 	write_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write `a_block', starting from `a_pos'
+			-- Write `a_block', starting from `a_pos'.
 		do
 			backend.put_managed_pointer (a_block, a_pos, a_block.count)
 		end
 
 	finalize
-			-- Finalize archive (write two 0 blocks)
+			-- Finalize archive (write two 0 blocks).
 		local
 			l_block: MANAGED_POINTER
 			l_template: STRING_8
@@ -195,16 +195,16 @@ feature -- Writing
 feature {NONE} -- Implementation
 
 	backend: FILE
-			-- file backend
+			-- file backend.
 
 	buffer: DYNAMIC_CIRCULAR [MANAGED_POINTER]
-			-- buffers blocks that were read ahead
+			-- buffers blocks that were read ahead.
 
 	block_buffer: MANAGED_POINTER
-			-- buffer to use for next read operation
+			-- buffer to use for next read operation.
 
 	has_valid_block: BOOLEAN
-			-- Boolean flag for `block_ready'
+			-- Boolean flag for `block_ready'.
 
 	read_block_to_buffer
 			-- Read block and add it to the buffer.

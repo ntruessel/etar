@@ -17,7 +17,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Create new instance
+			-- Create new instance.
 		do
 			name := "file to disk unarchiver"
 
@@ -27,7 +27,8 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
-			-- Current can unarchive every header belonging to a basic file.
+			-- Can the payload that belongs to `a_header' be unarchived using this FILE_UNARCHIVER?
+			-- note: Instances of this class can unarchive every header belonging to a basic file.
 		do
 			Result :=  a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file
 					or a_header.typeflag = {TAR_CONST}.tar_typeflag_regular_file_old
@@ -46,7 +47,7 @@ feature -- Status
 feature -- Output
 
 	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Unarchive block `p' starting at `a_pos'
+			-- Unarchive block `p' starting at `a_pos'.
 		local
 			remaining_bytes: NATURAL_64
 		do
@@ -79,7 +80,7 @@ feature -- Output
 feature {NONE} -- Implementation
 
 	do_internal_initialization
-			-- Setup internal structures after initialize has run
+			-- Setup internal structures after initialize has run.
 		local
 			l_file: FILE
 		do
@@ -106,13 +107,13 @@ feature {NONE} -- Implementation
 		end
 
 	active_file: detachable FILE
-			-- File that is currently unarchived
+			-- File that is currently unarchived.
 
 	skip: BOOLEAN
 			-- skip payload?
 
 	file_safe_delete (a_file: FILE)
-			-- Safe delete file (or ignore)
+			-- Safe delete file (or ignore).
 		local
 			l_failed: BOOLEAN
 		do

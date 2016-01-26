@@ -18,7 +18,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Create new PAX_HEADER_WRITER object
+			-- Create new PAX_HEADER_WRITER object.
 		do
 			create ustar_writer
 		end
@@ -26,7 +26,7 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	required_blocks: INTEGER
-			-- Indicates how many blocks are needed to write `active_header'
+			-- How many blocks are required to write `active_header`?
 		do
 			if attached pax_archivable as l_pax_archivable then
 				Result := 2 * ustar_writer.required_blocks + l_pax_archivable.required_blocks
@@ -36,7 +36,7 @@ feature -- Status
 		end
 
 	can_write (a_header: TAR_HEADER): BOOLEAN
-			-- Whether `a_header' can be written
+			-- Can `a_header' be written?
 		once
 			Result := True
 		end
@@ -44,7 +44,7 @@ feature -- Status
 feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write next block to `p', starting at `a_pos'
+			-- Write next block to `p', starting at `a_pos'.
 		do
 			if attached pax_archivable as l_pax_archivable then
 				if written_blocks = 0 then
@@ -72,10 +72,10 @@ feature -- Output
 feature {NONE} -- Implementation
 
 	ustar_writer: USTAR_HEADER_WRITER
-			-- used to write headers that fit in ustar headers
+			-- used to write headers that fit in ustar headers.
 
 	prepare_header
-			-- Prepare `active_header' after it was set
+			-- Prepare `active_header' after it was set.
 		local
 			l_pax_archivable: PAX_ARCHIVABLE
 		do
@@ -165,7 +165,7 @@ feature {NONE} -- Implementation
 		end
 
 	pax_archivable: detachable PAX_ARCHIVABLE
-			-- pax payload, attached if the current header does not fit into at ustar header
+			-- pax payload, attached if the current header does not fit into at ustar header.
 
 invariant
 	active_header_writable: attached active_header as l_header implies ustar_writer.can_write (l_header)

@@ -1,7 +1,7 @@
 note
 	description: "[
-		Header parser for the ustar header format
-	]"
+			Header parser for the ustar header format
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -56,7 +56,6 @@ feature -- Parsing
 			create l_header
 
 				-- parse "filename"
-				-- FIXME: Implement filename splitting
 			if not has_error then
 				l_filename := next_block_string (a_block, a_pos + {TAR_HEADER_CONST}.name_offset, {TAR_HEADER_CONST}.name_length)
 				if l_filename.is_whitespace then
@@ -251,7 +250,7 @@ feature {NONE} -- Implementation
 		end
 
 	is_checksum_verified (a_block: MANAGED_POINTER; a_pos: INTEGER): BOOLEAN
-			-- Verify the checksum of `a_block' (block starting at `a_pos')
+			-- Does the calculated checksum of `a_block' (block starting at `a_pos') match the value of the checksum field?
 		do
 				--| Parse checksum
 			Result := attached next_block_octal_natural_64_string (a_block, a_pos + {TAR_HEADER_CONST}.chksum_offset, {TAR_HEADER_CONST}.chksum_length) as checksum_string and then

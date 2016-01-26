@@ -1,8 +1,8 @@
 note
 	description: "[
-		Header of a tar entry.
-		Contains the metadata about the following payload.
-	]"
+			Header of a tar entry.
+			Contains the metadata about the following payload.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -19,7 +19,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Create an empty TAR_HEADER
+			-- Create an empty TAR_HEADER.
 		do
 			create filename.make_empty
 			create linkname.make_empty
@@ -30,6 +30,7 @@ feature {NONE} -- Initialization
 feature -- Equality
 
 	is_equal (other: like Current): BOOLEAN
+			-- Is `other' considered to be the same header as `Current' ?
 		do
 			Result := 	Current.filename ~ other.filename and
 						Current.mode = other.mode and
@@ -48,40 +49,40 @@ feature -- Equality
 feature -- Fields
 
 	filename: PATH
-			-- File name
+			-- File name.
 
 	mode: NATURAL_16
-			-- Protection mode (lower 12 bits)
+			-- Protection mode (lower 12 bits).
 
 	user_id: NATURAL_32
-			-- User ID
+			-- User ID.
 
 	group_id: NATURAL_32
-			-- Group ID
+			-- Group ID.
 
 	size: NATURAL_64
-			-- File size
+			-- File size.
 
 	mtime: NATURAL_64
-			-- Last modification time
+			-- Last modification time.
 
 	typeflag: CHARACTER_8
-			-- File type flag
+			-- File type flag.
 
 	linkname: PATH
-			-- Link target
+			-- Link target.
 
 	user_name: IMMUTABLE_STRING_8
-			-- User name
+			-- User name.
 
 	group_name: IMMUTABLE_STRING_8
-			-- Group name
+			-- Group name.
 
 	device_major: NATURAL_32
-			-- Major device number
+			-- Major device number.
 
 	device_minor: NATURAL_32
-			-- Minor device number
+			-- Minor device number.
 
 feature -- Mode queries
 
@@ -154,7 +155,7 @@ feature -- Mode queries
 feature -- Assign
 
 	set_filename (a_filename: PATH)
-			-- Set `filename' to `a_filename'
+			-- Set `filename' to `a_filename'.
 		do
 			create filename.make_from_separate (a_filename)
 		ensure
@@ -162,7 +163,7 @@ feature -- Assign
 		end
 
 	set_mode (a_mode: NATURAL_16)
-			-- Set `mode' to `a_mode'
+			-- Set `mode' to `a_mode'.
 		do
 			mode := a_mode & 0c7777
 		ensure
@@ -170,7 +171,7 @@ feature -- Assign
 		end
 
 	set_user_id (a_user_id: NATURAL_32)
-			-- Set `user_id' to `a_user_id'
+			-- Set `user_id' to `a_user_id'.
 		do
 			user_id := a_user_id
 		ensure
@@ -178,7 +179,7 @@ feature -- Assign
 		end
 
 	set_group_id (a_group_id: NATURAL_32)
-			-- Set `group_id' to `a_group_id'
+			-- Set `group_id' to `a_group_id'.
 		do
 			group_id := a_group_id
 		ensure
@@ -186,7 +187,7 @@ feature -- Assign
 		end
 
 	set_size (a_size: NATURAL_64)
-			-- Set `size' to `a_size'
+			-- Set `size' to `a_size'.
 		do
 			size := a_size
 		ensure
@@ -194,7 +195,7 @@ feature -- Assign
 		end
 
 	set_mtime (a_mtime: NATURAL_64)
-			-- Set `mtime' to `a_mtime'
+			-- Set `mtime' to `a_mtime'.
 		do
 			mtime := a_mtime
 		ensure
@@ -202,7 +203,7 @@ feature -- Assign
 		end
 
 	set_typeflag (a_typeflag: CHARACTER_8)
-			-- Set `typeflag' to `a_typeflag'
+			-- Set `typeflag' to `a_typeflag'.
 		do
 			typeflag := a_typeflag
 		ensure
@@ -210,7 +211,7 @@ feature -- Assign
 		end
 
 	set_linkname (a_linkname: PATH)
-			-- Set `linkname' to `a_linkname'
+			-- Set `linkname' to `a_linkname'.
 		do
 			linkname := a_linkname
 		ensure
@@ -218,7 +219,7 @@ feature -- Assign
 		end
 
 	set_user_name (a_user_name: STRING_8)
-			-- Set `user_name' to `a_user_name'
+			-- Set `user_name' to `a_user_name'.
 		do
 			create user_name.make_from_string (a_user_name)
 		ensure
@@ -226,7 +227,7 @@ feature -- Assign
 		end
 
 	set_group_name (a_group_name: STRING_8)
-			-- Set `group_name' to `a_group_name'
+			-- Set `group_name' to `a_group_name'.
 		do
 			create group_name.make_from_string (a_group_name)
 		ensure
@@ -234,7 +235,7 @@ feature -- Assign
 		end
 
 	set_device_major (a_device_major: NATURAL_32)
-			-- Set `device_major' to `a_device_major'
+			-- Set `device_major' to `a_device_major'.
 		do
 			device_major := a_device_major
 		ensure
@@ -242,7 +243,7 @@ feature -- Assign
 		end
 
 	set_device_minor (a_device_minor: NATURAL_32)
-			-- Set `device_minor' to `a_device_minor'
+			-- Set `device_minor' to `a_device_minor'.
 		do
 			device_minor := a_device_minor
 		ensure
@@ -250,7 +251,7 @@ feature -- Assign
 		end
 
 	set_setuid (b: BOOLEAN)
-			-- Set uid bit to `b'
+			-- Set uid bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.setuid_mask)
 		ensure
@@ -258,7 +259,7 @@ feature -- Assign
 		end
 
 	set_setgid (b: BOOLEAN)
-			-- Set gid bit to `b'
+			-- Set gid bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.setgid_mask)
 		ensure
@@ -266,7 +267,7 @@ feature -- Assign
 		end
 
 	set_user_readable (b: BOOLEAN)
-			-- Set user-read bit to `b'
+			-- Set user-read bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.uread_mask)
 		ensure
@@ -274,7 +275,7 @@ feature -- Assign
 		end
 
 	set_user_writable (b: BOOLEAN)
-			-- Set user-write bit to `b'
+			-- Set user-write bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.uwrite_mask)
 		ensure
@@ -282,7 +283,7 @@ feature -- Assign
 		end
 
 	set_user_executable (b: BOOLEAN)
-			-- Set user-execute bit to `b'
+			-- Set user-execute bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.uexec_mask)
 		ensure
@@ -290,7 +291,7 @@ feature -- Assign
 		end
 
 	set_group_readable (b: BOOLEAN)
-			-- Set group-read bit to `b'
+			-- Set group-read bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.gread_mask)
 		ensure
@@ -298,7 +299,7 @@ feature -- Assign
 		end
 
 	set_group_writable (b: BOOLEAN)
-			-- Set group-write bit to `b'
+			-- Set group-write bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.gwrite_mask)
 		ensure
@@ -306,7 +307,7 @@ feature -- Assign
 		end
 
 	set_group_executable (b: BOOLEAN)
-			-- Set group-execute bit to `b'
+			-- Set group-execute bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.gexec_mask)
 		ensure
@@ -314,7 +315,7 @@ feature -- Assign
 		end
 
 	set_other_readable (b: BOOLEAN)
-			-- Set other-read bit to `b'
+			-- Set other-read bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.oread_mask)
 		ensure
@@ -322,7 +323,7 @@ feature -- Assign
 		end
 
 	set_other_writable (b: BOOLEAN)
-			-- Set other-write bit to `b'
+			-- Set other-write bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.owrite_mask)
 		ensure
@@ -330,7 +331,7 @@ feature -- Assign
 		end
 
 	set_other_executable (b: BOOLEAN)
-			-- Set other-execute bit to `b'
+			-- Set other-execute bit to `b'.
 		do
 			mode := mode.set_bit_with_mask (b, {TAR_CONST}.oexec_mask)
 		ensure

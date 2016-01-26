@@ -17,7 +17,7 @@ create
 feature {NONE} -- Initialization
 
 	make (a_directory: FILE)
-			-- Create new DIRECTORY_ARCHIVABLE for `a_directory'
+			-- Create new DIRECTORY_ARCHIVABLE for `a_directory'.
 		require
 			directory_exists: a_directory.exists
 			is_directory: a_directory.is_directory
@@ -28,13 +28,13 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	required_blocks: INTEGER
-			-- Indicates how many blocks are required to store this instance
+			-- How many blocks are required to store this DIRECTORY_ARCHIVABLE?
 		do
 			Result := 0
 		end
 
 	header: TAR_HEADER
-			-- Header that belongs to the payload
+			-- Header that belongs to the payload.
 		local
 			f: like directory
 		do
@@ -54,7 +54,7 @@ feature -- Status
 feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the next block to `p', starting at `a_pos'
+			-- Write the next block to `p', starting at `a_pos'.
 		do
 			-- do_nothing (impossible to call)
 		end
@@ -62,8 +62,8 @@ feature -- Output
 feature {NONE} -- Implementation
 
 	directory: FILE
-			-- the directory this instance represents/wraps
-			-- to get directory metadata, use the FILE interface (the interface {DIRECTORY} is mostly used to get child information).
+			-- The directory this instance represents/wraps.
+			-- To get directory metadata, use the FILE interface (the interface {DIRECTORY} is mostly used to get child information).
 
 invariant
 	no_payload: required_blocks = 0

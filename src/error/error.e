@@ -1,8 +1,8 @@
 note
 	description: "[
-		Error objects, inspired Jocelyn Fiat's error library
-		(see https://svn.eiffel.com/eiffelstudio/branches/Eiffel_15.12/Src/contrib/library/utility/general/error/src/error.e)
-	]"
+			Error objects, inspired Jocelyn Fiat's error library
+			(see https://svn.eiffel.com/eiffelstudio/branches/Eiffel_15.12/Src/contrib/library/utility/general/error/src/error.e)
+		]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -17,7 +17,7 @@ create
 feature {NONE} -- Creation
 
 	make (a_message: like message)
-			-- Create new error object with message `a_message'
+			-- Create new error object with message `a_message'.
 		do
 			message := a_message
 			parent := Void
@@ -27,7 +27,7 @@ feature {NONE} -- Creation
 		end
 
 	make_with_parent (a_message: like message; a_parent: like parent)
-			-- Create new error object with parent `a_parent' and message `a_message'
+			-- Create new error object with parent `a_parent' and message `a_message'.
 		do
 			message := a_message
 			parent := a_parent
@@ -39,15 +39,15 @@ feature {NONE} -- Creation
 feature -- Access
 
 	message: READABLE_STRING_GENERAL
-			-- Error message
+			-- Error message.
 
 	parent: detachable like Current
-			-- Error parent (if any)
+			-- Error parent (if any).
 
 feature -- Output
 
 	string_representation: STRING_32
-			-- Output error message including all parents
+			-- Output error message including all parents.
 		local
 			l_error: detachable like Current
 		do

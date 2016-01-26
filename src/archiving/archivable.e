@@ -26,17 +26,17 @@ feature -- Status
 		end
 
 	required_blocks: INTEGER
-			-- Indicates how much space this archivable requires in blocks.
+			-- How many blocks are required to store this ARCHIVABLE?
 		deferred
 		ensure
 			non_negative: Result >= 0
 		end
 
 	written_blocks: INTEGER
-			-- Indicates how many payload blocks have been written so far.
+			-- How many blocks have been written so far?
 
 	header: TAR_HEADER
-			-- Header that belongs to the payload
+			-- Header that belongs to the payload.
 		deferred
 		end
 
@@ -53,8 +53,8 @@ feature -- Output
 			block_written: written_blocks = old written_blocks + 1
 		end
 
-	write_block_to_new_managed_pointer: MANAGED_POINTER
-			-- Write next block to a new managed pointer.
+	next_block: MANAGED_POINTER
+			-- Write next block to a new managed pointer and return it.
 		do
 			create Result.make ({TAR_CONST}.tar_block_size)
 			write_block_to_managed_pointer (Result, 0)

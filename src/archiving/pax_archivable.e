@@ -20,13 +20,13 @@ create
 feature {NONE} -- Initialization
 
 	make_empty
-			-- Create new pax archivable with empty payload
+			-- Create new pax archivable with empty payload.
 		do
 			create payload.make_empty
 		end
 
 	make_from_payload (a_payload: STRING_8)
-			-- Create new pax archivable with `a_payload' as payload
+			-- Create new pax archivable with `a_payload' as payload.
 		do
 			make_empty
 			payload := a_payload
@@ -35,13 +35,13 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	required_blocks: INTEGER
-			-- Indicates how many payload blocks this instance needs
+			-- How many blocks are required to store this PAX_ARCHIVABLE?
 		do
 			Result := needed_blocks (payload.count.as_natural_64).as_integer_32
 		end
 
 	header: TAR_HEADER
-			-- Header that belongs to the payload
+			-- Header that belongs to the payload.
 		do
 			create Result
 
@@ -56,7 +56,7 @@ feature -- Status
 feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Writes next payload block to `p', starting at `a_pos'
+			-- Writes next payload block to `p', starting at `a_pos'.
 		local
 			l_remaining_bytes: INTEGER
 		do
@@ -74,7 +74,7 @@ feature -- Output
 feature -- Modification
 
 	put (a_key: STRING_8; a_value: STRING_8)
-			-- Put `a_entry' to `payload'
+			-- Put `a_entry' to `payload'.
 		require
 			noting_written: written_blocks = 0
 		local
@@ -102,14 +102,14 @@ feature -- Modification
 feature {NONE} -- Implementation
 
 	payload: STRING_8
-			-- pax payload
-			-- one line per entry, each entry has the form
+			-- pax payload.
+			-- One line per entry, each entry has the form
 			-- length key=value%N
 			-- where length is the length of the whole line including
-			-- length itself and the %N character
+			-- length itself and the %N character.
 
 invariant
---	header_is_ustar: {USTAR_HEADER_WRITER}.can_write (header)
+--	header_is_ustar: {USTAR_HEADER_WRITER}.can_write (header)		-- No static calls allowed
 
 note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"

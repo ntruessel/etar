@@ -1,9 +1,9 @@
 note
 	description: "[
-		Error handling facility, allows to report errors,
-		check for errors and register a different error handler,
-		where errors should be redirected to.
-	]"
+			Error handling facility, allows to report errors,
+			check for errors and register a different error handler,
+			where errors should be redirected to.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -19,7 +19,7 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Initialize error handling structures
+			-- Initialize error handling structures.
 		do
 			create {ARRAYED_LIST [ERROR]} error_messages.make (1)
 			create error_listeners
@@ -48,7 +48,7 @@ feature -- Element change
 		end
 
 	register_error_callback (a_callback: PROCEDURE [ANY, TUPLE [ERROR]])
-			-- Register `a_callback' as new target to send error messages to
+			-- Register `a_callback' as new target to send error messages to.
 		do
 			error_listeners.force (a_callback)
 		end
@@ -56,7 +56,7 @@ feature -- Element change
 feature -- Error reporting
 
 	report_error (a_error: ERROR)
-			-- Report error `a_error'
+			-- Report error `a_error'.
 		do
 			across
 				error_listeners as ic
@@ -66,13 +66,13 @@ feature -- Error reporting
 		end
 
 	report_new_error (a_message: READABLE_STRING_GENERAL)
-			-- Report error message `a_message'
+			-- Report error message `a_message'.
 		do
 			report_error (create {ERROR}.make (a_message))
 		end
 
 	report_error_with_parent (a_message: READABLE_STRING_GENERAL; a_parent: ERROR)
-			-- Report error message `a_prefix': `a_message'
+			-- Report error message `a_prefix': `a_message'.
 		do
 			report_error (create {ERROR}.make_with_parent (a_message, a_parent))
 		end
@@ -80,7 +80,7 @@ feature -- Error reporting
 feature {NONE} -- Implementation
 
 	error_listeners: ACTION_SEQUENCE [TUPLE [ERROR]]
-			-- All procedures that are notified on error
+			-- All procedures that are notified on error.
 
 ;note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"

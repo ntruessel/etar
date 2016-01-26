@@ -1,7 +1,10 @@
 note
-	description: "Summary description for {PAX_HEADER_PARSER}."
+	description: "[
+			Parser for pax header format
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
+	EIS: "name=Further information about the PAX format", "src=http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_01", "tag=pax"
 
 class
 	PAX_HEADER_PARSER
@@ -15,12 +18,12 @@ inherit
 feature {NONE} -- Initialization
 
 	default_create
-			-- Create new instance
+			-- Create new instance.
 		do
 			create ustar_parser
 			create extended_payload_unarchiver
 			create global_payload_unarchiver
---			parsing_state := ps_pax_header
+			parsing_state := ps_first_header
 
 			Precursor
 
@@ -33,7 +36,7 @@ feature {NONE} -- Initialization
 feature -- Parsing
 
 	parse_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- parse `a_block' (starting from `a_pos')
+			-- parse `a_block' (starting from `a_pos').
 		do
 			if not has_error then
 				inspect parsing_state
@@ -60,35 +63,35 @@ feature -- Parsing
 feature {NONE} -- Implementation / Constants
 
 	ps_first_header: INTEGER = 0
-			-- parsing state: next block to be parsed belongs to pax header
+			-- parsing state: next block to be parsed belongs to pax header.
 
 	ps_global_payload: INTEGER = 1
-			-- parsint state: next block to be parsed belongs to global pax payload
+			-- parsint state: next block to be parsed belongs to global pax payload.
 
 	ps_extended_payload: INTEGER = 2
-			-- parsing state: next block to be parsed belongs to pax payload
+			-- parsing state: next block to be parsed belongs to pax payload.
 
 	ps_second_header: INTEGER = 3
-			-- parsing state: next block to be parsed belongs to ustar header
+			-- parsing state: next block to be parsed belongs to ustar header.
 
 feature {NONE} -- Implementation / Values
 
 	ustar_parser: USTAR_HEADER_PARSER
-			-- Used to parse the headers
+			-- Used to parse the headers.
 
 	global_payload_unarchiver: PAX_UNARCHIVER
-			-- Used to unarchive global pax payload
+			-- Used to unarchive global pax payload.
 
 	extended_payload_unarchiver: PAX_UNARCHIVER
-			-- Used to unarchive extended pax payload
+			-- Used to unarchive extended pax payload.
 
 	parsing_state: INTEGER
-			-- In what parsing state are we currently? One of the following constants
+			-- In what parsing state are we currently? One of the ps_... constants.
 
 feature {NONE} -- Implementation / Operations			
 
 	handle_first_header_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `a_block', starting from `a_pos', treating it as a first header block
+			-- Handle `a_block', starting from `a_pos', treating it as a first header block.
 		require
 			correct_parsing_state: parsing_state = ps_first_header
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
@@ -129,7 +132,7 @@ feature {NONE} -- Implementation / Operations
 		end
 
 	handle_global_payload_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `a_block', starting from `a_pos', treating it as a global (pax) payload block
+			-- Handle `a_block', starting from `a_pos', treating it as a global (pax) payload block.
 		require
 			correct_parsing_state: parsing_state = ps_global_payload
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
@@ -152,7 +155,7 @@ feature {NONE} -- Implementation / Operations
 		end
 
 	handle_extended_payload_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `a_block', starting from `a_pos', treating it as an extended (pax) payload block
+			-- Handle `a_block', starting from `a_pos', treating it as an extended (pax) payload block.
 		require
 			correct_parsing_state: parsing_state = ps_extended_payload
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
@@ -176,7 +179,7 @@ feature {NONE} -- Implementation / Operations
 		end
 
 	handle_second_header_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Handle `a_block', starting from `a_pos', treating it as a second header block
+			-- Handle `a_block', starting from `a_pos', treating it as a second header block.
 		require
 			correct_parsing_state: parsing_state = ps_second_header
 			block_size_large_enough: a_pos + {TAR_CONST}.tar_block_size <= a_block.count
@@ -206,7 +209,7 @@ feature {NONE} -- Implementation / Operations
 		end
 
 	apply_header_updates
-			-- Apply all updates that the unarchivers contain to `active_header'
+			-- Apply all updates that the unarchivers contain to `active_header'.
 		require
 			has_active_header: last_parsed_header /= Void
 			no_errors: not has_error
@@ -303,6 +306,9 @@ feature {NONE} -- Implementation / Operations
 		ensure
 			void_or_non_empty: Result = Void or else not Result.is_empty
 		end
+
+invariant
+	correct_state: parsing_state = ps_first_header or parsing_state = ps_second_header or parsing_state = ps_extended_payload or parsing_state = ps_global_payload or has_error
 
 note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"

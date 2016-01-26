@@ -1,9 +1,9 @@
 note
 	description: "[
-		ARCHIVABLE wrapper for files
-		
-		This version only accepts plain files.
-	]"
+			ARCHIVABLE wrapper for files
+			
+			This version only accepts plain files.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -19,7 +19,7 @@ create
 feature {NONE} -- Initialization
 
 	make (a_file: FILE)
-			-- Create a new FILE_ARCHIVABLE for `a_file'
+			-- Create a new FILE_ARCHIVABLE for `a_file'.
 		require
 			file_exists: a_file.exists
 			file_is_readable: a_file.is_readable
@@ -32,7 +32,7 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	required_blocks: INTEGER
-			-- Indicate how much space is needed to represent this ARCHIVABLE resource.
+			-- How many blocks are required to store this FILE_ARCHIVABLE?
 		do
 			Result := needed_blocks (file.file_info.size.as_natural_64).as_integer_32
 		end
@@ -56,7 +56,7 @@ feature -- Status
 feature -- Output
 
 	write_block_to_managed_pointer (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write the next block to `p' starting at `a_pos'
+			-- Write the next block to `p' starting at `a_pos'.
 		do
 				-- Write next block
 			file.read_to_managed_pointer (p, a_pos, {TAR_CONST}.tar_block_size)
@@ -73,7 +73,7 @@ feature -- Output
 feature {NONE} -- Implementation
 
 	file: FILE
-			-- The file this ARCHIVABLE represents
+			-- The file this ARCHIVABLE represents.
 
 ;note
 	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
