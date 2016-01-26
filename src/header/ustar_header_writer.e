@@ -54,7 +54,7 @@ feature -- Output
 			if attached active_header as header then
 					-- Fill with all '%U'
 				p.put_special_character_8 (
-						create {SPECIAL[CHARACTER_8]}.make_filled ('%U', {TAR_CONST}.tar_block_size),
+						create {SPECIAL [CHARACTER_8]}.make_filled ('%U', {TAR_CONST}.tar_block_size),
 						0, a_pos, {TAR_CONST}.tar_block_size)
 
 				l_split_filename := unify_and_split_filename (header.filename)

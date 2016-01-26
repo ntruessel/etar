@@ -120,7 +120,7 @@ feature -- Parsing
 			until
 				i < leading_zeros + 1 -- last non-zero digit
 			loop
-				Result := Result + digit_weight * (a_string[i].code - ('0').code).to_natural_64
+				Result := Result + digit_weight * (a_string [i].code - ('0').code).to_natural_64
 				digit_weight := digit_weight * 8
 				i := i - 1
 			end
@@ -189,7 +189,7 @@ feature -- Utilities
 			Result := if not a_string.is_empty and Result = a_string.count then Result - 1 else Result end
 		ensure
 			leading_zeros: a_string.head (Result).to_natural = 0
-			not_more_zeros: a_string.is_empty or else a_string[Result + 1] /= '0' or else Result + 1 = a_string.count
+			not_more_zeros: a_string.is_empty or else a_string [Result + 1] /= '0' or else Result + 1 = a_string.count
 		end
 
 	pad (a_string: STRING_8; n: INTEGER)
