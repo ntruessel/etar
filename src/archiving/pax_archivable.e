@@ -64,7 +64,7 @@ feature -- Output
 			p.put_special_character_8 (payload.area, 0, a_pos, l_remaining_bytes.min ({TAR_CONST}.tar_block_size))
 
 			if l_remaining_bytes <= {TAR_CONST}.tar_block_size then
-				-- Fill remaining space of block with '%U'
+					-- Fill remaining space of block with '%U'
 				pad_block (p, a_pos + l_remaining_bytes, {TAR_CONST}.tar_block_size - l_remaining_bytes)
 			end
 
