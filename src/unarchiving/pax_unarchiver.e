@@ -1,8 +1,7 @@
 note
 	description: "[
-		UNARCHIVER for pax payload
-	]"
-	author: ""
+			UNARCHIVER for pax payload
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -35,17 +34,16 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
-			-- Indicate whether this type of unarchiver can unarchive payload with
-			-- header `a_header'
+			-- Current can unarchive payload with header `a_header'?
 		do
-			Result := a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended or
-						a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global
+			Result :=  a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended
+					or a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global
 		ensure then
-			correct_result: Result = (a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended or
-											a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global)
+			correct_result: Result =   a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_extended
+									or a_header.typeflag = {TAR_CONST}.tar_typeflag_pax_global
 		end
 
-	get_value (a_key: STRING_8): detachable READABLE_STRING_8
+	value (a_key: STRING_8): detachable READABLE_STRING_8
 			-- Get value corresponding to `a_key'
 			-- Returns void if there is none
 		do
@@ -58,7 +56,7 @@ feature -- Status
 			if attached active_header as l_header then
 				Result := needed_blocks (l_header.size).as_integer_32
 			else
-				-- Unreachable (precondition)
+					-- Unreachable (precondition)
 			end
 		end
 
@@ -82,13 +80,14 @@ feature -- Unarchiving
 				from
 					i := 0
 				until
-					i >= {TAR_CONST}.tar_block_size or
-					i.as_natural_64 >= l_header.size - (unarchived_blocks * {TAR_CONST}.tar_block_size).as_natural_64 or
-					has_error
+					i >= {TAR_CONST}.tar_block_size
+					or i.as_natural_64 >= l_header.size - (unarchived_blocks * {TAR_CONST}.tar_block_size).as_natural_64
+					or has_error
 				loop
 					c := p.read_character (a_pos + i)
 
-					inspect parsing_state
+					inspect
+						parsing_state
 					when ps_length then
 						handle_length_character (c)
 					when ps_key then
@@ -96,13 +95,13 @@ feature -- Unarchiving
 					when ps_value then
 						handle_value_character (c)
 					else
-						-- Unreachable (invariant)
+							-- Unreachable (invariant)
 					end
 
 					i := i + 1
 				end
 			else
-				-- Unreachable (precondition)
+					-- Unreachable (precondition)
 			end
 			unarchived_blocks := unarchived_blocks + 1
 
@@ -248,4 +247,7 @@ invariant
 	value_state_active_fields: parsing_state = ps_value implies (not active_length.is_empty and not active_key.is_empty)
 	correct_state: parsing_state = ps_length or parsing_state = ps_key or parsing_state = ps_value
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -12,7 +12,7 @@ class
 feature -- Bytes to Blocks
 
 	needed_blocks (n: NATURAL_64): NATURAL_64
-			-- How many blocks are needed to store `n' bytes
+			-- Number of blocks needed to store `n' bytes.
 		do
 			Result := (n + {TAR_CONST}.tar_block_size.as_natural_64 - 1) // {TAR_CONST}.tar_block_size.as_natural_64
 		ensure
@@ -29,14 +29,13 @@ feature -- Block Padding
 			non_negative_length: n >= 0
 			enough_space: p.count >= a_pos + n
 		local
-			l_padding: SPECIAL[CHARACTER_8]
+			l_padding: SPECIAL [CHARACTER_8]
 		do
 			if n > 0 then
 				create l_padding.make_filled ('%U', n)
 				p.put_special_character_8 (l_padding, 0, a_pos, n)
 			end
 		end
-
 
 feature -- Header Checksum
 
@@ -74,7 +73,7 @@ feature -- Header Checksum
 feature -- Metadata manipulation
 
 	file_set_metadata (a_file: FILE; a_header: TAR_HEADER)
-			-- Set all of `a_file's metadata according to `a_header'
+			-- Set all of `a_file's metadata according to `a_header'.
 		require
 			file_exists: a_file.exists
 		do
@@ -92,7 +91,7 @@ feature -- Metadata manipulation
 		end
 
 	file_set_mode (a_file: FILE; a_mode: INTEGER)
-			-- Set `a_file's permissions ot `a_mode' or silently exit on error
+			-- Set `a_file's permissions ot `a_mode' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -107,7 +106,7 @@ feature -- Metadata manipulation
 		end
 
 	file_set_mtime (a_file: FILE; a_mtime: INTEGER)
-			-- Set `a_file's mtime to `a_mtime' or silently exit on error
+			-- Set `a_file's mtime to `a_mtime' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -122,7 +121,7 @@ feature -- Metadata manipulation
 		end
 
 	file_set_uid (a_file: FILE; a_uid: INTEGER)
-			-- Set `a_file's uid to `a_uid' or silently exit on error
+			-- Set `a_file's uid to `a_uid' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -137,7 +136,7 @@ feature -- Metadata manipulation
 		end
 
 	file_set_gid (a_file: FILE; a_gid: INTEGER)
-			-- Set `a_file's gid to `a_gid' or silently exit on error
+			-- Set `a_file's gid to `a_gid' or silently exit on error.
 		require
 			file_exists: a_file.exists
 		local
@@ -154,7 +153,7 @@ feature -- Metadata manipulation
 feature -- Filename normalization
 
 	unify_utf_8_path (a_path: PATH): STRING_8
-			-- Turns `a_path' into a UTF-8 string using unix directory separators
+			-- Turns `a_path' into a UTF-8 string using unix directory separators.
 		do
 			create Result.make (a_path.utf_8_name.count)
 			across
@@ -203,7 +202,7 @@ feature -- Filename normalization
 feature {NONE} -- Utilities stolen from file_info
 
 	file_owner (uid: INTEGER): STRING
-			-- Convert UID to login name if possible
+			-- Convert UID to login name if possible.
 		external
 			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
 		alias
@@ -211,11 +210,14 @@ feature {NONE} -- Utilities stolen from file_info
 		end
 
 	file_group (gid: INTEGER): STRING
-			-- Convert GID to group name if possible
+			-- Convert GID to group name if possible.
 		external
 			"C signature (int): EIF_REFERENCE use %"eif_file.h%""
 		alias
 			"eif_file_group"
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -340,4 +340,7 @@ feature -- Assign
 invariant
 	valid_mode: (mode & 0c7777 = mode)
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

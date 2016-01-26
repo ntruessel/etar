@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {SKIP_UNARCHIVER}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -26,7 +25,7 @@ feature {NONE} -- Initialization
 feature -- Status
 
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
-			-- Indicate whether this unarchiver can handle payload that belongs to `a_header'
+			-- Is Current able to handle payload that belongs to `a_header'.
 		once
 			Result := True
 		end
@@ -38,13 +37,12 @@ feature -- Status
 				if not {TAR_CONST}.tar_header_only_typeflags.has (l_header.typeflag) then
 					Result := needed_blocks (l_header.size).as_integer_32
 				else
---					Result := 0
+						--|	Result := 0
 				end
 			else
-				-- Unreachable (precondition)
+					-- Unreachable (precondition)
 			end
 		end
-
 
 feature -- Unarchiving
 
@@ -59,7 +57,10 @@ feature {NONE} -- Implementation
 	do_internal_initialization
 			-- Initialize internals
 		do
---			do_nothing
+				--| do_nothing
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

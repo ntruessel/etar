@@ -66,4 +66,7 @@ feature -- ustar field offsets and lengths (bytes)
 	prefix_offset: 		INTEGER 	= 345 			-- filename prefix field offset
 	prefix_length: 		INTEGER 	= 155 			-- filename prefix field length	
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

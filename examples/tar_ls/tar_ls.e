@@ -93,7 +93,7 @@ feature {NONE} -- Pretty printing
 			-- Print all errors that occured
 		do
 			across a_archive.error_messages as l_error_cursor loop
-				print_error (l_error_cursor.item.pretty_print)
+				print_error (l_error_cursor.item.string_representation)
 			end
 		end
 
@@ -109,4 +109,7 @@ feature {NONE} -- Utilites
 			smallest_fit: Result * {TAR_CONST}.tar_block_size.as_natural_64 < n + {TAR_CONST}.tar_block_size.as_natural_64
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

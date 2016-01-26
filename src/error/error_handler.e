@@ -4,7 +4,6 @@ note
 		check for errors and register a different error handler,
 		where errors should be redirected to.
 	]"
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -35,6 +34,11 @@ feature -- Access
 			Result := not error_messages.is_empty
 		end
 
+	error_messages: LIST [ERROR]
+			-- Error messages.
+
+feature -- Element change			
+
 	reset_error
 			-- Reset errors.
 		do
@@ -55,9 +59,9 @@ feature -- Error reporting
 			-- Report error `a_error'
 		do
 			across
-				error_listeners as l_listener_cursor
+				error_listeners as ic
 			loop
-				l_listener_cursor.item (a_error)
+				ic.item (a_error)
 			end
 		end
 
@@ -78,7 +82,7 @@ feature {NONE} -- Implementation
 	error_listeners: ACTION_SEQUENCE [TUPLE [ERROR]]
 			-- All procedures that are notified on error
 
-	error_messages: LIST [ERROR]
-			-- Error messages.
-
+;note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

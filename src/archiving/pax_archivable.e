@@ -1,10 +1,9 @@
 note
 	description: "[
-		ARCHIVABLE for pax headers, mainly used by PAX_HEADER_WRITER
-		
-		A pax archivable models the pax extended header payload
-	]"
-	author: ""
+			ARCHIVABLE for pax headers, mainly used by PAX_HEADER_WRITER
+			
+			A pax archivable models the pax extended header payload
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -112,4 +111,7 @@ feature {NONE} -- Implementation
 invariant
 --	header_is_ustar: {USTAR_HEADER_WRITER}.can_write (header)
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

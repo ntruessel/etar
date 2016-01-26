@@ -4,7 +4,6 @@ note
 
 		Everything that is too large will be truncated
 	]"
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 	EIS: "name=Further information about the USTAR format", "src=http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06", "tag=ustar"
@@ -222,4 +221,7 @@ feature {NONE} -- Utilities
 			p.put_special_character_8 (s.area, 0, a_pos, s.count)
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {PAX_HEADER_PARSER}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -58,7 +57,21 @@ feature -- Parsing
 			parsing_finished := parsing_finished or has_error
 		end
 
-feature {NONE} -- Implementation
+feature {NONE} -- Implementation / Constants
+
+	ps_first_header: INTEGER = 0
+			-- parsing state: next block to be parsed belongs to pax header
+
+	ps_global_payload: INTEGER = 1
+			-- parsint state: next block to be parsed belongs to global pax payload
+
+	ps_extended_payload: INTEGER = 2
+			-- parsing state: next block to be parsed belongs to pax payload
+
+	ps_second_header: INTEGER = 3
+			-- parsing state: next block to be parsed belongs to ustar header
+
+feature {NONE} -- Implementation / Values
 
 	ustar_parser: USTAR_HEADER_PARSER
 			-- Used to parse the headers
@@ -72,17 +85,7 @@ feature {NONE} -- Implementation
 	parsing_state: INTEGER
 			-- In what parsing state are we currently? One of the following constants
 
-	ps_first_header: INTEGER = 0
-			-- parsing state: next block to be parsed belongs to pax header
-
-	ps_global_payload: INTEGER = 1
-			-- parsint state: next block to be parsed belongs to global pax payload
-
-	ps_extended_payload: INTEGER = 2
-			-- parsing state: next block to be parsed belongs to pax payload
-
-	ps_second_header: INTEGER = 3
-			-- parsing state: next block to be parsed belongs to ustar header
+feature {NONE} -- Implementation / Operations			
 
 	handle_first_header_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
 			-- Handle `a_block', starting from `a_pos', treating it as a first header block
@@ -202,7 +205,6 @@ feature {NONE} -- Implementation
 			end
 		end
 
-
 	apply_header_updates
 			-- Apply all updates that the unarchivers contain to `active_header'
 		require
@@ -214,13 +216,13 @@ feature {NONE} -- Implementation
 		do
 			if attached last_parsed_header as l_header then
 					-- filename
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.name_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.name_pax_key)
 				if l_update_value /= Void then
 					l_header.set_filename (create {PATH}.make_from_string (l_update_value))
 				end
 
 					-- user id
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.uid_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.uid_pax_key)
 				if l_update_value /= Void then
 					if l_update_value.is_natural_32 then
 						l_header.set_user_id (l_update_value.to_natural_32)
@@ -230,7 +232,7 @@ feature {NONE} -- Implementation
 				end
 
 					-- group id
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.gid_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.gid_pax_key)
 				if l_update_value /= Void then
 					if l_update_value.is_natural_32 then
 						l_header.set_group_id (l_update_value.to_natural_32)
@@ -240,7 +242,7 @@ feature {NONE} -- Implementation
 				end
 
 					-- size
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.size_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.size_pax_key)
 				if l_update_value /= Void then
 					if l_update_value.is_natural_64 then
 						l_header.set_size (l_update_value.to_natural_64)
@@ -251,7 +253,7 @@ feature {NONE} -- Implementation
 
 					-- mtime
 					-- PAX time format: <epoch>[.<millis>], millis is optional
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.mtime_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.mtime_pax_key)
 				if l_update_value /= Void then
 						-- Keep <epoch> only
 					if l_update_value.index_of ('.', 1) > 0 then
@@ -266,19 +268,19 @@ feature {NONE} -- Implementation
 				end
 
 					-- linkname
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.linkname_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.linkname_pax_key)
 				if l_update_value /= Void then
 					l_header.set_linkname (create {PATH}.make_from_string (l_update_value))
 				end
 
 					-- user name
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.uname_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.uname_pax_key)
 				if l_update_value /= Void then
 					l_header.set_user_name (l_update_value)
 				end
 
 					-- group name
-				l_update_value := get_unarchiver_update_value ({TAR_HEADER_CONST}.gname_pax_key)
+				l_update_value := unarchiver_update_value ({TAR_HEADER_CONST}.gname_pax_key)
 				if l_update_value /= Void then
 					l_header.set_group_name (l_update_value)
 				end
@@ -287,13 +289,12 @@ feature {NONE} -- Implementation
 			end
 		end
 
-
-	get_unarchiver_update_value (a_key: READABLE_STRING_8): detachable READABLE_STRING_8
-			-- Get value to `a_key' from unarchivers if valid
+	unarchiver_update_value (a_key: READABLE_STRING_8): detachable READABLE_STRING_8
+			-- Value associated with `a_key' from unarchivers if valid.
 		do
-			Result := extended_payload_unarchiver.get_value (a_key)
+			Result := extended_payload_unarchiver.value (a_key)
 			if Result = Void then
-				Result := global_payload_unarchiver.get_value (a_key)
+				Result := global_payload_unarchiver.value (a_key)
 			end
 
 			if Result /= Void and then Result.is_empty then
@@ -302,4 +303,8 @@ feature {NONE} -- Implementation
 		ensure
 			void_or_non_empty: Result = Void or else not Result.is_empty
 		end
+
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

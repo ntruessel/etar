@@ -1,8 +1,7 @@
 note
 	description: "[
-		Header writer for the pax format
-	]"
-	author: ""
+			Header writer for the pax format
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 	EIS: "name=Further information about the PAX format", "src=http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_01", "tag=pax"
@@ -15,7 +14,6 @@ inherit
 		redefine
 			default_create
 		end
-
 
 feature {NONE} -- Initialization
 
@@ -114,7 +112,7 @@ feature {NONE} -- Implementation
 
 					if not ustar_writer.size_fits (l_ustar_header) then
 							-- put size in pax header
-						l_pax_archivable.put ({TAR_HEADER_CONST}.size_pax_key, l_ustar_header.size.out) 		-- pax takes decimal numbers
+						l_pax_archivable.put ({TAR_HEADER_CONST}.size_pax_key, l_ustar_header.size.out) 	-- pax takes decimal numbers
 
 							-- simplify size
 						l_ustar_header.set_size (0)
@@ -172,4 +170,7 @@ feature {NONE} -- Implementation
 invariant
 	active_header_writable: attached active_header as l_header implies ustar_writer.can_write (l_header)
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -231,4 +231,7 @@ feature {NONE} -- Implementation
 			Result := l_mtime.formatted_out ("yyyy-[0]mm-[0]dd [0]hh:[0]mi")
 		end
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -1,13 +1,12 @@
 note
 	description: "[
-		This class models an archive and allows to
-		create new archives and unarchive existing archives
+			This class models an archive and allows to
+			create new archives and unarchive existing archives
 
-		It supports the following modes:
-			- unarchiving (reading)
-			- archiving (writing)
-	]"
-	author: ""
+			It supports the following modes:
+				- unarchiving (reading)
+				- archiving (writing)
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -37,7 +36,7 @@ feature {NONE} -- Initialization
 
 --			unarchiving_finished := False
 
-			Precursor
+			Precursor {ERROR_HANDLER}
 
 				-- Add default unarchivers
 			add_unarchiver (create {SKIP_UNARCHIVER}) -- Fallback
@@ -62,7 +61,7 @@ feature {NONE} -- Initialization
 feature -- Status setting
 
 	open_archive
-			-- Open for archiving
+			-- Open for archiving.
 		do
 			storage_backend.open_write
 			mode := mode_archive
@@ -265,6 +264,77 @@ feature -- Archiving
 			mode := mode_closed
 		end
 
+feature -- Archiving helpers		
+
+	add_directory (a_dir: FILE)
+		require
+			exists: a_dir.exists
+			readable: a_dir.is_access_readable
+		do
+			add_entry (create {DIRECTORY_ARCHIVABLE}.make (a_dir))
+		end
+
+	add_file (a_file: FILE)
+		require
+			exists: a_file.exists and then a_file.is_plain
+			readable: a_file.is_access_readable
+		do
+			add_entry (create {FILE_ARCHIVABLE}.make (a_file))
+		end
+
+	add_location (a_location: PATH)
+			-- Add a node entry at location `a_location'.
+			-- note: it can be file or directory, ..
+		local
+			f: RAW_FILE
+		do
+			create f.make_with_path (a_location)
+			if f.exists and then f.is_access_readable then
+				if f.is_directory then
+					add_directory (f)
+				elseif f.is_plain then
+					add_file (f)
+				else
+					report_new_error ({STRING_32} "Unsupported type of node at %"" + a_location.name + {STRING_32} "%".")
+				end
+			else
+				report_new_error ({STRING_32} "Can not read file or directory at %"" + a_location.name + {STRING_32} "%".")
+			end
+		end
+
+	add_directory_location (a_location: PATH)
+			-- Add a directory entry at location `a_location'.
+		require
+			correct_mode: is_archiving_mode
+		local
+			d: RAW_FILE
+		do
+			create d.make_with_path (a_location)
+			if
+				d.exists and then
+				d.is_access_readable and then
+				d.is_directory
+			then
+				add_directory (d)
+			else
+				report_new_error ({STRING_32} "Can not add directory at %"" + a_location.name + {STRING_32} "%".")
+			end
+		end
+
+	add_plain_file_location (a_location: PATH)
+			-- Add a plain file entry at location `a_location'.
+		require
+			correct_mode: is_archiving_mode
+		local
+			f: RAW_FILE
+		do
+			create f.make_with_path (a_location)
+			if f.exists and then f.is_access_readable and then f.is_plain then
+				add_file (f)
+			else
+				report_new_error ({STRING_32} "Can not add file at %"" + a_location.name + {STRING_32} "%".")
+			end
+		end
 
 feature {NONE} -- Implementation
 
@@ -275,21 +345,17 @@ feature {NONE} -- Implementation
 			-- List of all registered unarchivers.
 
 	matching_unarchiver (a_header: TAR_HEADER): detachable UNARCHIVER
-			-- Return the last added unarchiver that can unarchive `a_header', Void if none
-		local
-			l_cursor: like unarchivers.new_cursor
+			-- Unarchiver being able to unarchive `a_header', Void if none.
 		do
-			from
-				l_cursor := unarchivers.new_cursor
-				l_cursor.reverse
-				l_cursor.start
+			across
+				unarchivers.new_cursor.reversed as ic
 			until
-				l_cursor.after or Result /= Void
+				Result /= Void
 			loop
-				if l_cursor.item.can_unarchive (a_header) then
-					Result := l_cursor.item
+				Result := ic.item
+				if not Result.can_unarchive (a_header) then
+					Result := Void
 				end
-				l_cursor.forth
 			end
 		end
 
@@ -304,30 +370,34 @@ feature {NONE} -- Implementation
 			-- Currently only removes absolute filenames and parent directories
 		local
 			l_safe_path: PATH
+			p: PATH
 		do
 			Result := a_header
 			if not absolute_filenames then
 				create l_safe_path.make_empty
 				across
-					Result.filename.components as l_path_cursor
+					Result.filename.components as ic
 				loop
-					if l_path_cursor.item.has_root or l_path_cursor.item.is_current_symbol or l_path_cursor.item.is_parent_symbol then
+					p := ic.item
+					if p.has_root or p.is_current_symbol or p.is_parent_symbol then
 						create l_safe_path.make_empty
 					else
-						l_safe_path := l_safe_path + l_path_cursor.item
+						l_safe_path := l_safe_path + p
 					end
 				end
 				Result.set_filename (l_safe_path)
 			end
-
 		ensure
 			relative_filename: not absolute_filenames implies Result.filename.is_relative
-			no_parent_or_current_symbols: not absolute_filenames implies across Result.filename.components as l_path_cursor all not l_path_cursor.item.is_current_symbol and not l_path_cursor.item.is_parent_symbol end
+			no_parent_or_current_symbols: not absolute_filenames implies
+					across Result.filename.components as ic all not ic.item.is_current_symbol and not ic.item.is_parent_symbol end
 		end
 
 invariant
-	only_one_mode: (is_archiving_mode and not is_unarchiving_mode and not is_closed) or
-					(not is_archiving_mode and is_unarchiving_mode and not is_closed) or
-					(not is_archiving_mode and not is_unarchiving_mode and is_closed)
+	only_one_mode: is_archiving_mode xor is_unarchiving_mode xor is_closed
 	closed_iff_backend_closed_or_error: is_closed = storage_backend.is_closed or has_error
+
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -1,8 +1,7 @@
 note
 	description: "[
-		Common ancestor for storage backends usable by ARCHIVE
-	]"
-	author: ""
+			Common ancestor for storage backends usable by ARCHIVE
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -46,7 +45,7 @@ feature -- Status
 		end
 
 	block_ready: BOOLEAN
-			-- Indicate whether there is a block ready
+			-- Is there a block ready?
 		require
 			readable: is_readable
 		deferred
@@ -55,28 +54,28 @@ feature -- Status
 		end
 
 	is_readable: BOOLEAN
-			-- Indicate whether this instance can be read from
+			-- Is Current backend readable?
 		deferred
 		ensure
 			no_error_if_readable: Result implies not has_error
 		end
 
 	is_writable: BOOLEAN
-			-- Indicate whether blocks can be written to this instance
+			-- Is Current backend writable and accept blocks to be written to Current?
 		deferred
 		ensure
 			no_error_if_writable: Result implies not has_error
 		end
 
 	is_closed: BOOLEAN
-			-- Indicate whether backend is closed
+			-- Is Current backend closed?
 		deferred
 		end
 
 feature -- Reading
 
 	last_block: MANAGED_POINTER
-			-- Last block that was read
+			-- Last read block.
 		require
 			has_block: block_ready
 		deferred
@@ -85,7 +84,7 @@ feature -- Reading
 		end
 
 	read_block
-			-- Try to read next block
+			-- Try to read next block.
 		require
 			readable: is_readable
 		deferred
@@ -96,7 +95,7 @@ feature -- Reading
 feature -- Writing
 
 	write_block (a_block: MANAGED_POINTER; a_pos: INTEGER)
-			-- Write `a_block' (starts at `a_pos')
+			-- Write `a_block' starting at position `a_pos'.
 		require
 			writable: is_writable
 			non_negative_pos: a_pos >= 0
@@ -105,11 +104,15 @@ feature -- Writing
 		end
 
 	finalize
-			-- Finalize archive (write two 0 blocks and close)
+			-- Finalize archive.
+			-- i.e: write two 0 blocks and close.
 		require
 			writable: is_writable
 		deferred
 		ensure
 			closed: is_closed
 		end
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

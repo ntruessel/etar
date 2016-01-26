@@ -84,4 +84,7 @@ feature {NONE} -- Utilities
 invariant
 	valid_header_if_no_errors: not has_error and parsing_finished implies attached last_parsed_header
 	parsing_finished_on_error: has_error implies parsing_finished
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

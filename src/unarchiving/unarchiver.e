@@ -1,8 +1,7 @@
 note
 	description: "[
-		Common ancestor for classes that allow to unarchive payload parts of archives
-	]"
-	author: ""
+			Common ancestor for classes that allow to unarchive payload parts of archives.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -34,10 +33,25 @@ feature {NONE} -- Initialization
 			no_unarchiving_in_progress: unarchiving_finished
 		end
 
-feature -- Status
+feature -- Access
 
 	name: STRING_8
-			-- Name that will be used when printing error messages this unarchiver reports
+			-- Name used when printing error messages reported by Current unarchiver.
+
+	active_header: detachable TAR_HEADER
+			-- Current header during unarchiving.
+
+	required_blocks: INTEGER
+			-- Number of blocks required to unarchive related payload with respect to `active_header'.
+		require
+			has_active_header: attached active_header
+		deferred
+		end
+
+feature -- Status			
+
+	unarchived_blocks: INTEGER
+			-- How many blocks have been unarchived so far.
 
 	unarchiving_finished: BOOLEAN
 			-- Flag that indicates whether unarchiving finished
@@ -45,29 +59,16 @@ feature -- Status
 			Result := has_error or attached active_header implies unarchived_blocks = required_blocks
 		end
 
-	active_header: detachable TAR_HEADER
-			-- The header for which unarchiving is in progress
-
-	required_blocks: INTEGER
-			-- Indicates how many blocks are required to unarchive this
-		require
-			has_active_header: attached active_header
-		deferred
-		end
-
-	unarchived_blocks: INTEGER
-			-- How many blocks have been unarchived so far
-
 	can_unarchive (a_header: TAR_HEADER): BOOLEAN
 			-- Indicate whether this type of unarchiver can unarchive payload with
 			-- header `a_header'
 		deferred
 		end
 
-feature -- Unarchiving
+feature -- Basic unarchiving operations.
 
 	frozen initialize (a_header: TAR_HEADER)
-			-- Initialize for unarchiving payload for `a_header'
+			-- Initialize for unarchiving payload for `a_header'.
 		require
 			can_handle: can_unarchive (a_header)
 			no_unarchiving_in_progress: unarchiving_finished
@@ -81,7 +82,7 @@ feature -- Unarchiving
 		end
 
 	unarchive_block (p: MANAGED_POINTER; a_pos: INTEGER)
-			-- Unarchive next block, stored in `p' starting at `a_pos'
+			-- Unarchive next block, stored in `p' starting at `a_pos'.
 		require
 			non_negative_position: a_pos >= 0
 			enough_payload: p.count >= a_pos + {TAR_CONST}.tar_block_size
@@ -108,4 +109,7 @@ invariant
 	unarchived_blocks_needs_header: unarchived_blocks > 0 implies attached active_header
 	non_negative_number_of_blocks: unarchived_blocks >= 0
 
+note
+	copyright: "2015-2016, Nicolas Truessel, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
