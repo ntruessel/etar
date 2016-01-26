@@ -36,7 +36,7 @@ feature -- Status
 	required_blocks: INTEGER
 			-- Number of blocks required to unarchive payload belonging `active_header'.
 		do
-			--| Result := 0
+			--| Result := 0			-- Is automatically initialized to 0
 		end
 
 feature -- Output

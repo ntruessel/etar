@@ -40,7 +40,7 @@ feature -- Status
 				if not {TAR_CONST}.tar_header_only_typeflags.has (l_header.typeflag) then
 					Result := needed_blocks (l_header.size).as_integer_32
 				else
-						--|	Result := 0
+						--|	Result := 0		-- Initialized to 0 anyway
 				end
 			else
 					-- Unreachable (precondition)

@@ -139,7 +139,7 @@ feature -- Parsing
 				if not l_field.is_whitespace then
 					l_header.set_linkname (create {PATH}.make_from_string (utf.utf_8_string_8_to_escaped_string_32 (l_field)))
 				else
---					report_new_error ("Missing linkname")
+--					report_new_error ("Missing linkname")		-- linkname only needed if typeflag is {TAR_CONST}.tar_typeflag_symlink, {TAR_CONST}.tar_typeflag_hardling, or custom
 				end
 			end
 
@@ -166,7 +166,7 @@ feature -- Parsing
 				if not l_field.is_whitespace then
 					l_header.set_user_name (l_field)
 				else
---					report_new_error ("Missing uname")
+--					report_new_error ("Missing uname")		-- optional
 				end
 			end
 
@@ -176,7 +176,7 @@ feature -- Parsing
 				if not l_field.is_whitespace then
 					l_header.set_group_name (l_field)
 				else
---					report_new_error ("Missing gname")
+--					report_new_error ("Missing gname")		-- optional
 				end
 			end
 
@@ -186,7 +186,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_device_major (octal_string_to_natural_32 (l_field))
 				else
---					report_new_error ("Missing devmajor")
+--					report_new_error ("Missing devmajor")		-- only for typeflags of special files (character/block device)
 				end
 			end
 
@@ -196,7 +196,7 @@ feature -- Parsing
 				if l_field /= Void then
 					l_header.set_device_minor (octal_string_to_natural_32 (l_field))
 				else
---					report_new_error ("Missing devminor")
+--					report_new_error ("Missing devminor")		-- only for typeflags of special files (character/block device)
 				end
 			end
 
