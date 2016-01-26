@@ -69,7 +69,7 @@ feature {NONE} -- Implementation
 	permissions_string (header: TAR_HEADER): READABLE_STRING_GENERAL
 			-- Prettyprint `header's permissions/mode.
 		do
-			-- User
+				-- User
 			if header.is_user_readable then
 				Result := ("r")
 			else
@@ -90,7 +90,7 @@ feature {NONE} -- Implementation
 				Result := Result + ("-")
 			end
 
-			-- Group
+				-- Group
 			if header.is_group_readable then
 				Result := Result + ("r")
 			else
@@ -111,7 +111,7 @@ feature {NONE} -- Implementation
 				Result := Result + ("-")
 			end
 
-			-- Other
+				-- Other
 			if header.is_other_readable then
 				Result := Result + ("r")
 			else
@@ -144,7 +144,7 @@ feature {NONE} -- Implementation
 				l_username := a_header.user_id.out
 			end
 
-			-- Pad
+				-- Pad
 			if l_username.count < user_width_memo then
 				l_padding := " "
 				l_padding.multiply (user_width_memo - l_username.count)
@@ -169,7 +169,7 @@ feature {NONE} -- Implementation
 				l_groupname := a_header.group_id.out
 			end
 
-			-- Pad
+				-- Pad
 			if l_groupname.count < group_width_memo then
 				l_padding := " "
 				l_padding.multiply (group_width_memo - l_groupname.count)
@@ -199,13 +199,13 @@ feature {NONE} -- Implementation
 				l_size := 1
 			end
 
-			-- Fix width to 3 characters
+				-- Fix width to 3 characters
 			l_output := " "
 			l_output.multiply (4 - l_size.out.count)
 			l_output.remove (1)
 			l_output.append (l_size.out)
 
-			-- Unit
+				-- Unit
 			inspect i
 			when 0 then
 				l_output.prepend (" ")
