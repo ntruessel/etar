@@ -79,14 +79,16 @@ feature -- Modification
 			noting_written: written_blocks = 0
 		local
 			l_entry_length: INTEGER
+			l_key_value_length: INTEGER
 		do
 				-- Calculate the length part of the entry
 			from
-				l_entry_length := a_key.count + a_value.count + 3	-- Three extra characters: ' ', '=', '%N'
+				l_key_value_length := a_key.count + a_value.count + 3	-- Three extra characters: ' ', '=', '%N'
+				l_entry_length := l_key_value_length
 			until
-				l_entry_length = a_key.count + a_value.count + 3 + l_entry_length.out.count
+				l_entry_length = l_key_value_length + l_entry_length.out.count
 			loop
-				l_entry_length := a_key.count + a_value.count + 3 + l_entry_length.out.count
+				l_entry_length := l_key_value_length + l_entry_length.out.count
 			end
 
 				-- Put entry
