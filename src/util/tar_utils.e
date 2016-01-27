@@ -162,7 +162,7 @@ feature -- Filename normalization
 				if not Result.is_empty and Result /~ "/" then
 					Result.append_character ('/')
 				end
-				if Result.is_empty and Result ~ "\" then
+				if Result.is_empty and ic.item.utf_8_name ~ "\" then
 					Result.append ("/")						-- Workaround for windows root '\'
 				else
 					Result.append (ic.item.utf_8_name)
