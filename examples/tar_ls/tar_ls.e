@@ -36,7 +36,11 @@ feature {NONE} -- Initialization
 				i > n
 			loop
 				create {RAW_FILE} f.make_with_name (args.argument (i))
-				list_contents (f)
+				if f.exists and then f.is_readable then
+					list_contents (f)
+				else
+					print_error ({STRING_32} "Skipping File %"" + f.path.name + {STRING_32} "%"")
+				end
 				i := i + 1
 
 			end
