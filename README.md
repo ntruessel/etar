@@ -15,5 +15,5 @@ The archive folder contains some archives. For a detailed description, view
 Since some of these archives are rather large, they use git lfs.
 
 ## License
-etar is licensed under the Eiffel Forum License, version 2 (see [[LICENSE]]).
-For copyright information see [[license.lic]].
+etar is licensed under the Eiffel Forum License, version 2 (see [LICENSE](LICENSE)).
+For copyright information see [license.lic](license.lic).
